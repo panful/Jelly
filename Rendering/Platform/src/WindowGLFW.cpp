@@ -11,3 +11,8 @@ void WindowGLFW::Render() const noexcept
         m_window = GLFWHelper::GetInstance()->CreateWindow(m_width, m_height, m_title.c_str());
     });
 }
+
+void* WindowGLFW::GetNativeWindow() const noexcept
+{
+    return m_window;
+}

@@ -12,7 +12,6 @@
 #pragma once
 #pragma warning(disable : 4251)
 
-#include "GlobalExport.h"
 #include "Object.h"
 #include <cstdint>
 #include <string>
@@ -23,6 +22,8 @@ class JELLY_EXPORT Window : public Object
 {
 public:
     virtual void Render() const noexcept = 0;
+
+    virtual void* GetNativeWindow() const noexcept = 0;
 
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
     void SetTitle(const std::string_view title) noexcept;
