@@ -1,9 +1,12 @@
-set(target_name Common)
+﻿set(target_name RenderingCore)
 
 file(GLOB SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(${target_name} ${JELLY_LIB_TYPE} ${SRCS})
+add_dependencies(${target_name} Common)
+
+target_link_libraries(${target_name} PUBLIC Common)
 
 target_include_directories(${target_name} PRIVATE ${PROJECT_SOURCE_DIR}/External)
 target_include_directories(${target_name} PUBLIC 
