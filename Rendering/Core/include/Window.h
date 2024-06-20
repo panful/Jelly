@@ -22,10 +22,12 @@ namespace Jelly {
 class JELLY_EXPORT Window : public Object
 {
 public:
+    virtual void Render() const noexcept = 0;
+
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
     void SetTitle(const std::string_view title) noexcept;
 
-private:
+protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
     std::string m_title {"Jelly"};

@@ -17,6 +17,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 option(BUILD_UNIT_TESTING "build the unit test" ON)
 option(BUILD_EXAMPLES "build the examples" ON)
 option(BUILD_SHARED_LIBRARIES "build shared libraries(dlls)" ON)
+option(USE_GLFW_WINDOW "display using glfw dindow" ON)
 
 if(BUILD_SHARED_LIBRARIES)
     set(JELLY_LIB_TYPE SHARED)
@@ -27,6 +28,10 @@ endif(BUILD_SHARED_LIBRARIES)
 
 add_subdirectory(Common)
 add_subdirectory(Rendering)
+
+if(USE_GLFW_WINDOW)
+    add_subdirectory(External/glfw)
+endif(USE_GLFW_WINDOW)
 
 if(BUILD_UNIT_TESTING)
     enable_testing()

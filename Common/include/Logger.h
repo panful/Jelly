@@ -43,11 +43,11 @@ public:
     static void SetFileName(const std::string_view fileName);
 
 public:
-    void Debug(
+    void Trace(
         const std::string_view message, const std::source_location location = std::source_location::current()
     ) noexcept;
 
-    void Trace(
+    void Debug(
         const std::string_view message, const std::source_location location = std::source_location::current()
     ) noexcept;
 
@@ -63,6 +63,6 @@ private:
     std::shared_ptr<spdlog::logger> m_spdLogger {};
 
     inline static std::string s_fileName {"Logs/Jelly.log"};
-    inline static LogLevel s_level {LogLevel::Warn};
+    inline static LogLevel s_level {LogLevel::Trace};
 };
 } // namespace Jelly
