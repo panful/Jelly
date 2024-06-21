@@ -1,16 +1,17 @@
-﻿set(target_name RenderingUI)
+set(target_name RenderingCore)
 
 file(GLOB SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(${target_name} ${JELLY_LIB_TYPE} ${SRCS})
-add_dependencies(${target_name} Common RenderingCore)
 
-target_link_libraries(${target_name} PUBLIC Common RenderingCore)
+target_link_libraries(${target_name} PUBLIC Common ${Vulkan_LIBRARIES})
 
 target_include_directories(${target_name} PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
+
+target_include_directories(${target_name} PUBLIC ${Vulkan_INCLUDE_DIR})
 
 add_library(${PROJECT_NAME}::${target_name} ALIAS ${target_name})        
 

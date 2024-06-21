@@ -5,3 +5,8 @@
 - [x] 组件
 - [ ] 查找依赖
 - [ ] option USE_GLFW_WINDOW
+
+
+Core:       Vulkan render
+Ui:         Window Interactor
+Platform:   GLFW Win32 ...

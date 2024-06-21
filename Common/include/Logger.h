@@ -44,19 +44,19 @@ public:
 
 public:
     void Trace(
-        const std::string_view message, const std::source_location location = std::source_location::current()
+        const std::string_view message = "", const std::source_location location = std::source_location::current()
     ) noexcept;
 
     void Debug(
-        const std::string_view message, const std::source_location location = std::source_location::current()
+        const std::string_view message = "", const std::source_location location = std::source_location::current()
     ) noexcept;
 
     void Warn(
-        const std::string_view message, const std::source_location location = std::source_location::current()
+        const std::string_view message = "", const std::source_location location = std::source_location::current()
     ) noexcept;
 
     void Error(
-        const std::string_view message, const std::source_location location = std::source_location::current()
+        const std::string_view message = "", const std::source_location location = std::source_location::current()
     ) noexcept;
 
 private:

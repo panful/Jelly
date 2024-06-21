@@ -1,0 +1,197 @@
+#include "Device.h"
+#include "Logger.h"
+#include <format>
+#include <optional>
+#include <set>
+
+using namespace Jelly;
+
+namespace {
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType,
+    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData
+) noexcept
+{
+    Logger::GetInstance()->Debug(std::format("Vulkan: {}", pCallbackData->pMessage));
+    return VK_FALSE;
+}
+} // namespace
+
+vk::Instance Device::InitInstance() noexcept
+{
+    Logger::GetInstance()->Trace();
+    if (*m_instance)
+    {
+        return m_instance;
+    }
+
+    m_enableInstanceExtensionNames.emplace_back("VK_KHR_surface");
+#if WIN32
+    m_enableInstanceExtensionNames.emplace_back("VK_KHR_win32_surface");
+#endif // WIN32
+
+    vk::DebugUtilsMessageSeverityFlagsEXT severityFlags {
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
+        | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
+    };
+    vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags {
+        vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+        | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation
+    };
+
+    vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoExt {
+        {}, severityFlags, messageTypeFlags, DebugCallback
+    };
+
+    vk::ApplicationInfo applicationInfo {m_appName.c_str(), 1, m_engineName.c_str(), 1, VK_API_VERSION_1_1};
+
+    vk::InstanceCreateInfo instanceCreateInfo {};
+    if (m_enableValidationLayers)
+    {
+        m_enableInstanceExtensionNames.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        instanceCreateInfo.setPEnabledLayerNames(m_enableLayerNames);
+        instanceCreateInfo.setPNext(&debugUtilsMessengerCreateInfoExt);
+    }
+    instanceCreateInfo.setPApplicationInfo(&applicationInfo);
+    instanceCreateInfo.setPEnabledExtensionNames(m_enableInstanceExtensionNames);
+
+    m_instance = vk::raii::Instance(m_context, instanceCreateInfo);
+
+    if (m_enableValidationLayers)
+    {
+        CreateDebugUtilsMessengerEXT();
+    }
+
+    return m_instance;
+}
+
+void Device::SetEnableValidationLayers(bool enable)
+{
+    m_enableValidationLayers = enable;
+}
+
+bool Device::CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface)
+{
+    return false;
+}
+
+const vk::raii::Instance& Device::GetInstance() const noexcept
+{
+    return m_instance;
+}
+
+vk::PhysicalDevice Device::PickPhysicalDevice(const vk::raii::SurfaceKHR& surface) noexcept
+{
+    Logger::GetInstance()->Trace();
+    if (*m_physicalDevice)
+    {
+        return m_physicalDevice;
+    }
+
+    vk::raii::PhysicalDevices physicalDevices(m_instance);
+    for (const auto& physicalDevice : physicalDevices)
+    {
+        if (auto [suitable, gIndex, pIndex] = IsDeviceSuitable(physicalDevice, surface); suitable)
+        {
+            m_physicalDevice     = physicalDevice;
+            m_graphicsQueueIndex = gIndex;
+            m_presentQueueIndex  = pIndex;
+            break;
+        }
+    }
+
+    if (!(*m_physicalDevice))
+    {
+        Logger::GetInstance()->Error("Invalid physical device");
+    }
+
+    Logger::GetInstance()->Trace(
+        std::format("Physical device name: {}", m_physicalDevice.getProperties().deviceName.data())
+    );
+
+    return m_physicalDevice;
+}
+
+vk::Device Device::InitDevice() noexcept
+{
+    Logger::GetInstance()->Trace();
+    if (*m_device)
+    {
+        return m_device;
+    }
+
+    float queuePriority = 0.f;
+
+    std::set<uint32_t> uniqueQueueFamilyIndices {m_graphicsQueueIndex, m_presentQueueIndex};
+    std::vector<vk::DeviceQueueCreateInfo> deviceQueueCreateInfos {};
+    for (const auto queueIndex : uniqueQueueFamilyIndices)
+    {
+        deviceQueueCreateInfos.emplace_back(vk::DeviceQueueCreateInfo {{}, queueIndex, 1, &queuePriority});
+    }
+
+    vk::DeviceCreateInfo deviceCreateInfo({}, deviceQueueCreateInfos, {}, m_enableDeviceExtensionNames, {});
+    m_device = vk::raii::Device(m_physicalDevice, deviceCreateInfo);
+
+    return m_device;
+}
+
+std::pair<vk::Queue, vk::Queue> Device::InitQueues() noexcept
+{
+    Logger::GetInstance()->Trace();
+    if (*m_graphicsQueue && *m_presentQueue)
+    {
+        return {m_graphicsQueue, m_presentQueue};
+    }
+
+    m_graphicsQueue = vk::raii::Queue(m_device, m_graphicsQueueIndex, 0);
+    m_presentQueue  = vk::raii::Queue(m_device, m_presentQueueIndex, 0);
+
+    return {m_graphicsQueue, m_presentQueue};
+}
+
+void Device::CreateDebugUtilsMessengerEXT() noexcept
+{
+    m_debugUtilsMessengerEXT = vk::raii::DebugUtilsMessengerEXT(
+        m_instance,
+        vk::DebugUtilsMessengerCreateInfoEXT {
+            {},
+            vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
+                | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation,
+            &DebugCallback
+        }
+    );
+}
+
+std::tuple<bool, uint32_t, uint32_t> Device::IsDeviceSuitable(
+    const vk::raii::PhysicalDevice& physicalDevice, const vk::raii::SurfaceKHR& surface
+) const noexcept
+{
+    std::vector<vk::QueueFamilyProperties> queueFamilyProperties = physicalDevice.getQueueFamilyProperties();
+
+    std::optional<uint32_t> optPresentIndex {}, optGraphicsIndex {};
+    for (uint32_t i = 0; i < queueFamilyProperties.size(); ++i)
+    {
+        optPresentIndex = physicalDevice.getSurfaceSupportKHR(i, surface) ? i : optPresentIndex;
+
+        if ((vk::QueueFlagBits::eGraphics & queueFamilyProperties[i].queueFlags)
+            && (vk::QueueFlagBits::eTransfer & queueFamilyProperties[i].queueFlags))
+        {
+            optGraphicsIndex = i;
+        }
+
+        if (optPresentIndex && optGraphicsIndex)
+        {
+            break;
+        }
+    }
+
+    auto supportSurface = !physicalDevice.getSurfacePresentModesKHR(surface).empty()
+        && !physicalDevice.getSurfaceFormatsKHR(surface).empty();
+
+    return std::forward_as_tuple(
+        optPresentIndex && optGraphicsIndex && supportSurface, optGraphicsIndex.value_or(0), optPresentIndex.value_or(0)
+    );
+}

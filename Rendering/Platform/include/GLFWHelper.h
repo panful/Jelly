@@ -17,6 +17,10 @@
 struct GLFWwindow;
 
 namespace Jelly {
+/**
+ * @brief 用来创建和销毁窗口，保证GLFW只被初始化和销毁一次
+ *
+ */
 class GLFWHelper
 {
 private:

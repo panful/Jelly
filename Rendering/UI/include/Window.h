@@ -14,14 +14,20 @@
 
 #include "Object.h"
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <string_view>
+#include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
+class Device;
+
 class JELLY_EXPORT Window : public Object
 {
 public:
-    virtual void Render() const noexcept = 0;
+    Window() noexcept;
+
+    virtual void Render() noexcept = 0;
 
     virtual void* GetNativeWindow() const noexcept = 0;
 
@@ -32,5 +38,7 @@ protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
     std::string m_title {"Jelly"};
+    std::shared_ptr<Device> m_device {};
+    vk::raii::SurfaceKHR m_surface {nullptr};
 };
 } // namespace Jelly

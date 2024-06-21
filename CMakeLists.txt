@@ -19,6 +19,8 @@ option(BUILD_EXAMPLES "build the examples" ON)
 option(BUILD_SHARED_LIBRARIES "build shared libraries(dlls)" ON)
 option(USE_GLFW_WINDOW "display using glfw dindow" ON)
 
+find_package(Vulkan REQUIRED)
+
 if(BUILD_SHARED_LIBRARIES)
     set(JELLY_LIB_TYPE SHARED)
     add_definitions(-DJELLY_SHARED_LIBRARY)

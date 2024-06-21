@@ -19,11 +19,11 @@ namespace Jelly {
 class JELLY_EXPORT WindowGLFW : public Window
 {
 public:
-    void Render() const noexcept override;
+    void Render() noexcept override;
 
     void* GetNativeWindow() const noexcept override;
 
 private:
-    mutable GLFWwindow* m_window {nullptr};
+    GLFWwindow* m_window {nullptr};
 };
 } // namespace Jelly
