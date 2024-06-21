@@ -1,4 +1,4 @@
-﻿set(target_name RenderingCore)
+﻿set(target_name RenderingUI)
 
 file(GLOB SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)

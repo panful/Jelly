@@ -4,9 +4,9 @@ file(GLOB SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(${target_name} ${JELLY_LIB_TYPE} ${SRCS})
-add_dependencies(${target_name} RenderingCore glfw)
+add_dependencies(${target_name} RenderingUI glfw)
 
-target_link_libraries(${target_name} PUBLIC RenderingCore)
+target_link_libraries(${target_name} PUBLIC RenderingUI)
 target_link_libraries(${target_name} PRIVATE glfw)
 
 target_include_directories(${target_name} PUBLIC 
