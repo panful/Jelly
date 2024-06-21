@@ -17,15 +17,19 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
 class Device;
+class Renderer;
 
 class JELLY_EXPORT Window : public Object
 {
 public:
     Window() noexcept;
+
+    void AddRenderer(std::shared_ptr<Renderer> renderer);
 
     virtual void Render() noexcept = 0;
 
@@ -40,5 +44,6 @@ protected:
     std::string m_title {"Jelly"};
     std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
+    std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
 } // namespace Jelly

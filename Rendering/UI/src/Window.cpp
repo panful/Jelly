@@ -8,6 +8,11 @@ Window::Window() noexcept
 {
 }
 
+void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
+{
+    m_renderers.emplace_back(std::move(renderer));
+}
+
 void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 {
     m_width  = width;

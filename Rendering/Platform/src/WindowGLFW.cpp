@@ -1,6 +1,7 @@
 #include "WindowGLFW.h"
 #include "Device.h"
 #include "GLFWHelper.h"
+#include "Renderer.h"
 #include <GLFW/glfw3.h>
 #include <mutex>
 
@@ -20,6 +21,11 @@ void WindowGLFW::Render() noexcept
         m_device->InitDevice();
         m_device->InitQueues();
     });
+
+    for (auto& renderer : m_renderers)
+    {
+        renderer->Render();
+    }
 }
 
 void* WindowGLFW::GetNativeWindow() const noexcept
