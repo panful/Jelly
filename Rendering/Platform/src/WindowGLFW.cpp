@@ -23,10 +23,12 @@ void WindowGLFW::Render() noexcept
         InitWindow();
     });
 
+    PreRender();
     for (auto& renderer : m_renderers)
     {
         renderer->Render();
     }
+    PostRender();
 }
 
 void* WindowGLFW::GetNativeWindow() const noexcept

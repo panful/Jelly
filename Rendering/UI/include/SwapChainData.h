@@ -30,6 +30,7 @@ public:
     vk::Format GetColorFormat() const noexcept;
     uint32_t GetNumberOfImages() const noexcept;
     const vk::raii::ImageView& GetImageView(uint32_t index) const noexcept;
+    const vk::raii::SwapchainKHR& GetSwapChain() const noexcept;
 
 private:
     static vk::PresentModeKHR PickPresentMode(const std::vector<vk::PresentModeKHR>& presentModes);

@@ -1,6 +1,8 @@
 #include "Window.h"
 #include "Device.h"
+#include "Logger.h"
 #include <array>
+#include <limits>
 
 using namespace Jelly;
 
@@ -23,6 +25,66 @@ void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 void Window::SetTitle(const std::string_view title) noexcept
 {
     m_title = title;
+}
+
+void Window::PreRender() noexcept
+{
+    auto fenceResult = m_device->GetDevice().waitForFences(
+        {m_inFlightFences[m_currentFrameIndex]}, vk::True, std::numeric_limits<uint64_t>::max()
+    );
+
+    if (vk::Result::eSuccess != fenceResult)
+    {
+        Logger::GetInstance()->Error("Failed to wait for fence");
+    }
+
+    vk::Result imageResult {};
+    std::tie(imageResult, m_currentImageIndex) = m_swapChainData.GetSwapChain().acquireNextImage(
+        std::numeric_limits<uint64_t>::max(), m_imageAcquiredSemaphores[m_currentFrameIndex]
+    );
+
+    auto&& cmd = m_commandBuffers[m_currentFrameIndex];
+    cmd.reset();
+
+    std::array<vk::ClearValue, 1> clearValues {};
+    clearValues[0].color = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
+
+    vk::RenderPassBeginInfo renderPassBeginInfo(
+        *m_renderPass,
+        m_framebuffers[m_currentFrameIndex],
+        vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)),
+        clearValues
+    );
+
+    cmd.begin({});
+    cmd.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+}
+
+void Window::PostRender() noexcept
+{
+    auto&& cmd = m_commandBuffers[m_currentFrameIndex];
+    cmd.endRenderPass();
+    cmd.end();
+
+    std::array<vk::CommandBuffer, 1> drawCommandBuffers {cmd};
+    std::array<vk::Semaphore, 1> signalSemaphores {m_renderFinishedSemaphores[m_currentFrameIndex]};
+    std::array<vk::Semaphore, 1> waitSemaphores {m_imageAcquiredSemaphores[m_currentFrameIndex]};
+    std::array<vk::PipelineStageFlags, 1> waitStages = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    vk::SubmitInfo drawSubmitInfo(waitSemaphores, waitStages, drawCommandBuffers, signalSemaphores);
+    m_device->GetGraphicsQueue().submit(drawSubmitInfo, m_inFlightFences[m_currentFrameIndex]);
+
+    std::array<vk::Semaphore, 1> presentWait {m_renderFinishedSemaphores[m_currentFrameIndex]};
+    std::array<vk::SwapchainKHR, 1> swapchains {m_swapChainData.GetSwapChain()};
+    vk::PresentInfoKHR presentInfoKHR(presentWait, swapchains, m_currentImageIndex);
+
+    auto presentResult = m_device->GetPresentQueue().presentKHR(presentInfoKHR);
+
+    if (vk::Result::eSuccess != presentResult)
+    {
+        Logger::GetInstance()->Error("Failed to present");
+    }
+
+    m_currentFrameIndex = (m_currentFrameIndex + 1) % m_numberOfFrames;
 }
 
 void Window::InitWindow() noexcept

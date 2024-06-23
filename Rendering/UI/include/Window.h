@@ -41,6 +41,8 @@ public:
 
 protected:
     void InitWindow() noexcept;
+    void PreRender() noexcept;
+    void PostRender() noexcept;
 
 private:
     void InitSwapChain() noexcept;
@@ -54,6 +56,8 @@ protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
     uint32_t m_numberOfFrames {3};
+    uint32_t m_currentFrameIndex {0};
+    uint32_t m_currentImageIndex {0};
 
     std::string m_title {"Jelly"};
 

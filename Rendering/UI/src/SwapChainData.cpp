@@ -120,6 +120,11 @@ const vk::raii::ImageView& SwapChainData::GetImageView(uint32_t index) const noe
     return m_imageViews[index];
 }
 
+const vk::raii::SwapchainKHR& SwapChainData::GetSwapChain() const noexcept
+{
+    return m_swapChain;
+}
+
 vk::SurfaceFormatKHR SwapChainData::PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
     if (formats.empty())
