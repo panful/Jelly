@@ -27,6 +27,8 @@ public:
         vk::ImageUsageFlags usage
     );
 
+    vk::Format GetColorFormat() const noexcept;
+
 private:
     static vk::PresentModeKHR PickPresentMode(const std::vector<vk::PresentModeKHR>& presentModes);
     static vk::SurfaceFormatKHR PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats);

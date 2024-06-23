@@ -5,8 +5,5 @@
 - [x] 组件
 - [ ] 查找依赖
 - [ ] option USE_GLFW_WINDOW
-
-
-Core:       Vulkan render
-Ui:         Window Interactor
-Platform:   GLFW Win32 ...
+- [ ] 可配置的验证层
+- [ ] 可配置的设备扩展

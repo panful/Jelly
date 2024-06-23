@@ -100,6 +100,11 @@ SwapChainData::SwapChainData(
     }
 }
 
+vk::Format SwapChainData::GetColorFormat() const noexcept
+{
+    return m_colorFormat;
+}
+
 vk::SurfaceFormatKHR SwapChainData::PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)
 {
     if (formats.empty())

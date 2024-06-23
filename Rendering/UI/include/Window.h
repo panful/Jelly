@@ -42,6 +42,10 @@ public:
 protected:
     void InitWindow() noexcept;
 
+private:
+    void InitSwapChain() noexcept;
+    void InitRenderPass() noexcept;
+
 protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
@@ -50,6 +54,7 @@ protected:
     std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
     SwapChainData m_swapChainData {nullptr};
+    vk::raii::RenderPass m_renderPass {nullptr};
 
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
