@@ -41,6 +41,11 @@ SwapChainData::SwapChainData(
         m_swapchainExtent = surfaceCapabilities.currentExtent;
     }
 
+    if (m_swapchainExtent != extent)
+    {
+        Logger::GetInstance()->Error("Surface extent incompatible");
+    }
+
     vk::SurfaceTransformFlagBitsKHR preTransform =
         (surfaceCapabilities.supportedTransforms & vk::SurfaceTransformFlagBitsKHR::eIdentity)
         ? vk::SurfaceTransformFlagBitsKHR::eIdentity
@@ -103,6 +108,16 @@ SwapChainData::SwapChainData(
 vk::Format SwapChainData::GetColorFormat() const noexcept
 {
     return m_colorFormat;
+}
+
+uint32_t SwapChainData::GetNumberOfImages() const noexcept
+{
+    return static_cast<uint32_t>(m_images.size());
+}
+
+const vk::raii::ImageView& SwapChainData::GetImageView(uint32_t index) const noexcept
+{
+    return m_imageViews[index];
 }
 
 vk::SurfaceFormatKHR SwapChainData::PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats)

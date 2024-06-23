@@ -45,6 +45,7 @@ protected:
 private:
     void InitSwapChain() noexcept;
     void InitRenderPass() noexcept;
+    void InitFramebuffers() noexcept;
 
 protected:
     uint32_t m_width {800};
@@ -55,6 +56,7 @@ protected:
     vk::raii::SurfaceKHR m_surface {nullptr};
     SwapChainData m_swapChainData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};
+    std::vector<vk::raii::Framebuffer> m_framebuffers {};
 
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };

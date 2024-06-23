@@ -29,6 +29,7 @@ void Window::InitWindow() noexcept
 {
     InitSwapChain();
     InitRenderPass();
+    InitFramebuffers();
 }
 
 void Window::InitSwapChain() noexcept
@@ -67,4 +68,17 @@ void Window::InitRenderPass() noexcept
     );
 
     m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
+}
+
+void Window::InitFramebuffers() noexcept
+{
+    const auto numberOfImages = m_swapChainData.GetNumberOfImages();
+    m_framebuffers.reserve(numberOfImages);
+    for (uint32_t i = 0; i < numberOfImages; ++i)
+    {
+        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
+        m_framebuffers.emplace_back(vk::raii::Framebuffer(
+            m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
+        ));
+    }
 }
