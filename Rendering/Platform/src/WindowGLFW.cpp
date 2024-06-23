@@ -19,6 +19,8 @@ void WindowGLFW::Render() noexcept
         m_device->PickPhysicalDevice(m_surface);
         m_device->InitDevice();
         m_device->InitQueues();
+
+        InitWindow();
     });
 
     for (auto& renderer : m_renderers)

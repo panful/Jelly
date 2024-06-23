@@ -13,6 +13,7 @@
 #pragma warning(disable : 4251)
 
 #include "Object.h"
+#include "SwapChainData.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -39,11 +40,17 @@ public:
     void SetTitle(const std::string_view title) noexcept;
 
 protected:
+    void InitWindow() noexcept;
+
+protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
     std::string m_title {"Jelly"};
+
     std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
+    SwapChainData m_swapChainData {nullptr};
+
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
 } // namespace Jelly

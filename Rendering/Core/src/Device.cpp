@@ -78,6 +78,16 @@ bool Device::CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface)
     return false;
 }
 
+uint32_t Device::GetGraphicsQueueIndex() const noexcept
+{
+    return m_graphicsQueueIndex;
+}
+
+uint32_t Device::GetPresentQueueIndex() const noexcept
+{
+    return m_presentQueueIndex;
+}
+
 const vk::raii::Instance& Device::GetInstance() const noexcept
 {
     return m_instance;

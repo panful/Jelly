@@ -25,6 +25,9 @@ public:
 
     bool CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface);
 
+    uint32_t GetGraphicsQueueIndex() const noexcept;
+    uint32_t GetPresentQueueIndex() const noexcept;
+
     const vk::raii::Instance& GetInstance() const noexcept;
     const vk::raii::PhysicalDevice& GetPhysicalDevice() const noexcept;
     const vk::raii::Device& GetDevice() const noexcept;
@@ -73,6 +76,6 @@ private:
 
     std::vector<const char*> m_enableLayerNames {"VK_LAYER_KHRONOS_validation"};
     std::vector<const char*> m_enableInstanceExtensionNames {};
-    std::vector<const char*> m_enableDeviceExtensionNames {};
+    std::vector<const char*> m_enableDeviceExtensionNames {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 };
 } // namespace Jelly

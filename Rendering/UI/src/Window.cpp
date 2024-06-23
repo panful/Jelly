@@ -23,3 +23,10 @@ void Window::SetTitle(const std::string_view title) noexcept
 {
     m_title = title;
 }
+
+void Window::InitWindow() noexcept
+{
+    m_swapChainData = SwapChainData(
+        m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, vk::ImageUsageFlagBits::eColorAttachment
+    );
+}
