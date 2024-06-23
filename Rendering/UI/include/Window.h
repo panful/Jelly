@@ -29,6 +29,7 @@ class JELLY_EXPORT Window : public Object
 {
 public:
     Window() noexcept;
+    ~Window() noexcept override;
 
     void AddRenderer(std::shared_ptr<Renderer> renderer);
 

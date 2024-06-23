@@ -11,6 +11,11 @@ Window::Window() noexcept
 {
 }
 
+Window::~Window() noexcept
+{
+    m_device->GetDevice().waitIdle();
+}
+
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
     m_renderers.emplace_back(std::move(renderer));
@@ -42,6 +47,8 @@ void Window::PreRender() noexcept
     std::tie(imageResult, m_currentImageIndex) = m_swapChainData.GetSwapChain().acquireNextImage(
         std::numeric_limits<uint64_t>::max(), m_imageAcquiredSemaphores[m_currentFrameIndex]
     );
+
+    m_device->GetDevice().resetFences({m_inFlightFences[m_currentFrameIndex]});
 
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
     cmd.reset();
