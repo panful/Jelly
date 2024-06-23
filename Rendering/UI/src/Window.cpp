@@ -30,6 +30,7 @@ void Window::InitWindow() noexcept
     InitSwapChain();
     InitRenderPass();
     InitFramebuffers();
+    InitSyncObjects();
 }
 
 void Window::InitSwapChain() noexcept
@@ -80,5 +81,18 @@ void Window::InitFramebuffers() noexcept
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
         ));
+    }
+}
+
+void Window::InitSyncObjects() noexcept
+{
+    m_inFlightFences.reserve(m_numberOfFrames);
+    m_renderFinishedSemaphores.reserve(m_numberOfFrames);
+    m_imageAcquiredSemaphores.reserve(m_numberOfFrames);
+    for (uint32_t i = 0; i < m_numberOfFrames; ++i)
+    {
+        m_inFlightFences.emplace_back(vk::raii::Fence(m_device->GetDevice(), {vk::FenceCreateFlagBits::eSignaled}));
+        m_renderFinishedSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
+        m_imageAcquiredSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
     }
 }

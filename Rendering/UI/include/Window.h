@@ -46,10 +46,13 @@ private:
     void InitSwapChain() noexcept;
     void InitRenderPass() noexcept;
     void InitFramebuffers() noexcept;
+    void InitSyncObjects() noexcept;
 
 protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
+    uint32_t m_numberOfFrames {3};
+
     std::string m_title {"Jelly"};
 
     std::shared_ptr<Device> m_device {};
@@ -57,6 +60,9 @@ protected:
     SwapChainData m_swapChainData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
+    std::vector<vk::raii::Fence> m_inFlightFences {};
+    std::vector<vk::raii::Semaphore> m_renderFinishedSemaphores {};
+    std::vector<vk::raii::Semaphore> m_imageAcquiredSemaphores {};
 
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
