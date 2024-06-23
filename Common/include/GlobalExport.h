@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(WIN32)
+#if defined(_WIN32)
     #if defined(JELLY_SHARED_LIBRARY)
         #define JELLY_EXPORT __declspec(dllexport)
     #else

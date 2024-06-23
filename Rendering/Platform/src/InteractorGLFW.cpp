@@ -1,6 +1,6 @@
 #include "InteractorGLFW.h"
-#include "GLFW/glfw3.h"
 #include "WindowGLFW.h"
+#include <GLFW/glfw3.h>
 
 using namespace Jelly;
 

@@ -26,6 +26,10 @@ public:
     bool CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface);
 
     const vk::raii::Instance& GetInstance() const noexcept;
+    const vk::raii::PhysicalDevice& GetPhysicalDevice() const noexcept;
+    const vk::raii::Device& GetDevice() const noexcept;
+    const vk::raii::Queue& GetGraphicsQueue() const noexcept;
+    const vk::raii::Queue& GetPresentQueue() const noexcept;
 
 public:
     vk::Instance InitInstance() noexcept;

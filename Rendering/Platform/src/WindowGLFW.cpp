@@ -3,7 +3,6 @@
 #include "GLFWHelper.h"
 #include "Renderer.h"
 #include <GLFW/glfw3.h>
-#include <mutex>
 
 using namespace Jelly;
 

@@ -28,9 +28,10 @@ vk::Instance Device::InitInstance() noexcept
     }
 
     m_enableInstanceExtensionNames.emplace_back("VK_KHR_surface");
-#if WIN32
+// TODO
+#if _WIN32
     m_enableInstanceExtensionNames.emplace_back("VK_KHR_win32_surface");
-#endif // WIN32
+#endif // _WIN32
 
     vk::DebugUtilsMessageSeverityFlagsEXT severityFlags {
         vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
@@ -80,6 +81,26 @@ bool Device::CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface)
 const vk::raii::Instance& Device::GetInstance() const noexcept
 {
     return m_instance;
+}
+
+const vk::raii::PhysicalDevice& Device::GetPhysicalDevice() const noexcept
+{
+    return m_physicalDevice;
+}
+
+const vk::raii::Device& Device::GetDevice() const noexcept
+{
+    return m_device;
+}
+
+const vk::raii::Queue& Device::GetGraphicsQueue() const noexcept
+{
+    return m_graphicsQueue;
+}
+
+const vk::raii::Queue& Device::GetPresentQueue() const noexcept
+{
+    return m_presentQueue;
 }
 
 vk::PhysicalDevice Device::PickPhysicalDevice(const vk::raii::SurfaceKHR& surface) noexcept
