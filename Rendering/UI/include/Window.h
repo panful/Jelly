@@ -47,6 +47,8 @@ private:
     void InitRenderPass() noexcept;
     void InitFramebuffers() noexcept;
     void InitSyncObjects() noexcept;
+    void InitCommandPool() noexcept;
+    void InitCommandBuffers() noexcept;
 
 protected:
     uint32_t m_width {800};
@@ -56,9 +58,11 @@ protected:
     std::string m_title {"Jelly"};
 
     std::shared_ptr<Device> m_device {};
+    vk::raii::CommandPool m_commandPool {nullptr};
     vk::raii::SurfaceKHR m_surface {nullptr};
     SwapChainData m_swapChainData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};
+    vk::raii::CommandBuffers m_commandBuffers {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
     std::vector<vk::raii::Fence> m_inFlightFences {};
     std::vector<vk::raii::Semaphore> m_renderFinishedSemaphores {};

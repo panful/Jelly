@@ -31,6 +31,8 @@ void Window::InitWindow() noexcept
     InitRenderPass();
     InitFramebuffers();
     InitSyncObjects();
+    InitCommandPool();
+    InitCommandBuffers();
 }
 
 void Window::InitSwapChain() noexcept
@@ -95,4 +97,19 @@ void Window::InitSyncObjects() noexcept
         m_renderFinishedSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
         m_imageAcquiredSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
     }
+}
+
+void Window::InitCommandPool() noexcept
+{
+    m_commandPool = vk::raii::CommandPool(
+        m_device->GetDevice(), {{vk::CommandPoolCreateFlagBits::eResetCommandBuffer}, m_device->GetGraphicsQueueIndex()}
+    );
+}
+
+void Window::InitCommandBuffers() noexcept
+{
+    m_commandBuffers = vk::raii::CommandBuffers(
+        m_device->GetDevice(),
+        vk::CommandBufferAllocateInfo {m_commandPool, vk::CommandBufferLevel::ePrimary, m_numberOfFrames}
+    );
 }
