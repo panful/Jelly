@@ -2,12 +2,16 @@
 #include "InteractorGLFW.h"
 #include "Renderer.h"
 #include "WindowGLFW.h"
+#include "MapperPolyData.h"
 #include <iostream>
 #include <memory>
 
 int main()
 {
+    auto mapper = std::make_shared<Jelly::MapperPolyData>();
+
     auto actor = std::make_shared<Jelly::Actor3D>();
+    actor->SetMapper(mapper);
 
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor);
