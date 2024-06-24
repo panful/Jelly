@@ -26,7 +26,7 @@ void WindowGLFW::Render() noexcept
     PreRender();
     for (auto& renderer : m_renderers)
     {
-        renderer->Render();
+        renderer->Render(m_commandBuffers[m_currentFrameIndex]);
     }
     PostRender();
 }

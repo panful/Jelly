@@ -25,7 +25,9 @@ namespace Jelly {
 class Device;
 class Renderer;
 
-class JELLY_EXPORT Window : public Object
+class JELLY_EXPORT Window
+    : public Object
+    , public std::enable_shared_from_this<Window>
 {
 public:
     Window() noexcept;
@@ -39,6 +41,9 @@ public:
 
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
     void SetTitle(const std::string_view title) noexcept;
+
+    vk::Extent2D GetSize() const noexcept;
+    std::shared_ptr<Device> GetDevice() const noexcept;
 
 protected:
     void InitWindow() noexcept;

@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Device.h"
 #include "Logger.h"
+#include "Renderer.h"
 #include <array>
 #include <limits>
 
@@ -18,6 +19,7 @@ Window::~Window() noexcept
 
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
+    renderer->SetWindow(shared_from_this());
     m_renderers.emplace_back(std::move(renderer));
 }
 
@@ -30,6 +32,16 @@ void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 void Window::SetTitle(const std::string_view title) noexcept
 {
     m_title = title;
+}
+
+vk::Extent2D Window::GetSize() const noexcept
+{
+    return {m_width, m_height};
+}
+
+std::shared_ptr<Device> Window::GetDevice() const noexcept
+{
+    return m_device;
 }
 
 void Window::PreRender() noexcept
