@@ -1,3 +1,4 @@
+#include "Actor3D.h"
 #include "InteractorGLFW.h"
 #include "Renderer.h"
 #include "WindowGLFW.h"
@@ -6,7 +7,10 @@
 
 int main()
 {
+    auto actor = std::make_shared<Jelly::Actor3D>();
+
     auto renderer = std::make_shared<Jelly::Renderer>();
+    renderer->AddActor(actor);
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer);

@@ -19,6 +19,7 @@ Window::~Window() noexcept
 
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
+    renderer->SetDevice(m_device);
     renderer->SetWindow(shared_from_this());
     m_renderers.emplace_back(std::move(renderer));
 }

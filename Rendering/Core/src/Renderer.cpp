@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Actor.h"
 #include "Logger.h"
 #include "Window.h"
 
@@ -37,11 +38,26 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
     commandBuffer.setViewport(0, m_viewport);
     commandBuffer.setScissor(0, vk::Rect2D(offset, extent));
     commandBuffer.clearAttachments(attachment, rect);
+
+    for (auto& actor : m_actors)
+    {
+        actor->Render();
+    }
 }
 
-void Renderer::SetWindow(std::shared_ptr<Window> window)
+void Renderer::AddActor(std::shared_ptr<Actor> actor)
 {
-    m_device = window->GetDevice();
+    actor->SetDevice(m_device);
+    m_actors.emplace_back(std::move(actor));
+}
+
+void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
+{
+    m_device = std::move(device);
+}
+
+void Renderer::SetWindow(std::shared_ptr<Window> window) noexcept
+{
     m_window = window;
 }
 
