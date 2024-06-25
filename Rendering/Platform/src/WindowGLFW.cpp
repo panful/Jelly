@@ -19,6 +19,12 @@ void WindowGLFW::Render() noexcept
         m_device->PickPhysicalDevice(m_surface);
         m_device->InitDevice();
         m_device->InitQueues();
+        m_device->InitPipelineCache();
+
+        for (auto& renderer : m_renderers)
+        {
+            renderer->SetDevice(m_device);
+        }
 
         InitWindow();
     });
@@ -26,7 +32,7 @@ void WindowGLFW::Render() noexcept
     PreRender();
     for (auto& renderer : m_renderers)
     {
-        renderer->Render(m_commandBuffers[m_currentFrameIndex]);
+        renderer->Render(m_commandBuffers[m_currentFrameIndex], m_renderPass);
     }
     PostRender();
 }

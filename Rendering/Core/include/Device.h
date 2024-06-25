@@ -13,11 +13,11 @@
 #pragma warning(disable : 4251)
 
 #include "Object.h"
+#include "PipelineCache.h"
 #include <tuple>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-
 class JELLY_EXPORT Device : public Object
 {
 public:
@@ -33,6 +33,7 @@ public:
     const vk::raii::Device& GetDevice() const noexcept;
     const vk::raii::Queue& GetGraphicsQueue() const noexcept;
     const vk::raii::Queue& GetPresentQueue() const noexcept;
+    const std::unique_ptr<PipelineCache>& GetPipelineCache() const noexcept;
 
 public:
     vk::Instance InitInstance() noexcept;
@@ -42,6 +43,8 @@ public:
     vk::Device InitDevice() noexcept;
 
     std::pair<vk::Queue, vk::Queue> InitQueues() noexcept;
+
+    void InitPipelineCache();
 
 private:
     void CreateDebugUtilsMessengerEXT() noexcept;
@@ -67,6 +70,8 @@ private:
 
     uint32_t m_graphicsQueueIndex {};
     uint32_t m_presentQueueIndex {};
+
+    std::unique_ptr<PipelineCache> m_pipelineCache {};
 
 private:
     inline static const std::string m_appName {"Jelly"};

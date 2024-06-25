@@ -5,7 +5,7 @@
 
 using namespace Jelly;
 
-void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
+void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept
 {
     Logger::GetInstance()->Trace();
 
@@ -41,7 +41,10 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 
     for (auto& actor : m_actors)
     {
-        actor->Render();
+        if (actor->GetVisibility())
+        {
+            actor->Render(commandBuffer, renderPass);
+        }
     }
 }
 
@@ -54,6 +57,10 @@ void Renderer::AddActor(std::shared_ptr<Actor> actor)
 void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
 {
     m_device = std::move(device);
+    for (auto& actor : m_actors)
+    {
+        actor->SetDevice(m_device);
+    }
 }
 
 void Renderer::SetWindow(std::shared_ptr<Window> window) noexcept

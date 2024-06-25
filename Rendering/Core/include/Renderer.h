@@ -25,7 +25,7 @@ class Window;
 class JELLY_EXPORT Renderer : public Object
 {
 public:
-    void Render(const vk::raii::CommandBuffer& commandBuffer) noexcept;
+    void Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept;
 
     void AddActor(std::shared_ptr<Actor> actor);
 

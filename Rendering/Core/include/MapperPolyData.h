@@ -17,6 +17,6 @@ namespace Jelly {
 class JELLY_EXPORT MapperPolyData : public Mapper
 {
 public:
-    void Render() noexcept override;
+    void Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept override;
 };
 } // namespace Jelly

@@ -1,5 +1,6 @@
 #include "Device.h"
 #include "Logger.h"
+#include "PipelineCache.h"
 #include <format>
 #include <optional>
 #include <set>
@@ -113,6 +114,11 @@ const vk::raii::Queue& Device::GetPresentQueue() const noexcept
     return m_presentQueue;
 }
 
+const std::unique_ptr<PipelineCache>& Device::GetPipelineCache() const noexcept
+{
+    return m_pipelineCache;
+}
+
 vk::PhysicalDevice Device::PickPhysicalDevice(const vk::raii::SurfaceKHR& surface) noexcept
 {
     Logger::GetInstance()->Trace();
@@ -180,6 +186,11 @@ std::pair<vk::Queue, vk::Queue> Device::InitQueues() noexcept
     m_presentQueue  = vk::raii::Queue(m_device, m_presentQueueIndex, 0);
 
     return {m_graphicsQueue, m_presentQueue};
+}
+
+void Device::InitPipelineCache()
+{
+    m_pipelineCache = std::make_unique<PipelineCache>();
 }
 
 void Device::CreateDebugUtilsMessengerEXT() noexcept
