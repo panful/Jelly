@@ -1,6 +1,8 @@
 #include "Pipeline.h"
 #include "Device.h"
+#include "Logger.h"
 #include <array>
+#include <format>
 
 using namespace Jelly;
 
@@ -20,18 +22,30 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
     };
 
     //----------------------------------------
+    auto getFormat = [](uint32_t stride) -> vk::Format {
+        switch (stride / sizeof(float))
+        {
+            case 3:
+                return vk::Format::eR32G32B32Sfloat;
+            case 2:
+                return vk::Format::eR32G32Sfloat;
+            default:
+                Logger::GetInstance()->Error(std::format("stride error, current stride is {}", stride));
+        }
+        return {};
+    };
+
     uint32_t offset {0};
-    uint32_t location {0};
+    uint32_t locationBinding {0};
     std::vector<vk::VertexInputAttributeDescription> inputAttributes {};
+    std::vector<vk::VertexInputBindingDescription> inputBindings {};
     for (auto& stride : pipelineInfo.strides)
     {
-        inputAttributes.emplace_back(location, 0, vk::Format::eR32G32B32Sfloat, offset); // XXX
+        inputAttributes.emplace_back(locationBinding, locationBinding, getFormat(stride), offset);
+        inputBindings.emplace_back(locationBinding, stride, vk::VertexInputRate::eVertex);
         offset += stride;
-        location++;
+        locationBinding++;
     }
-    std::array inputBindings {
-        vk::VertexInputBindingDescription {0, offset, vk::VertexInputRate::eVertex}
-    };
 
     vk::PipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo({}, inputBindings, inputAttributes);
 

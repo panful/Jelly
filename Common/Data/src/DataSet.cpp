@@ -73,6 +73,11 @@ constexpr size_t DataSet::GetIndexCount() const noexcept
     return m_indices.size();
 }
 
+constexpr size_t DataSet::GetPointCount() const noexcept
+{
+    return m_points.size();
+}
+
 constexpr bool DataSet::HasColorData() const noexcept
 {
     return !m_colors.empty();

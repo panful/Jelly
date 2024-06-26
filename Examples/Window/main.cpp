@@ -1,15 +1,19 @@
 #include "Actor3D.h"
+#include "DataSet.h"
+#include "DataSetMapper.h"
 #include "InteractorGLFW.h"
 #include "Renderer.h"
 #include "WindowGLFW.h"
-#include "MapperPolyData.h"
 #include <iostream>
 #include <memory>
 
 int main()
 {
-    auto mapper = std::make_shared<Jelly::MapperPolyData>();
+    auto dataSet = std::make_shared<Jelly::DataSet>();
 
+    auto mapper = std::make_shared<Jelly::DataSetMapper>();
+    mapper->SetDataSet(dataSet);
+    
     auto actor = std::make_shared<Jelly::Actor3D>();
     actor->SetMapper(mapper);
 

@@ -86,6 +86,7 @@ public:
     /// @brief 获取索引的个数
     /// @return
     constexpr size_t GetIndexCount() const noexcept;
+    constexpr size_t GetPointCount() const noexcept;
 
     constexpr bool HasColorData() const noexcept;
 

@@ -1,5 +1,5 @@
 /**
- * @file MapperPolyData.h
+ * @file DataSetMapper.h
  * @author yangpan (yangpan0822@qq.com)
  * @brief
  * @version 0.1
@@ -12,11 +12,19 @@
 #pragma once
 
 #include "Mapper.h"
+#include <memory>
 
 namespace Jelly {
-class JELLY_EXPORT MapperPolyData : public Mapper
+class DataSet;
+
+class JELLY_EXPORT DataSetMapper : public Mapper
 {
 public:
     void Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept override;
+
+    void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
+
+private:
+    std::shared_ptr<DataSet> m_dataSet {};
 };
 } // namespace Jelly

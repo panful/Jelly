@@ -12,7 +12,9 @@
 #pragma once
 #pragma warning(disable : 4251)
 
+#include "Drawable.h"
 #include "Object.h"
+#include "Pipeline.h"
 #include <atomic>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
@@ -29,11 +31,13 @@ public:
     void SetDevice(std::shared_ptr<Device> device) noexcept;
 
 protected:
-    void BuildPipeline(const vk::raii::RenderPass& renderPass) noexcept;
+    void BuildPipeline(const vk::raii::RenderPass& renderPass, const PipelineInfo& pipelineInfo) noexcept;
 
 protected:
     std::shared_ptr<Device> m_device {};
-    size_t m_pipelineUID {};
+    std::unique_ptr<Drawable> m_drawable {};
+
+    size_t m_pipelineKey {};
 
     std::atomic_bool m_needUpdate {true};
 };
