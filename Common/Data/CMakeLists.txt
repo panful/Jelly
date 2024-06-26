@@ -1,13 +1,13 @@
-﻿set(target_name RenderingUI)
+set(target_name CommonData)
 
 file(GLOB SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(${target_name} ${JELLY_LIB_TYPE} ${SRCS})
-add_dependencies(${target_name} CommonCore RenderingCore)
 
-target_link_libraries(${target_name} PUBLIC CommonCore RenderingCore)
+target_link_libraries(${target_name} PUBLIC CommonCore)
 
+target_include_directories(${target_name} PRIVATE ${PROJECT_SOURCE_DIR}/External)
 target_include_directories(${target_name} PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
