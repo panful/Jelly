@@ -30,17 +30,29 @@ else()
     set(JELLY_LIB_TYPE STATIC)
 endif(BUILD_SHARED_LIBRARIES)
 
+include(CMake/WarningSwitch.cmake)
+TurnOffWarnings()
+    set(ENABLE_OPT OFF)
+    set(ENABLE_HLSL OFF)
+    set(GLSLANG_TESTS OFF)
+    set(ENABLE_SPVREMAPPER OFF)
+    set(ENABLE_GLSLANG_BINARIES OFF)
+    add_subdirectory(External/glslang)
+
+    if(USE_GLFW_WINDOW)
+        add_subdirectory(External/glfw)
+    endif(USE_GLFW_WINDOW)
+
+    if(BUILD_UNIT_TESTING)
+        set(INSTALL_GTEST OFF)
+        add_subdirectory(External/googletest)
+    endif(BUILD_UNIT_TESTING)
+TurnOnWarnings()
+
 add_subdirectory(Common)
 add_subdirectory(Rendering)
-
-if(USE_GLFW_WINDOW)
-    add_subdirectory(External/glfw)
-endif(USE_GLFW_WINDOW)
-
 if(BUILD_UNIT_TESTING)
     enable_testing()
-    set(INSTALL_GTEST OFF)
-    add_subdirectory(External/googletest)
     add_subdirectory(Testing)
 endif(BUILD_UNIT_TESTING)
 

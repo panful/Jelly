@@ -11,7 +11,6 @@
 
 #pragma once
 
-#include "GlobalExport.h"
 #include "Object.h"
 #include <memory>
 #include <source_location>
