@@ -10,7 +10,6 @@
  */
 
 #pragma once
-#pragma warning(disable : 4251)
 
 #include "GlobalExport.h"
 #include "Object.h"

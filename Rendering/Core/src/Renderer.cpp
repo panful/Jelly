@@ -19,7 +19,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, const vk::ra
         static_cast<uint32_t>(window->GetSize().width * m_viewport[2]),
         static_cast<uint32_t>(window->GetSize().height * m_viewport[3])
     };
-    auto m_viewport = vk::Viewport {
+    auto viewport = vk::Viewport {
         static_cast<float>(offset.x),
         static_cast<float>(offset.y),
         static_cast<float>(extent.width),
@@ -35,7 +35,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, const vk::ra
          0, 1
     };
 
-    commandBuffer.setViewport(0, m_viewport);
+    commandBuffer.setViewport(0, viewport);
     commandBuffer.setScissor(0, vk::Rect2D(offset, extent));
     commandBuffer.clearAttachments(attachment, rect);
 

@@ -33,52 +33,52 @@ void DataSet::SetPrimitiveType(PrimitiveType primitiveType) noexcept
     m_primitiveType = primitiveType;
 }
 
-constexpr PrimitiveType DataSet::GetPrimitiveType() const noexcept
+PrimitiveType DataSet::GetPrimitiveType() const noexcept
 {
     return m_primitiveType;
 }
 
-constexpr size_t DataSet::GetIndexSize() const noexcept
+size_t DataSet::GetIndexSize() const noexcept
 {
     return m_indices.size() * sizeof(uint32_t);
 }
 
-constexpr size_t DataSet::GetPointSize() const noexcept
+size_t DataSet::GetPointSize() const noexcept
 {
     return m_points.size() * Point::GetSize();
 }
 
-constexpr size_t DataSet::GetColorSize() const noexcept
+size_t DataSet::GetColorSize() const noexcept
 {
     return m_colors.size() * Color::GetSize();
 }
 
-// constexpr size_t DataSet::GetPointElementSize() const noexcept
+//  size_t DataSet::GetPointElementSize() const noexcept
 // {
 //     return Point::GetSize();
 // }
 
-// constexpr size_t DataSet::GetColorElementSize() const noexcept
+//  size_t DataSet::GetColorElementSize() const noexcept
 // {
 //     return Color::GetSize();
 // }
 
-// constexpr size_t DataSet::GetIndexElementSize() const noexcept
+//  size_t DataSet::GetIndexElementSize() const noexcept
 // {
 //     return sizeof(uint32_t);
 // }
 
-constexpr size_t DataSet::GetIndexCount() const noexcept
+size_t DataSet::GetIndexCount() const noexcept
 {
     return m_indices.size();
 }
 
-constexpr size_t DataSet::GetPointCount() const noexcept
+size_t DataSet::GetPointCount() const noexcept
 {
     return m_points.size();
 }
 
-constexpr bool DataSet::HasColorData() const noexcept
+bool DataSet::HasColorData() const noexcept
 {
     return !m_colors.empty();
 }

@@ -10,9 +10,9 @@
  */
 
 #pragma once
-#pragma warning(disable : 4251)
 
 #include "Object.h"
+#include <cstdint>
 #include <vector>
 
 namespace Jelly {
@@ -69,26 +69,26 @@ public:
 
     void SetPrimitiveType(PrimitiveType primitiveType) noexcept;
 
-    constexpr PrimitiveType GetPrimitiveType() const noexcept;
+    PrimitiveType GetPrimitiveType() const noexcept;
 
     /// @brief 获取索引数据的大小
     /// @return
-    constexpr size_t GetIndexSize() const noexcept;
-    constexpr size_t GetPointSize() const noexcept;
-    constexpr size_t GetColorSize() const noexcept;
+    size_t GetIndexSize() const noexcept;
+    size_t GetPointSize() const noexcept;
+    size_t GetColorSize() const noexcept;
 
     // /// @brief 获取每个索引的大小
     // /// @return
-    // constexpr size_t GetIndexElementSize() const noexcept;
-    // constexpr size_t GetPointElementSize() const noexcept;
-    // constexpr size_t GetColorElementSize() const noexcept;
+    // size_t GetIndexElementSize() const noexcept;
+    // size_t GetPointElementSize() const noexcept;
+    // size_t GetColorElementSize() const noexcept;
 
     /// @brief 获取索引的个数
     /// @return
-    constexpr size_t GetIndexCount() const noexcept;
-    constexpr size_t GetPointCount() const noexcept;
+    size_t GetIndexCount() const noexcept;
+    size_t GetPointCount() const noexcept;
 
-    constexpr bool HasColorData() const noexcept;
+    bool HasColorData() const noexcept;
 
     /// @brief 每个顶点属性的字节大小
     /// @return
