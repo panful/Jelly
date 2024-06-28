@@ -21,9 +21,27 @@ void DataSetMapper::Render(
         m_needUpdate = false;
 
         uint32_t location {1}; // 0 是 inPos, 其他输入从1开始
-        if (m_dataSet->HasColorData())
+
+        switch (m_colorMode)
         {
-            m_shaderGenerator->AddPointColor(location);
+            case ColorMode::ColorMap:
+                // TODO
+                break;
+            case ColorMode::VertexColoring:
+                if (m_dataSet->HasColorData())
+                {
+                    m_shaderGenerator->AddPointColor(location);
+                    break;
+                }
+                else
+                {
+                    Logger::GetInstance()->Warn("Color mode is VertexColoring, but not have color data");
+                }
+            case ColorMode::UniformColor:
+                [[fallthrough]];
+            default:
+                m_shaderGenerator->SetFragColor(m_color);
+                break;
         }
 
         auto vertCode = m_shaderGenerator->GetVertexShaderCode();

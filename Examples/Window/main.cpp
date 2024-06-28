@@ -33,6 +33,8 @@ int main()
 
     auto mapper = std::make_shared<Jelly::DataSetMapper>();
     mapper->SetDataSet(dataSet);
+    mapper->SetColor({1., 0., 1.});
+    mapper->SetColorMode(Jelly::ColorMode::VertexColoring);
 
     auto actor = std::make_shared<Jelly::Actor3D>();
     actor->SetMapper(mapper);
