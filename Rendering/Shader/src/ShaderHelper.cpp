@@ -159,27 +159,28 @@ ShaderHelper* ShaderHelper::GetInstance() noexcept
 std::optional<std::vector<uint32_t>>
 ShaderHelper::GLSL2SPV(const vk::ShaderStageFlagBits shaderType, const std::string_view shaderCode)
 {
-    EShLanguage stage = TranslateShaderStage(shaderType);
+    EShLanguage stage    = TranslateShaderStage(shaderType);
+    EShMessages messages = EShMsgSpvRules;
 
     const auto shaderStrings = shaderCode.data();
 
     glslang::TShader shader(stage);
     shader.setStrings(&shaderStrings, 1);
 
-    if (!shader.parse(&DefaultTBuiltInResource, 100, false, EShMsgDefault))
+    if (!shader.parse(&DefaultTBuiltInResource, 100, false, messages))
     {
         Logger::GetInstance()->Error(
-            std::format("## Shader code: {}\t##Shader parse: {}", shaderCode, shader.getInfoLog())
+            std::format("Shader code:\n{}\nShader parse info log:\n{}\n", shaderCode, shader.getInfoLog())
         );
         return {};
     }
 
     glslang::TProgram program {};
     program.addShader(&shader);
-    if (!program.link(EShMsgDefault))
+    if (!program.link(messages))
     {
         Logger::GetInstance()->Error(
-            std::format("## Shader code: {}\t##Shader parse: {}", shaderCode, program.getInfoLog())
+            std::format("Shader code:\n{}\nProgram link info log:\n{}\n", shaderCode, program.getInfoLog())
         );
         return {};
     }

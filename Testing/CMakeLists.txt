@@ -8,4 +8,6 @@ add_dependencies(${target_name} CommonCore GTest::gtest GTest::gmock)
 target_link_libraries(${target_name} PRIVATE CommonCore RenderingShader)
 target_link_libraries(${target_name} PRIVATE GTest::gtest GTest::gmock)
 
+target_compile_definitions(${target_name} PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/TestData")
+
 add_test(NAME JellyUnitTest COMMAND ${target_name})
