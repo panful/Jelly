@@ -147,6 +147,7 @@ ShaderHelper::ShaderHelper() noexcept
 
 ShaderHelper::~ShaderHelper() noexcept
 {
+    Logger::GetInstance()->Trace("glslang terminate");
     glslang::FinalizeProcess();
 }
 

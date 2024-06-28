@@ -32,6 +32,7 @@ Logger::Logger() noexcept
 
 Logger::~Logger() noexcept
 {
+    Trace("Logger terminate");
     spdlog::drop_all();
 }
 
