@@ -17,10 +17,18 @@ int main()
         {-.5f, .5f,  0.f},
         {.5f,  .5f,  0.f},
     };
+    std::vector<Jelly::Color> colors {
+        {1.f, 0.f, 0.f},
+        {0.f, 1.f, 0.f},
+        {0.f, 0.f, 0.f},
+        {0.f, 0.f, 1.f},
+        {1.f, 1.f, 1.f},
+    };
     std::vector<uint32_t> triangles {0, 2, 1, 2, 3, 4};
 
     auto dataSet = std::make_shared<Jelly::DataSet>();
     dataSet->SetPoints(std::move(points));
+    dataSet->SetColors(std::move(colors));
     dataSet->SetIndices(std::move(triangles));
 
     auto mapper = std::make_shared<Jelly::DataSetMapper>();

@@ -35,15 +35,13 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
         return {};
     };
 
-    uint32_t offset {0};
     uint32_t locationBinding {0};
     std::vector<vk::VertexInputAttributeDescription> inputAttributes {};
     std::vector<vk::VertexInputBindingDescription> inputBindings {};
     for (auto& stride : pipelineInfo.strides)
     {
-        inputAttributes.emplace_back(locationBinding, locationBinding, getFormat(stride), offset);
+        inputAttributes.emplace_back(locationBinding, locationBinding, getFormat(stride), 0);
         inputBindings.emplace_back(locationBinding, stride, vk::VertexInputRate::eVertex);
-        offset += stride;
         locationBinding++;
     }
 

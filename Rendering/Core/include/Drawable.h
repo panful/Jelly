@@ -29,6 +29,8 @@ public:
     Drawable& operator=(const Drawable&) = delete;
 
     std::vector<vk::Buffer> GetVertexBuffers() const noexcept;
+    std::vector<vk::DeviceSize> GetVertexOffsets() const noexcept;
+
     vk::Buffer GetIndexBuffer() const noexcept;
 
     uint32_t GetIndexCount() const noexcept;

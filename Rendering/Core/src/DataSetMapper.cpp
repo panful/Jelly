@@ -20,6 +20,12 @@ void DataSetMapper::Render(
     {
         m_needUpdate = false;
 
+        uint32_t location {1}; // 0 是 inPos, 其他输入从1开始
+        if (m_dataSet->HasColorData())
+        {
+            m_shaderGenerator->AddPointColor(location);
+        }
+
         auto vertCode = m_shaderGenerator->GetVertexShaderCode();
         auto fragCode = m_shaderGenerator->GetFragmentShaderCode();
 
@@ -54,7 +60,7 @@ void DataSetMapper::Render(
     auto pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
 
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
-    commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), {0});
+    commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
     commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());
     commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);
 }

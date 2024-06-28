@@ -56,6 +56,13 @@ std::vector<vk::Buffer> Drawable::GetVertexBuffers() const noexcept
     return buffers;
 }
 
+std::vector<vk::DeviceSize> Drawable::GetVertexOffsets() const noexcept
+{
+    std::vector<vk::DeviceSize> offsets {};
+    offsets.resize(m_vertexBufferDatas.size(), 0);
+    return offsets;
+}
+
 vk::Buffer Drawable::GetIndexBuffer() const noexcept
 {
     return m_indexBufferData->GetBuffer();
