@@ -4,16 +4,28 @@
 #include "InteractorGLFW.h"
 #include "Renderer.h"
 #include "WindowGLFW.h"
+
 #include <iostream>
 #include <memory>
 
 int main()
 {
+    std::vector<Jelly::Point> points {
+        {-.5f, -.5f, 0.f},
+        {.5f,  -.5f, 0.f},
+        {0.f,  0.f,  0.f},
+        {-.5f, .5f,  0.f},
+        {.5f,  .5f,  0.f},
+    };
+    std::vector<uint32_t> triangles {0, 2, 1, 2, 3, 4};
+
     auto dataSet = std::make_shared<Jelly::DataSet>();
+    dataSet->SetPoints(std::move(points));
+    dataSet->SetIndices(std::move(triangles));
 
     auto mapper = std::make_shared<Jelly::DataSetMapper>();
     mapper->SetDataSet(dataSet);
-    
+
     auto actor = std::make_shared<Jelly::Actor3D>();
     actor->SetMapper(mapper);
 

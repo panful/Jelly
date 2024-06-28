@@ -5,7 +5,7 @@ file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h)
 
 add_library(${target_name} ${JELLY_LIB_TYPE} ${SRCS})
 
-target_link_libraries(${target_name} PUBLIC CommonCore CommonData ${Vulkan_LIBRARIES})
+target_link_libraries(${target_name} PUBLIC CommonCore CommonData RenderingShader ${Vulkan_LIBRARIES})
 
 target_include_directories(${target_name} PUBLIC 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

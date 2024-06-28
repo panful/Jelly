@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "Pipeline.h"
 #include "PipelineCache.h"
+#include "ShaderHelper.h"
 #include <format>
 
 using namespace Jelly;
@@ -19,31 +20,43 @@ void DataSetMapper::Render(
     {
         m_needUpdate = false;
 
-        if (!m_dataSet)
+        auto vertCode = m_shaderGenerator->GetVertexShaderCode();
+        auto fragCode = m_shaderGenerator->GetFragmentShaderCode();
+
+        auto vertSpv = ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
+        auto fragSpv = ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);
+
+        if (!vertSpv)
         {
+            Logger::GetInstance()->Error(std::format("failed to compile vertex shader, shader code: {}", vertCode));
+            return;
+        }
+        if (!fragSpv)
+        {
+            Logger::GetInstance()->Error(std::format("failed to compile fragment shader, shader code: {}", fragCode));
             return;
         }
 
         PipelineInfo pipelineInfo {
-            .strides          = m_dataSet->GetStrides(),
-            .depthTestEnable  = false,
-            .depthWriteEnable = false,
-            .renderPass       = renderPass
+            .vertexShaderCode   = vertSpv.value(),
+            .fragmentShaderCode = fragSpv.value(),
+            .strides            = m_dataSet->GetStrides(),
+            .depthTestEnable    = false,
+            .depthWriteEnable   = false,
+            .renderPass         = renderPass
         };
 
-        if (m_dataSet->GetPointCount() > 0 && m_dataSet->GetIndexCount() > 0)
-        {
-            m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
-        }
-        else
-        {
-            Logger::GetInstance()->Warn(std::format(
-                "Data set is empty, point count is {}, index count is {}",
-                m_dataSet->GetPointCount(),
-                m_dataSet->GetIndexCount()
-            ));
-        }
+        BuildPipeline(renderPass, pipelineInfo);
+
+        m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
     }
+
+    auto pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
+
+    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
+    commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), {0});
+    commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());
+    commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);
 }
 
 void DataSetMapper::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept

@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Mapper.h"
+#include "ShaderGenerator.h"
 #include <memory>
 
 namespace Jelly {
@@ -26,5 +27,6 @@ public:
 
 private:
     std::shared_ptr<DataSet> m_dataSet {};
+    std::unique_ptr<ShaderGenerator> m_shaderGenerator {std::make_unique<ShaderGenerator>()};
 };
 } // namespace Jelly
