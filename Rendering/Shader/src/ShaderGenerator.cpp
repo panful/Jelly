@@ -79,6 +79,9 @@ void ShaderGenerator::RemovePointColor()
 
 void ShaderGenerator::SetFragColor(const std::array<double, 3>& color)
 {
+    ReplaceValue(
+        m_fragmentShaderCode, "FragColor = ", ";", std::format("vec4({}, {}, {}, 1.)", color[0], color[1], color[2])
+    );
 }
 
 void ShaderGenerator::ReplaceValue(
