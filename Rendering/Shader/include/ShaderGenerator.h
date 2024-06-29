@@ -13,6 +13,7 @@
 
 #include "Object.h"
 #include <array>
+#include <cstdint>
 #include <string>
 
 namespace Jelly {
