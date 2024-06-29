@@ -1,4 +1,4 @@
-#include "ShaderHelper.h"
+#include "SpvCreater.h"
 #include <fstream>
 #include <gtest/gtest.h>
 #include <string>
@@ -34,7 +34,7 @@ TEST(Test_ShaderHelper, vertexShader)
     auto stage_str = ReadGLSL(TEST_DATA_DIR + "/base.vert"s);
 
     std::optional<std::vector<uint32_t>> generate_spv =
-        Jelly::ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, stage_str);
+        Jelly::SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, stage_str);
 
     EXPECT_TRUE(generate_spv.has_value());
     EXPECT_TRUE((read_spv == generate_spv.value_or(std::vector<uint32_t>())));
@@ -46,7 +46,7 @@ TEST(Test_ShaderHelper, fragmenShader)
     auto stage_str = ReadGLSL(TEST_DATA_DIR + "/base.frag"s);
 
     std::optional<std::vector<uint32_t>> generate_spv =
-        Jelly::ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, stage_str);
+        Jelly::SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, stage_str);
 
     EXPECT_TRUE(generate_spv.has_value());
     EXPECT_TRUE((read_spv == generate_spv.value_or(std::vector<uint32_t>())));

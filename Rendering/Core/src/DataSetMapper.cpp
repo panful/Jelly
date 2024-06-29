@@ -5,7 +5,7 @@
 #include "Logger.h"
 #include "Pipeline.h"
 #include "PipelineCache.h"
-#include "ShaderHelper.h"
+#include "SpvCreater.h"
 #include <format>
 
 using namespace Jelly;
@@ -30,7 +30,7 @@ void DataSetMapper::Render(
             case ColorMode::VertexColoring:
                 if (m_dataSet->HasColorData())
                 {
-                    m_shaderGenerator->AddPointColor(location);
+                    m_shaderCreater->AddPointColor(location);
                     break;
                 }
                 else
@@ -40,15 +40,15 @@ void DataSetMapper::Render(
             case ColorMode::UniformColor:
                 [[fallthrough]];
             default:
-                m_shaderGenerator->SetFragColor(m_color);
+                m_shaderCreater->SetFragColor(m_color);
                 break;
         }
 
-        auto vertCode = m_shaderGenerator->GetVertexShaderCode();
-        auto fragCode = m_shaderGenerator->GetFragmentShaderCode();
+        auto vertCode = m_shaderCreater->GetVertexShaderCode();
+        auto fragCode = m_shaderCreater->GetFragmentShaderCode();
 
-        auto vertSpv = ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
-        auto fragSpv = ShaderHelper::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);
+        auto vertSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
+        auto fragSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);
 
         if (!vertSpv)
         {

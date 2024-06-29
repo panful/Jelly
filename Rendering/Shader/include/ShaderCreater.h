@@ -1,5 +1,5 @@
 /**
- * @file ShaderGenerator.h
+ * @file ShaderCreater.h
  * @author yangpan (yangpan0822@qq.com)
  * @brief
  * @version 0.1
@@ -17,10 +17,10 @@
 #include <string>
 
 namespace Jelly {
-class JELLY_EXPORT ShaderGenerator : public Object
+class JELLY_EXPORT ShaderCreater : public Object
 {
 public:
-    ShaderGenerator();
+    ShaderCreater();
 
     std::string GetVertexShaderCode() const noexcept;
     std::string GetFragmentShaderCode() const noexcept;

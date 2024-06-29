@@ -1,4 +1,4 @@
-#include "ShaderGenerator.h"
+#include "ShaderCreater.h"
 #include <gtest/gtest.h>
 #include <string>
 
@@ -40,7 +40,7 @@ void main()
     // FS::Main End
 })";
 
-    Jelly::ShaderGenerator generator {};
+    Jelly::ShaderCreater generator {};
     generator.AddPointColor(1);
 
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
@@ -82,7 +82,7 @@ void main()
     // FS::Main End
 })";
 
-    Jelly::ShaderGenerator generator {};
+    Jelly::ShaderCreater generator {};
     generator.SetFragColor({.1, .2, .3});
 
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
@@ -124,7 +124,7 @@ void main()
     // FS::Main End
 })";
 
-    Jelly::ShaderGenerator generator {};
+    Jelly::ShaderCreater generator {};
     generator.SetFragColor({1.1, 9.99, .001});
 
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());

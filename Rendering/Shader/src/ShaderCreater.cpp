@@ -1,4 +1,4 @@
-#include "ShaderGenerator.h"
+#include "ShaderCreater.h"
 #include "Logger.h"
 #include <format>
 
@@ -39,23 +39,23 @@ void main()
 
 using namespace Jelly;
 
-ShaderGenerator::ShaderGenerator()
+ShaderCreater::ShaderCreater()
     : m_vertexShaderCode(VertexShaderTemplateString)
     , m_fragmentShaderCode(FragmentShaderTemplateString)
 {
 }
 
-std::string ShaderGenerator::GetVertexShaderCode() const noexcept
+std::string ShaderCreater::GetVertexShaderCode() const noexcept
 {
     return m_vertexShaderCode;
 }
 
-std::string ShaderGenerator::GetFragmentShaderCode() const noexcept
+std::string ShaderCreater::GetFragmentShaderCode() const noexcept
 {
     return m_fragmentShaderCode;
 }
 
-void ShaderGenerator::AddPointColor(uint32_t location)
+void ShaderCreater::AddPointColor(uint32_t location)
 {
     ReplaceValue(
         m_vertexShaderCode,
@@ -73,18 +73,18 @@ void ShaderGenerator::AddPointColor(uint32_t location)
     ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(fsInColor, 1.)");
 }
 
-void ShaderGenerator::RemovePointColor()
+void ShaderCreater::RemovePointColor()
 {
 }
 
-void ShaderGenerator::SetFragColor(const std::array<double, 3>& color)
+void ShaderCreater::SetFragColor(const std::array<double, 3>& color)
 {
     ReplaceValue(
         m_fragmentShaderCode, "FragColor = ", ";", std::format("vec4({}, {}, {}, 1.)", color[0], color[1], color[2])
     );
 }
 
-void ShaderGenerator::ReplaceValue(
+void ShaderCreater::ReplaceValue(
     std::string& str, const std::string& start, const std::string& end, const std::string& replacement
 )
 {
@@ -100,7 +100,7 @@ void ShaderGenerator::ReplaceValue(
     Logger::GetInstance()->Error(std::format("{} or {} not found in {}", start, end, str));
 }
 
-void ShaderGenerator::ReplaceValue(std::string& str, const std::string& oldStr, const std::string& newStr)
+void ShaderCreater::ReplaceValue(std::string& str, const std::string& oldStr, const std::string& newStr)
 {
     if (auto pos = str.find(oldStr); pos != std::string::npos)
     {

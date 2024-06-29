@@ -1,4 +1,4 @@
-#include "ShaderHelper.h"
+#include "SpvCreater.h"
 #include "Logger.h"
 #include <format>
 #include <glslang/SPIRV/GlslangToSpv.h>
@@ -125,7 +125,7 @@ constexpr TBuiltInResource DefaultTBuiltInResource = {
 
 using namespace Jelly;
 
-ShaderHelper::ShaderHelper() noexcept
+SpvCreater::SpvCreater() noexcept
 {
     auto version = glslang::GetVersion();
     Logger::GetInstance()->Trace(std::format(
@@ -145,20 +145,20 @@ ShaderHelper::ShaderHelper() noexcept
     }
 }
 
-ShaderHelper::~ShaderHelper() noexcept
+SpvCreater::~SpvCreater() noexcept
 {
     Logger::GetInstance()->Trace("glslang terminate");
     glslang::FinalizeProcess();
 }
 
-ShaderHelper* ShaderHelper::GetInstance() noexcept
+SpvCreater* SpvCreater::GetInstance() noexcept
 {
-    static ShaderHelper shaderHelper {};
+    static SpvCreater shaderHelper {};
     return &shaderHelper;
 }
 
 std::optional<std::vector<uint32_t>>
-ShaderHelper::GLSL2SPV(const vk::ShaderStageFlagBits shaderType, const std::string_view shaderCode)
+SpvCreater::GLSL2SPV(const vk::ShaderStageFlagBits shaderType, const std::string_view shaderCode)
 {
     EShLanguage stage    = TranslateShaderStage(shaderType);
     EShMessages messages = EShMsgSpvRules;
@@ -191,7 +191,7 @@ ShaderHelper::GLSL2SPV(const vk::ShaderStageFlagBits shaderType, const std::stri
     return spv_result;
 }
 
-EShLanguage ShaderHelper::TranslateShaderStage(vk::ShaderStageFlagBits stage) noexcept
+EShLanguage SpvCreater::TranslateShaderStage(vk::ShaderStageFlagBits stage) noexcept
 {
     switch (stage)
     {
