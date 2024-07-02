@@ -12,6 +12,8 @@
 #pragma once
 
 #include "Object.h"
+#include <functional>
+#include <string>
 #include <vector>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -81,7 +83,50 @@ struct hash<Jelly::PipelineInfo>
 {
     size_t operator()(const Jelly::PipelineInfo& pipelineInfo) const noexcept
     {
-        return 0; // TODO
+        std::string infoStr {};
+        infoStr.reserve(1024);
+        infoStr += "#vertexShaderCode";
+        infoStr.insert(infoStr.cend(), pipelineInfo.vertexShaderCode.begin(), pipelineInfo.vertexShaderCode.end());
+        infoStr += "#fragmentShaderCode";
+        infoStr.insert(infoStr.cend(), pipelineInfo.fragmentShaderCode.begin(), pipelineInfo.fragmentShaderCode.end());
+        infoStr += "#strides";
+        infoStr.insert(infoStr.cend(), pipelineInfo.strides.begin(), pipelineInfo.strides.end());
+        infoStr += "#topology";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.topology));
+        infoStr += "#polygonMode";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.polygonMode));
+        infoStr += "#frontFace";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.frontFace));
+        infoStr += "#cullMode";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.cullMode));
+        infoStr += "#depthBiasEnable";
+        infoStr += std::to_string(pipelineInfo.depthBiasEnable);
+        infoStr += "#lineWidth";
+        infoStr += std::to_string(pipelineInfo.lineWidth);
+        infoStr += "#sampleCount";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.sampleCount));
+        infoStr += "#depthTestEnable";
+        infoStr += std::to_string(pipelineInfo.depthTestEnable);
+        infoStr += "#depthWriteEnable";
+        infoStr += std::to_string(pipelineInfo.depthWriteEnable);
+        infoStr += "#StencilTestEnable";
+        infoStr += std::to_string(pipelineInfo.StencilTestEnable);
+        infoStr += "#depthCompareOp";
+        infoStr += std::to_string(static_cast<int>(pipelineInfo.depthCompareOp));
+        infoStr += "#blendEnable";
+        infoStr += std::to_string(pipelineInfo.blendEnable);
+        infoStr += "#dynamicStates";
+        for (auto& dynamicState : pipelineInfo.dynamicStates)
+        {
+            infoStr += std::to_string(static_cast<int>(dynamicState));
+        }
+
+        // TODO
+        infoStr += "#descriptorSet";
+        infoStr += "#renderPass";
+
+        std::hash<std::string> hashPipelineInfo {};
+        return hashPipelineInfo(infoStr);
     }
 };
 } // namespace std
