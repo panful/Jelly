@@ -32,7 +32,7 @@ Logger::Logger() noexcept
 
 Logger::~Logger() noexcept
 {
-    Trace("Logger terminate");
+    Trace("spdlog terminate");
     m_spdLogger->flush();
     spdlog::drop_all();
 }

@@ -8,6 +8,7 @@
 - [ ] 可配置的验证层
 - [ ] 可配置的设备扩展
 - [ ] Renderer 放在 UI 还是 Core ？
+- [ ] Rendering目录新增Vulkan，和Vulkan相关的都放在该目录下，Core不依赖Vulkan任何东西（可以扩展OpenGL等）
 - [ ] 隐藏平台相关头文件，自动根据不同平台创建不同类型的窗口
 - [ ] Pipeline 应该放在 Device or Window
 - [ ] Window 中的 Device 调用 Render() 时初始化
