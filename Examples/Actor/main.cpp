@@ -19,10 +19,10 @@ std::vector<float> points1 {
 };
 
 std::vector<float> points2 {
-    -.2f, -.2f,  0.f,
-    -.2f,  .5f,  0.f,
-     .5f,  .5f,  0.f,
-     .5f, -.2f,  0.f,
+    -.2f, -.2f,  .1f,
+    -.2f,  .5f,  .1f,
+     .5f,  .5f,  .1f,
+     .5f, -.2f,  .1f,
 };
 
 std::vector<float> colors1 {

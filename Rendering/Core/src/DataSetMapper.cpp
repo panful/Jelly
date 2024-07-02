@@ -79,8 +79,6 @@ void DataSetMapper::Render(
             .vertexShaderCode   = std::move(vertSpv.value()),
             .fragmentShaderCode = std::move(fragSpv.value()),
             .strides            = std::move(strides),
-            .depthTestEnable    = false,
-            .depthWriteEnable   = false,
             .renderPass         = renderPass
         };
 

@@ -66,8 +66,9 @@ void Window::PreRender() noexcept
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
     cmd.reset();
 
-    std::array<vk::ClearValue, 1> clearValues {};
-    clearValues[0].color = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
+    std::array<vk::ClearValue, 2> clearValues {};
+    clearValues[0].color        = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
+    clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
         *m_renderPass,
@@ -122,16 +123,19 @@ void Window::InitSwapChain() noexcept
     m_swapChainData = SwapChainData(
         m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, vk::ImageUsageFlagBits::eColorAttachment
     );
+
+    m_depthImageData = DepthImageData(m_device, m_depthFormat, vk::Extent2D {m_width, m_height});
 }
 
 void Window::InitRenderPass() noexcept
 {
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
+    vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
     std::array colorAttachments {colorAttachment};
 
     vk::SubpassDescription subpassDescription(
-        vk::SubpassDescriptionFlags(), vk::PipelineBindPoint::eGraphics, {}, colorAttachments, {}, {}, {}
+        vk::SubpassDescriptionFlags(), vk::PipelineBindPoint::eGraphics, {}, colorAttachments, {}, &depthAttachment, {}
     );
 
     std::array attachmentDescriptions {
@@ -145,6 +149,16 @@ void Window::InitRenderPass() noexcept
                                    vk::AttachmentStoreOp::eDontCare,
                                    vk::ImageLayout::eUndefined,
                                    vk::ImageLayout::ePresentSrcKHR
+        },
+        vk::AttachmentDescription {
+                                   {},
+                                   m_depthFormat,                    vk::SampleCountFlagBits::e1,
+                                   vk::AttachmentLoadOp::eClear,
+                                   vk::AttachmentStoreOp::eDontCare,
+                                   vk::AttachmentLoadOp::eDontCare,
+                                   vk::AttachmentStoreOp::eDontCare,
+                                   vk::ImageLayout::eUndefined,
+                                   vk::ImageLayout::eDepthStencilAttachmentOptimal
         }
     };
 
@@ -161,7 +175,7 @@ void Window::InitFramebuffers() noexcept
     m_framebuffers.reserve(numberOfImages);
     for (uint32_t i = 0; i < numberOfImages; ++i)
     {
-        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
+        std::array<vk::ImageView, 2> imageViews {m_swapChainData.GetImageView(i), m_depthImageData.GetImageView()};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
         ));

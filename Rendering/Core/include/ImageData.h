@@ -1,0 +1,58 @@
+/**
+ * @file ImageData.h
+ * @author yangpan (yangpan0822@qq.com)
+ * @brief
+ * @version 0.1
+ * @date 2024-07-02
+ *
+ * @copyright Copyright (c) 2024
+ *
+ */
+
+#pragma once
+
+#include <memory>
+#include <vulkan/vulkan_raii.hpp>
+
+namespace Jelly {
+class Device;
+
+class ImageData
+{
+public:
+    ImageData(
+        std::shared_ptr<Device> device,
+        vk::Format format,
+        const vk::Extent2D& extent,
+        vk::ImageTiling tiling,
+        vk::ImageUsageFlags usage,
+        vk::ImageLayout initialLayout,
+        vk::MemoryPropertyFlags memoryProperties,
+        vk::ImageAspectFlags aspectMask,
+        bool createImageView = true
+    );
+
+    ImageData(std::nullptr_t);
+
+    ImageData(const ImageData&)                = delete;
+    ImageData& operator=(const ImageData&)     = delete;
+    ImageData(ImageData&&) noexcept            = default;
+    ImageData& operator=(ImageData&&) noexcept = default;
+    virtual ~ImageData() noexcept              = default;
+
+    const vk::raii::ImageView& GetImageView() const noexcept;
+
+    static void SetImageLayout(
+        const vk::raii::CommandBuffer& commandBuffer,
+        vk::Image image,
+        vk::Format format,
+        vk::ImageLayout oldImageLayout,
+        vk::ImageLayout newImageLayout
+    );
+
+private:
+    vk::raii::Image m_image {nullptr};
+    vk::raii::ImageView m_imageView {nullptr};
+    vk::raii::DeviceMemory m_deviceMemory {nullptr};
+};
+} // namespace Jelly

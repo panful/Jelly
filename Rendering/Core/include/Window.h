@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "DepthImageData.h"
 #include "Object.h"
 #include "SwapChainData.h"
 #include <cstdint>
@@ -64,12 +65,15 @@ protected:
     uint32_t m_currentFrameIndex {0};
     uint32_t m_currentImageIndex {0};
 
+    vk::Format m_depthFormat {vk::Format::eD16Unorm};
+
     std::string m_title {"Jelly"};
 
     std::shared_ptr<Device> m_device {};
     vk::raii::CommandPool m_commandPool {nullptr};
     vk::raii::SurfaceKHR m_surface {nullptr};
     SwapChainData m_swapChainData {nullptr};
+    DepthImageData m_depthImageData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};
     vk::raii::CommandBuffers m_commandBuffers {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
