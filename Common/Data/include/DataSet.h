@@ -13,43 +13,10 @@
 
 #include "Object.h"
 #include <cstdint>
-#include <vector>
+#include <memory>
 
 namespace Jelly {
-struct Point
-{
-    float x {};
-    float y {};
-    float z {};
-
-    static constexpr uint32_t GetSize() noexcept
-    {
-        return sizeof(Point);
-    }
-};
-
-struct Color
-{
-    float r {};
-    float g {};
-    float b {};
-
-    static constexpr uint32_t GetSize() noexcept
-    {
-        return sizeof(Color);
-    }
-};
-
-struct TexCoord
-{
-    float u {};
-    float v {};
-
-    static constexpr uint32_t GetSize() noexcept
-    {
-        return sizeof(TexCoord);
-    }
-};
+class DataArray;
 
 enum class PrimitiveType : uint8_t
 {
@@ -61,47 +28,27 @@ enum class PrimitiveType : uint8_t
 class JELLY_EXPORT DataSet : public Object
 {
 public:
-    void SetPoints(std::vector<Point>&& points) noexcept;
+    void SetPoints(std::shared_ptr<DataArray> points) noexcept;
 
-    void SetColors(std::vector<Color>&& colors) noexcept;
+    void SetColors(std::shared_ptr<DataArray> colors) noexcept;
 
-    void SetIndices(std::vector<uint32_t>&& indices) noexcept;
+    void SetIndices(std::shared_ptr<DataArray> indices) noexcept;
 
     void SetPrimitiveType(PrimitiveType primitiveType) noexcept;
 
     PrimitiveType GetPrimitiveType() const noexcept;
 
-    /// @brief 获取索引数据的大小
-    /// @return
-    size_t GetIndexSize() const noexcept;
-    size_t GetPointSize() const noexcept;
-    size_t GetColorSize() const noexcept;
-
-    // /// @brief 获取每个索引的大小
-    // /// @return
-    // size_t GetIndexElementSize() const noexcept;
-    // size_t GetPointElementSize() const noexcept;
-    // size_t GetColorElementSize() const noexcept;
-
-    /// @brief 获取索引的个数
-    /// @return
-    size_t GetIndexCount() const noexcept;
-    size_t GetPointCount() const noexcept;
-
+    bool HasPointData() const noexcept;
     bool HasColorData() const noexcept;
 
-    /// @brief 每个顶点属性的字节大小
-    /// @return
-    std::vector<uint32_t> GetStrides() const noexcept;
-
-    const std::vector<Point>& GetPoints() const noexcept;
-    const std::vector<Color>& GetColors() const noexcept;
-    const std::vector<uint32_t>& GetIndices() const noexcept;
+    std::shared_ptr<DataArray> GetPoints() const noexcept;
+    std::shared_ptr<DataArray> GetColors() const noexcept;
+    std::shared_ptr<DataArray> GetIndices() const noexcept;
 
 private:
-    std::vector<Point> m_points {};
-    std::vector<Color> m_colors {};
-    std::vector<uint32_t> m_indices {};
+    std::shared_ptr<DataArray> m_points {};
+    std::shared_ptr<DataArray> m_colors {};
+    std::shared_ptr<DataArray> m_indices {};
 
     PrimitiveType m_primitiveType {PrimitiveType::Triangle};
 };

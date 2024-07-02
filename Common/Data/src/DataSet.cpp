@@ -2,30 +2,19 @@
 
 using namespace Jelly;
 
-void DataSet::SetPoints(std::vector<Point>&& points) noexcept
+void DataSet::SetPoints(std::shared_ptr<DataArray> points) noexcept
 {
     m_points = std::move(points);
 }
 
-void DataSet::SetColors(std::vector<Color>&& colors) noexcept
+void DataSet::SetColors(std::shared_ptr<DataArray> colors) noexcept
 {
     m_colors = std::move(colors);
 }
 
-void DataSet::SetIndices(std::vector<uint32_t>&& indices) noexcept
+void DataSet::SetIndices(std::shared_ptr<DataArray> indices) noexcept
 {
     m_indices = std::move(indices);
-}
-
-std::vector<uint32_t> DataSet::GetStrides() const noexcept
-{
-    std::vector<uint32_t> strides {Point::GetSize()};
-    if (!m_colors.empty())
-    {
-        strides.emplace_back(Color::GetSize());
-    }
-
-    return strides;
 }
 
 void DataSet::SetPrimitiveType(PrimitiveType primitiveType) noexcept
@@ -38,62 +27,27 @@ PrimitiveType DataSet::GetPrimitiveType() const noexcept
     return m_primitiveType;
 }
 
-size_t DataSet::GetIndexSize() const noexcept
+bool DataSet::HasPointData() const noexcept
 {
-    return m_indices.size() * sizeof(uint32_t);
-}
-
-size_t DataSet::GetPointSize() const noexcept
-{
-    return m_points.size() * Point::GetSize();
-}
-
-size_t DataSet::GetColorSize() const noexcept
-{
-    return m_colors.size() * Color::GetSize();
-}
-
-//  size_t DataSet::GetPointElementSize() const noexcept
-// {
-//     return Point::GetSize();
-// }
-
-//  size_t DataSet::GetColorElementSize() const noexcept
-// {
-//     return Color::GetSize();
-// }
-
-//  size_t DataSet::GetIndexElementSize() const noexcept
-// {
-//     return sizeof(uint32_t);
-// }
-
-size_t DataSet::GetIndexCount() const noexcept
-{
-    return m_indices.size();
-}
-
-size_t DataSet::GetPointCount() const noexcept
-{
-    return m_points.size();
+    return m_points != nullptr;
 }
 
 bool DataSet::HasColorData() const noexcept
 {
-    return !m_colors.empty();
+    return m_colors != nullptr;
 }
 
-const std::vector<Point>& DataSet::GetPoints() const noexcept
+std::shared_ptr<DataArray> DataSet::GetPoints() const noexcept
 {
     return m_points;
 }
 
-const std::vector<Color>& DataSet::GetColors() const noexcept
+std::shared_ptr<DataArray> DataSet::GetColors() const noexcept
 {
     return m_colors;
 }
 
-const std::vector<uint32_t>& DataSet::GetIndices() const noexcept
+std::shared_ptr<DataArray> DataSet::GetIndices() const noexcept
 {
     return m_indices;
 }

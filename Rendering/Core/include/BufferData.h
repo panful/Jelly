@@ -56,6 +56,9 @@ public:
     template <typename DataType>
     void Upload(const std::shared_ptr<Device> device, const std::vector<DataType>& data, size_t stride = 0) const;
 
+    template <typename DataType>
+    void Upload(const std::shared_ptr<Device> device, const DataType* pData, size_t elementCount) const;
+
 private:
     vk::raii::DeviceMemory m_deviceMemory {nullptr};
     vk::raii::Buffer m_buffer {nullptr};
@@ -81,8 +84,8 @@ void BufferData::Upload(const DataType& data) const
         );
     }
 
-    void* dataPtr = m_deviceMemory.mapMemory(0, sizeof(DataType));
-    std::memcpy(dataPtr, &data, sizeof(DataType));
+    void* pData = m_deviceMemory.mapMemory(0, sizeof(DataType));
+    std::memcpy(pData, &data, sizeof(DataType));
     m_deviceMemory.unmapMemory();
 }
 
@@ -133,7 +136,7 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const std::vector<
 
     size_t dataSize = data.size() * elementSize;
 
-    if (dataSize > m_size)
+    if (dataSize != m_size)
     {
         Logger::GetInstance()->Error(
             std::format("Data size error, need size is {}, but current size is {}", m_size, dataSize)
@@ -148,6 +151,46 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const std::vector<
     );
 
     MemoryHelper::CopyToDevice(stagingBuffer.m_deviceMemory, data.data(), data.size(), elementSize);
+
+    MemoryHelper::OneTimeSubmit(device, [&](const vk::raii::CommandBuffer& commandBuffer) {
+        commandBuffer.copyBuffer(*stagingBuffer.m_buffer, *this->m_buffer, vk::BufferCopy(0, 0, dataSize));
+    });
+}
+
+template <typename DataType>
+void BufferData::Upload(const std::shared_ptr<Device> device, const DataType* pData, size_t elementCount) const
+{
+    if (!(m_usage & vk::BufferUsageFlagBits::eTransferDst))
+    {
+        Logger::GetInstance()->Error(
+            "Buffer usage error, if use stagingbuffer, the m_usage should be vk::BufferUsageFlagBits::eTransferDst"
+        );
+    }
+
+    if (!(m_propertyFlags & vk::MemoryPropertyFlagBits::eDeviceLocal))
+    {
+        Logger::GetInstance()->Error("Memory property error, if use stagingbuffer, the m_propertyFlags should be "
+                                     "vk::MemoryPropertyFlagBits::eDeviceLocal");
+    }
+
+    size_t elementSize = sizeof(DataType);
+    size_t dataSize    = elementCount * elementSize;
+
+    if (dataSize != m_size)
+    {
+        Logger::GetInstance()->Error(
+            std::format("Data size error, need size is {}, but current size is {}", m_size, dataSize)
+        );
+    }
+
+    BufferData stagingBuffer(
+        device,
+        dataSize,
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+    );
+
+    MemoryHelper::CopyToDevice(stagingBuffer.m_deviceMemory, pData, elementCount, elementSize);
 
     MemoryHelper::OneTimeSubmit(device, [&](const vk::raii::CommandBuffer& commandBuffer) {
         commandBuffer.copyBuffer(*stagingBuffer.m_buffer, *this->m_buffer, vk::BufferCopy(0, 0, dataSize));

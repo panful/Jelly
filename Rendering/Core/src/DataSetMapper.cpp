@@ -1,4 +1,5 @@
 #include "DataSetMapper.h"
+#include "DataArray.h"
 #include "DataSet.h"
 #include "Device.h"
 #include "Drawable.h"
@@ -20,8 +21,21 @@ void DataSetMapper::Render(
     {
         m_needUpdate = false;
 
-        uint32_t location {1}; // 0 是 inPos, 其他输入从1开始
+        if (!m_dataSet->HasPointData())
+        {
+            return;
+        }
 
+        static constexpr uint32_t vertexDimension {3};
+        static constexpr uint32_t colorComponents {3};
+
+        std::vector<uint32_t> strides {vertexDimension * sizeof(float)};
+        if (m_dataSet->HasColorData() && ColorMode::VertexColoring == m_colorMode)
+        {
+            strides.emplace_back(static_cast<uint32_t>(colorComponents * sizeof(float)));
+        }
+
+        uint32_t location {1}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
         switch (m_colorMode)
         {
             case ColorMode::ColorMap:
@@ -62,9 +76,9 @@ void DataSetMapper::Render(
         }
 
         PipelineInfo pipelineInfo {
-            .vertexShaderCode   = vertSpv.value(),
-            .fragmentShaderCode = fragSpv.value(),
-            .strides            = m_dataSet->GetStrides(),
+            .vertexShaderCode   = std::move(vertSpv.value()),
+            .fragmentShaderCode = std::move(fragSpv.value()),
+            .strides            = std::move(strides),
             .depthTestEnable    = false,
             .depthWriteEnable   = false,
             .renderPass         = renderPass
