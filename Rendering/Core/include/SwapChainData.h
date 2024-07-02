@@ -12,9 +12,10 @@
 #pragma once
 
 #include "Device.h"
+#include "VkDataBase.h"
 
 namespace Jelly {
-class SwapChainData
+class SwapChainData : public VkDataBase
 {
 public:
     SwapChainData(std::nullptr_t);

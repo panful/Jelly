@@ -11,13 +11,14 @@
 
 #pragma once
 
+#include "VkDataBase.h"
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
 class Device;
 
-class ImageData
+class ImageData : public VkDataBase
 {
 public:
     ImageData(
@@ -33,12 +34,6 @@ public:
     );
 
     ImageData(std::nullptr_t);
-
-    ImageData(const ImageData&)                = delete;
-    ImageData& operator=(const ImageData&)     = delete;
-    ImageData(ImageData&&) noexcept            = default;
-    ImageData& operator=(ImageData&&) noexcept = default;
-    virtual ~ImageData() noexcept              = default;
 
     const vk::raii::ImageView& GetImageView() const noexcept;
 
