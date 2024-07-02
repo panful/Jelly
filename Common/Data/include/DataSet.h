@@ -40,6 +40,7 @@ public:
 
     bool HasPointData() const noexcept;
     bool HasColorData() const noexcept;
+    bool HasIndexData() const noexcept;
 
     std::shared_ptr<DataArray> GetPoints() const noexcept;
     std::shared_ptr<DataArray> GetColors() const noexcept;

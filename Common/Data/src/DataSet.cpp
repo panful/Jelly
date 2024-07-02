@@ -1,4 +1,5 @@
 #include "DataSet.h"
+#include "DataArray.h"
 
 using namespace Jelly;
 
@@ -29,12 +30,17 @@ PrimitiveType DataSet::GetPrimitiveType() const noexcept
 
 bool DataSet::HasPointData() const noexcept
 {
-    return m_points != nullptr;
+    return m_points != nullptr && !m_points->Empty();
 }
 
 bool DataSet::HasColorData() const noexcept
 {
-    return m_colors != nullptr;
+    return m_colors != nullptr && !m_colors->Empty();
+}
+
+bool DataSet::HasIndexData() const noexcept
+{
+    return m_indices != nullptr && !m_indices->Empty();
 }
 
 std::shared_ptr<DataArray> DataSet::GetPoints() const noexcept

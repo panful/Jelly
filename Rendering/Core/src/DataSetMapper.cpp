@@ -17,14 +17,14 @@ void DataSetMapper::Render(
 {
     Logger::GetInstance()->Debug();
 
+    if (!m_dataSet->HasPointData() || !m_dataSet->HasIndexData())
+    {
+        return;
+    }
+
     if (m_needUpdate)
     {
         m_needUpdate = false;
-
-        if (!m_dataSet->HasPointData())
-        {
-            return;
-        }
 
         static constexpr uint32_t vertexDimension {3};
         static constexpr uint32_t colorComponents {3};

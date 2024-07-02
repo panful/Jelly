@@ -52,11 +52,11 @@ Drawable::Drawable(std::shared_ptr<Device> device, std::shared_ptr<DataSet> data
         dataSet->GetIndices()->GetElementCount()
     );
 
+    if (DataType::UnsignedInt != dataSet->GetIndices()->GetDataType())
+    {
+        Logger::GetInstance()->Error("Currently, only uint32_t type is supported");
+    }
     m_indexType = vk::IndexType::eUint32;
-    // if (dataSet->GetIndices()->GetElementCount() > 0)
-    // {
-    //    m_indexType = vk::IndexTypeValue<std::remove_cvref_t<decltype(dataSet->GetIndices().front())>>::value;
-    // }
 }
 
 std::vector<vk::Buffer> Drawable::GetVertexBuffers() const noexcept
