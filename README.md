@@ -17,3 +17,4 @@
 - [x] 使用UniformColor着色时，设置了顶点颜色，顶点着色器警告：inColor没有使用
 - [ ] 添加ShaderGeneratorCache，着色器代码相同时不用重复生成SPV
 - [ ] 共享vk::Buffer，而不仅仅是共享 DataArray
+- [ ] Actor颜色应该使用描述符设置，不能在shader中写死

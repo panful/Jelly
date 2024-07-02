@@ -15,7 +15,7 @@ void Mapper::BuildPipeline(const vk::raii::RenderPass& renderPass, const Pipelin
 
     if (!m_device->GetPipelineCache()->HasPipeline(m_pipelineKey))
     {
-        m_device->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_shared<Pipeline>(m_device, pipelineInfo));
+        m_device->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(m_device, pipelineInfo));
     }
 }
 

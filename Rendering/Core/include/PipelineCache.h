@@ -11,24 +11,23 @@
 
 #pragma once
 
+#include "Pipeline.h"
 #include <memory>
 #include <unordered_map>
 
 namespace Jelly {
-class Pipeline;
-
 class PipelineCache
 {
 public:
-    bool HasPipeline(size_t uid) const noexcept;
+    bool HasPipeline(size_t key) const noexcept;
 
-    void AddPipeline(size_t uid, std::shared_ptr<Pipeline> pipeline) noexcept;
+    void AddPipeline(size_t key, std::unique_ptr<Pipeline>&& pipeline) noexcept;
 
-    void AddPipeline(std::pair<size_t, std::shared_ptr<Pipeline>>&& pipeline) noexcept;
+    void AddPipeline(std::pair<size_t, std::unique_ptr<Pipeline>>&& pipeline) noexcept;
 
-    std::shared_ptr<Pipeline> GetPipeline(size_t uid) const noexcept;
+    const std::unique_ptr<Pipeline>& GetPipeline(size_t key) const;
 
 private:
-    std::unordered_map<size_t, std::shared_ptr<Pipeline>> m_pipelines {};
+    std::unordered_map<size_t, std::unique_ptr<Pipeline>> m_pipelines {};
 };
 } // namespace Jelly

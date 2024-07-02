@@ -2,17 +2,17 @@
 
 using namespace Jelly;
 
-bool PipelineCache::HasPipeline(size_t uid) const noexcept
+bool PipelineCache::HasPipeline(size_t key) const noexcept
 {
-    return m_pipelines.contains(uid);
+    return m_pipelines.contains(key);
 }
 
-void PipelineCache::AddPipeline(size_t uid, std::shared_ptr<Pipeline> pipeline) noexcept
+void PipelineCache::AddPipeline(size_t key, std::unique_ptr<Pipeline>&& pipeline) noexcept
 {
-    m_pipelines[uid] = std::move(pipeline);
+    m_pipelines[key] = std::move(pipeline);
 }
 
-void PipelineCache::AddPipeline(std::pair<size_t, std::shared_ptr<Pipeline>>&& pipeline) noexcept
+void PipelineCache::AddPipeline(std::pair<size_t, std::unique_ptr<Pipeline>>&& pipeline) noexcept
 {
     if (HasPipeline(pipeline.first))
     {
@@ -22,7 +22,7 @@ void PipelineCache::AddPipeline(std::pair<size_t, std::shared_ptr<Pipeline>>&& p
     m_pipelines.emplace(std::move(pipeline));
 }
 
-std::shared_ptr<Pipeline> PipelineCache::GetPipeline(size_t uid) const noexcept
+const std::unique_ptr<Pipeline>& PipelineCache::GetPipeline(size_t key) const
 {
-    return HasPipeline(uid) ? m_pipelines.at(uid) : nullptr;
+    return m_pipelines.at(key);
 }

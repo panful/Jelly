@@ -89,7 +89,7 @@ void DataSetMapper::Render(
         m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
     }
 
-    auto pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
+    auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
 
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
     commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
