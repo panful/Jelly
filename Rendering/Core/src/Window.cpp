@@ -303,7 +303,7 @@ void Window::InitPipeline() noexcept
 
 void Window::InitViewer() noexcept
 {
-    m_viewer->Init(m_device, m_numberOfFrames, vk::Extent2D {m_width, m_height});
+    m_viewer->Init(m_device, vk::Extent2D {m_width, m_height});
 }
 
 void Window::InitDescriptorPool() noexcept

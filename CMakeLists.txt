@@ -22,6 +22,8 @@ option(BUILD_EXAMPLES "build the examples" ON)
 option(BUILD_SHARED_LIBRARIES "build shared libraries(dlls)" ON)
 option(USE_GLFW_WINDOW "display using glfw dindow" ON)
 
+add_definitions(-DJELLY_MAX_FRAMES=3)
+
 find_package(Vulkan REQUIRED)
 
 if(BUILD_SHARED_LIBRARIES)

@@ -4,14 +4,13 @@
 
 using namespace Jelly;
 
-void Viewer::Init(std::shared_ptr<Device> device, uint32_t numberOfImages, const vk::Extent2D& extent)
+void Viewer::Init(std::shared_ptr<Device> device, const vk::Extent2D& extent)
 {
-    m_device         = std::move(device);
-    m_numberOfImages = numberOfImages;
-    m_extent         = extent;
+    m_device = std::move(device);
+    m_extent = extent;
 
-    m_colorImageDatas.reserve(numberOfImages);
-    for (uint32_t i = 0; i < numberOfImages; ++i)
+    m_colorImageDatas.reserve(m_numberOfImages);
+    for (uint32_t i = 0; i < m_numberOfImages; ++i)
     {
         m_colorImageDatas.emplace_back(ImageData(
             m_device,
@@ -61,9 +60,8 @@ void Viewer::Init(std::shared_ptr<Device> device, uint32_t numberOfImages, const
     );
     m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
 
-    //------------------------------
-    m_framebuffers.reserve(numberOfImages);
-    for (uint32_t i = 0; i < numberOfImages; ++i)
+    m_framebuffers.reserve(m_numberOfImages);
+    for (uint32_t i = 0; i < m_numberOfImages; ++i)
     {
         std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData.GetImageView()};
 

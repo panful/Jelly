@@ -23,7 +23,7 @@ class Renderer;
 class JELLY_EXPORT Viewer : public Object
 {
 public:
-    void Init(std::shared_ptr<Device> device, uint32_t numberOfImages, const vk::Extent2D& extent);
+    void Init(std::shared_ptr<Device> device, const vk::Extent2D& extent);
 
     void Render(const vk::raii::CommandBuffer& commandBuffer);
 
@@ -33,7 +33,7 @@ public:
 
 private:
     uint32_t m_currentImageIndex {0};
-    uint32_t m_numberOfImages {3};
+    uint32_t m_numberOfImages {JELLY_MAX_FRAMES};
     vk::Extent2D m_extent {};
     vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
     vk::Format m_depthFormat {vk::Format::eD16Unorm};

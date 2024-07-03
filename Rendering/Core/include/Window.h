@@ -77,7 +77,7 @@ protected:
     vk::raii::SurfaceKHR m_surface {nullptr};
 
 private:
-    uint32_t m_numberOfFrames {3};
+    uint32_t m_numberOfFrames {JELLY_MAX_FRAMES};
     uint32_t m_currentFrameIndex {0};
     uint32_t m_currentImageIndex {0};
 
