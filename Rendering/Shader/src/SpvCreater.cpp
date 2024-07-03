@@ -161,7 +161,7 @@ std::optional<std::vector<uint32_t>>
 SpvCreater::GLSL2SPV(const vk::ShaderStageFlagBits shaderType, const std::string_view shaderCode)
 {
     EShLanguage stage    = TranslateShaderStage(shaderType);
-    EShMessages messages = EShMsgSpvRules;
+    EShMessages messages = static_cast<EShMessages>(EShMsgSpvRules | EShMsgVulkanRules);
 
     const auto shaderStrings = shaderCode.data();
 
