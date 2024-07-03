@@ -20,6 +20,13 @@
 namespace Jelly {
 class Device;
 
+struct DescriptorSetLayoutBindings
+{
+    uint32_t binding;
+    vk::DescriptorType descriptorType;
+    vk::ShaderStageFlags stageFlags;
+};
+
 struct PipelineInfo
 {
     std::vector<uint32_t> vertexShaderCode {};
@@ -57,8 +64,8 @@ struct PipelineInfo
     // 动态状态
     std::vector<vk::DynamicState> dynamicStates {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
 
-    // 描述符集（Uniform等）
-    std::vector<void*> descriptorSet {};
+    // 描述符集布局
+    std::vector<DescriptorSetLayoutBindings> descriptorSetLayoutBindings {};
 
     vk::RenderPass renderPass {nullptr};
 };
@@ -68,10 +75,12 @@ class JELLY_EXPORT Pipeline : public Object
 public:
     Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineInfo) noexcept;
 
+    const vk::raii::DescriptorSetLayout& GetDescriptorSetLayout() const noexcept;
     const vk::raii::PipelineLayout& GetPipelineLayout() const noexcept;
     const vk::raii::Pipeline& GetPipeline() const noexcept;
 
 private:
+    vk::raii::DescriptorSetLayout m_descriptorSetLayout {nullptr};
     vk::raii::PipelineLayout m_pipelineLayout {nullptr};
     vk::raii::Pipeline m_pipeline {nullptr};
 };

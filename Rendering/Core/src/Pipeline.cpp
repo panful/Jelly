@@ -105,7 +105,21 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
         vk::PipelineDynamicStateCreateFlags(), pipelineInfo.dynamicStates
     );
 
-    m_pipelineLayout = vk::raii::PipelineLayout(device->GetDevice(), vk::PipelineLayoutCreateInfo());
+    std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
+    for (const auto& binding : pipelineInfo.descriptorSetLayoutBindings)
+    {
+        static constexpr uint32_t descriptorCount {1};
+        descriptorSetLayoutBindings.emplace_back(
+            binding.binding, binding.descriptorType, descriptorCount, binding.stageFlags
+        );
+    }
+
+    vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo({}, descriptorSetLayoutBindings);
+    m_descriptorSetLayout = vk::raii::DescriptorSetLayout(device->GetDevice(), descriptorSetLayoutCreateInfo);
+
+    std::array<vk::DescriptorSetLayout, 1> descriptorSetLayouts {m_descriptorSetLayout};
+    m_pipelineLayout =
+        vk::raii::PipelineLayout(device->GetDevice(), vk::PipelineLayoutCreateInfo({}, descriptorSetLayouts));
 
     vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
         vk::PipelineCreateFlags(),
@@ -125,6 +139,11 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
 
     vk::raii::PipelineCache pipelineCache(device->GetDevice(), vk::PipelineCacheCreateInfo());
     m_pipeline = vk::raii::Pipeline(device->GetDevice(), pipelineCache, graphicsPipelineCreateInfo);
+}
+
+const vk::raii::DescriptorSetLayout& Pipeline::GetDescriptorSetLayout() const noexcept
+{
+    return m_descriptorSetLayout;
 }
 
 const vk::raii::PipelineLayout& Pipeline::GetPipelineLayout() const noexcept
