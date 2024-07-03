@@ -14,7 +14,7 @@
 #include "ImageData.h"
 
 namespace Jelly {
-class DepthImageData : public ImageData
+class JELLY_EXPORT DepthImageData : public ImageData
 {
 public:
     DepthImageData(std::shared_ptr<Device> device, vk::Format format, const vk::Extent2D& extent);

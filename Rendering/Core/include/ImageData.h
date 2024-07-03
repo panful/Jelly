@@ -18,7 +18,7 @@
 namespace Jelly {
 class Device;
 
-class ImageData : public VkDataBase
+class JELLY_EXPORT ImageData : public VkDataBase
 {
 public:
     ImageData(

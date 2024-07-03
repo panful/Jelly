@@ -2,6 +2,8 @@
 #include "Device.h"
 #include "Logger.h"
 #include "Renderer.h"
+#include "SpvCreater.h"
+#include "Viewer.h"
 #include <array>
 #include <limits>
 
@@ -9,6 +11,7 @@ using namespace Jelly;
 
 Window::Window() noexcept
     : m_device(std::make_shared<Device>())
+    , m_viewer(std::make_unique<Viewer>())
 {
 }
 
@@ -21,7 +24,7 @@ void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
     renderer->SetDevice(m_device);
     renderer->SetWindow(shared_from_this());
-    m_renderers.emplace_back(std::move(renderer));
+    m_viewer->AddRenderer(std::move(renderer));
 }
 
 void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
@@ -40,9 +43,25 @@ vk::Extent2D Window::GetSize() const noexcept
     return {m_width, m_height};
 }
 
+std::any Window::GetNativeWindow() const noexcept
+{
+    return m_window;
+}
+
 std::shared_ptr<Device> Window::GetDevice() const noexcept
 {
     return m_device;
+}
+
+void Window::Render() noexcept
+{
+    static std::once_flag flag {};
+    std::call_once(flag, [this]() { InitWindow(); });
+
+    PreRender();
+    m_viewer->Render(m_commandBuffers[m_currentFrameIndex]);
+    Present();
+    PostRender();
 }
 
 void Window::PreRender() noexcept
@@ -65,26 +84,12 @@ void Window::PreRender() noexcept
 
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
     cmd.reset();
-
-    std::array<vk::ClearValue, 2> clearValues {};
-    clearValues[0].color        = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
-    clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
-
-    vk::RenderPassBeginInfo renderPassBeginInfo(
-        *m_renderPass,
-        m_framebuffers[m_currentFrameIndex],
-        vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)),
-        clearValues
-    );
-
     cmd.begin({});
-    cmd.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 }
 
 void Window::PostRender() noexcept
 {
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
-    cmd.endRenderPass();
     cmd.end();
 
     std::array<vk::CommandBuffer, 1> drawCommandBuffers {cmd};
@@ -108,14 +113,55 @@ void Window::PostRender() noexcept
     m_currentFrameIndex = (m_currentFrameIndex + 1) % m_numberOfFrames;
 }
 
+void Window::Present() const noexcept
+{
+    std::array<vk::ClearValue, 1> clearValues {};
+    clearValues[0].color = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
+
+    vk::RenderPassBeginInfo renderPassBeginInfo(
+        m_renderPass,
+        m_framebuffers[m_currentFrameIndex],
+        vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)),
+        clearValues
+    );
+
+    auto&& cmd = m_commandBuffers[m_currentFrameIndex];
+    cmd.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
+    cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline->GetPipeline());
+    cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(m_width), static_cast<float>(m_height), 0.f, 1.f));
+    cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)));
+    cmd.bindDescriptorSets(
+        vk::PipelineBindPoint::eGraphics,
+        m_pipeline->GetPipelineLayout(),
+        0,
+        {m_descriptorSets[m_currentFrameIndex]},
+        nullptr
+    );
+    cmd.draw(3, 1, 0, 0);
+    cmd.endRenderPass();
+}
+
 void Window::InitWindow() noexcept
 {
+    InitSurface();
+
+    m_device->PickPhysicalDevice(m_surface);
+    m_device->InitDevice();
+    m_device->InitQueues();
+    m_device->InitPipelineCache();
+
     InitSwapChain();
+    InitViewer();
     InitRenderPass();
+    InitPipeline();
     InitFramebuffers();
     InitSyncObjects();
     InitCommandPool();
     InitCommandBuffers();
+    InitSampler();
+    InitDescriptorPool();
+    InitDescriptorSets();
+    UpdateDescriptorSets();
 }
 
 void Window::InitSwapChain() noexcept
@@ -123,19 +169,16 @@ void Window::InitSwapChain() noexcept
     m_swapChainData = SwapChainData(
         m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, vk::ImageUsageFlagBits::eColorAttachment
     );
-
-    m_depthImageData = DepthImageData(m_device, m_depthFormat, vk::Extent2D {m_width, m_height});
 }
 
 void Window::InitRenderPass() noexcept
 {
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
-    vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
     std::array colorAttachments {colorAttachment};
 
     vk::SubpassDescription subpassDescription(
-        vk::SubpassDescriptionFlags(), vk::PipelineBindPoint::eGraphics, {}, colorAttachments, {}, &depthAttachment, {}
+        vk::SubpassDescriptionFlags(), vk::PipelineBindPoint::eGraphics, {}, colorAttachments, {}, {}, {}
     );
 
     std::array attachmentDescriptions {
@@ -149,16 +192,6 @@ void Window::InitRenderPass() noexcept
                                    vk::AttachmentStoreOp::eDontCare,
                                    vk::ImageLayout::eUndefined,
                                    vk::ImageLayout::ePresentSrcKHR
-        },
-        vk::AttachmentDescription {
-                                   {},
-                                   m_depthFormat,                    vk::SampleCountFlagBits::e1,
-                                   vk::AttachmentLoadOp::eClear,
-                                   vk::AttachmentStoreOp::eDontCare,
-                                   vk::AttachmentLoadOp::eDontCare,
-                                   vk::AttachmentStoreOp::eDontCare,
-                                   vk::ImageLayout::eUndefined,
-                                   vk::ImageLayout::eDepthStencilAttachmentOptimal
         }
     };
 
@@ -175,7 +208,7 @@ void Window::InitFramebuffers() noexcept
     m_framebuffers.reserve(numberOfImages);
     for (uint32_t i = 0; i < numberOfImages; ++i)
     {
-        std::array<vk::ImageView, 2> imageViews {m_swapChainData.GetImageView(i), m_depthImageData.GetImageView()};
+        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
         ));
@@ -208,4 +241,105 @@ void Window::InitCommandBuffers() noexcept
         m_device->GetDevice(),
         vk::CommandBufferAllocateInfo {m_commandPool, vk::CommandBufferLevel::ePrimary, m_numberOfFrames}
     );
+}
+
+void Window::InitSampler() noexcept
+{
+    m_sampler = vk::raii::Sampler(
+        m_device->GetDevice(),
+        vk::SamplerCreateInfo {
+            {},
+            vk::Filter::eLinear,
+            vk::Filter::eLinear,
+            vk::SamplerMipmapMode::eLinear,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat,
+            vk::SamplerAddressMode::eRepeat,
+            0.0f,
+            false,
+            16.0f,
+            false,
+            vk::CompareOp::eNever,
+            0.0f,
+            0.0f,
+            vk::BorderColor::eFloatOpaqueBlack
+        }
+    );
+}
+
+void Window::InitPipeline() noexcept
+{
+    static std::string_view vertCode = R"(
+        #version 450
+        layout (location = 0) out vec2 outUV;
+        void main() {
+            outUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
+            gl_Position = vec4(outUV * 2.0f - 1.0f, 0.0f, 1.0f);
+        }
+    )";
+    static std::string_view fragCode = R"(
+        #version 450
+        layout (location = 0) in vec2 inUV;
+        layout (location = 0) out vec4 outFragColor;
+        layout (binding = 0) uniform sampler2D samplerColor;
+        void main() {
+            outFragColor = texture(samplerColor, inUV);
+        }
+    )";
+
+    auto vertSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
+    auto fragSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);
+
+    PipelineInfo pipelineInfo {
+        .vertexShaderCode   = std::move(vertSpv.value()),
+        .fragmentShaderCode = std::move(fragSpv.value()),
+        .strides            = {},
+        .descriptorSetLayoutBindings =
+            {{0, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment}},
+        .renderPass = m_renderPass
+    };
+    m_pipeline = std::make_unique<Pipeline>(m_device, pipelineInfo);
+}
+
+void Window::InitViewer() noexcept
+{
+    m_viewer->Init(m_device, m_numberOfFrames, vk::Extent2D {m_width, m_height});
+}
+
+void Window::InitDescriptorPool() noexcept
+{
+    // XXX 需要动态创建 Pool
+    std::array descriptorPoolSizes {
+        vk::DescriptorPoolSize {vk::DescriptorType::eCombinedImageSampler, m_numberOfFrames},
+    };
+
+    m_descriptorPool = vk::raii::DescriptorPool(
+        m_device->GetDevice(),
+        vk::DescriptorPoolCreateInfo {
+            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, m_numberOfFrames, descriptorPoolSizes
+        }
+    );
+}
+
+void Window::InitDescriptorSets() noexcept
+{
+    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(m_numberOfFrames, m_pipeline->GetDescriptorSetLayout());
+
+    m_descriptorSets = vk::raii::DescriptorSets(
+        m_device->GetDevice(), vk::DescriptorSetAllocateInfo {m_descriptorPool, descriptorSetLayouts}
+    );
+}
+
+void Window::UpdateDescriptorSets() noexcept
+{
+    auto&& imageViews = m_viewer->GetColorImageViews();
+
+    for (uint32_t i = 0; i < m_numberOfFrames; ++i)
+    {
+        vk::DescriptorImageInfo descriptorImageInfo(m_sampler, imageViews[i], vk::ImageLayout::eShaderReadOnlyOptimal);
+        std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
+            {{m_descriptorSets[i], 0, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, nullptr}}
+        };
+        m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+    }
 }

@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "DepthImageData.h"
 #include "Object.h"
 #include "SwapChainData.h"
+#include <any>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -24,6 +24,8 @@
 namespace Jelly {
 class Device;
 class Renderer;
+class Viewer;
+class Pipeline;
 
 class JELLY_EXPORT Window
     : public Object
@@ -33,54 +35,69 @@ public:
     Window() noexcept;
     ~Window() noexcept override;
 
+    void Render() noexcept;
+
     void AddRenderer(std::shared_ptr<Renderer> renderer);
-
-    virtual void Render() noexcept = 0;
-
-    virtual void* GetNativeWindow() const noexcept = 0;
 
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
     void SetTitle(const std::string_view title) noexcept;
 
     vk::Extent2D GetSize() const noexcept;
+    std::any GetNativeWindow() const noexcept;
     std::shared_ptr<Device> GetDevice() const noexcept;
 
 protected:
-    void InitWindow() noexcept;
-    void PreRender() noexcept;
-    void PostRender() noexcept;
+    virtual void InitSurface() noexcept = 0;
 
 private:
+    void PreRender() noexcept;
+    void PostRender() noexcept;
+    void Present() const noexcept;
+
+    void InitWindow() noexcept;
     void InitSwapChain() noexcept;
     void InitRenderPass() noexcept;
     void InitFramebuffers() noexcept;
     void InitSyncObjects() noexcept;
     void InitCommandPool() noexcept;
     void InitCommandBuffers() noexcept;
+    void InitSampler() noexcept;
+    void InitPipeline() noexcept;
+    void InitViewer() noexcept;
+    void InitDescriptorPool() noexcept;
+    void InitDescriptorSets() noexcept;
+    void UpdateDescriptorSets() noexcept;
 
 protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
+    std::any m_window {};
+    std::string m_title {"Jelly"};
+    std::shared_ptr<Device> m_device {};
+    vk::raii::SurfaceKHR m_surface {nullptr};
+
+private:
     uint32_t m_numberOfFrames {3};
     uint32_t m_currentFrameIndex {0};
     uint32_t m_currentImageIndex {0};
 
-    vk::Format m_depthFormat {vk::Format::eD16Unorm};
+    std::unique_ptr<Viewer> m_viewer {};
 
-    std::string m_title {"Jelly"};
-
-    std::shared_ptr<Device> m_device {};
     vk::raii::CommandPool m_commandPool {nullptr};
-    vk::raii::SurfaceKHR m_surface {nullptr};
+    vk::raii::DescriptorPool m_descriptorPool {nullptr};
+
     SwapChainData m_swapChainData {nullptr};
-    DepthImageData m_depthImageData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};
-    vk::raii::CommandBuffers m_commandBuffers {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
+
+    std::unique_ptr<Pipeline> m_pipeline {};
+    vk::raii::Sampler m_sampler {nullptr};
+
+    vk::raii::CommandBuffers m_commandBuffers {nullptr};
+    vk::raii::DescriptorSets m_descriptorSets {nullptr};
+
     std::vector<vk::raii::Fence> m_inFlightFences {};
     std::vector<vk::raii::Semaphore> m_renderFinishedSemaphores {};
     std::vector<vk::raii::Semaphore> m_imageAcquiredSemaphores {};
-
-    std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
 } // namespace Jelly

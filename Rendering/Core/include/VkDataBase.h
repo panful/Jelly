@@ -11,8 +11,10 @@
 
 #pragma once
 
+#include "GlobalExport.h"
+
 namespace Jelly {
-class VkDataBase
+class JELLY_EXPORT VkDataBase
 {
 public:
     VkDataBase()                                 = default;

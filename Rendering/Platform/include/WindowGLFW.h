@@ -18,12 +18,7 @@ struct GLFWwindow;
 namespace Jelly {
 class JELLY_EXPORT WindowGLFW : public Window
 {
-public:
-    void Render() noexcept override;
-
-    void* GetNativeWindow() const noexcept override;
-
-private:
-    GLFWwindow* m_window {nullptr};
+protected:
+    void InitSurface() noexcept override;
 };
 } // namespace Jelly
