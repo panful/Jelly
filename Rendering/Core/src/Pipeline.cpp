@@ -105,6 +105,13 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
         vk::PipelineDynamicStateCreateFlags(), pipelineInfo.dynamicStates
     );
 
+    std::vector<vk::PushConstantRange> pushConstantRanges {};
+    for (const auto& pushConstantRange : pipelineInfo.pushConstantRanges)
+    {
+        static constexpr uint32_t offset {0};
+        pushConstantRanges.emplace_back(pushConstantRange.stageFlags, offset, pushConstantRange.size);
+    }
+
     std::vector<vk::DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
     for (const auto& binding : pipelineInfo.descriptorSetLayoutBindings)
     {
@@ -118,8 +125,9 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
     m_descriptorSetLayout = vk::raii::DescriptorSetLayout(device->GetDevice(), descriptorSetLayoutCreateInfo);
 
     std::array<vk::DescriptorSetLayout, 1> descriptorSetLayouts {m_descriptorSetLayout};
-    m_pipelineLayout =
-        vk::raii::PipelineLayout(device->GetDevice(), vk::PipelineLayoutCreateInfo({}, descriptorSetLayouts));
+    m_pipelineLayout = vk::raii::PipelineLayout(
+        device->GetDevice(), vk::PipelineLayoutCreateInfo({}, descriptorSetLayouts, pushConstantRanges)
+    );
 
     vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
         vk::PipelineCreateFlags(),

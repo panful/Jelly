@@ -22,9 +22,15 @@ class Device;
 
 struct DescriptorSetLayoutBindings
 {
-    uint32_t binding;
-    vk::DescriptorType descriptorType;
-    vk::ShaderStageFlags stageFlags;
+    uint32_t binding {};
+    vk::DescriptorType descriptorType {};
+    vk::ShaderStageFlags stageFlags {};
+};
+
+struct PushConstantRange
+{
+    vk::ShaderStageFlags stageFlags {};
+    uint32_t size {};
 };
 
 struct PipelineInfo
@@ -63,6 +69,8 @@ struct PipelineInfo
 
     // 动态状态
     std::vector<vk::DynamicState> dynamicStates {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+
+    std::vector<PushConstantRange> pushConstantRanges {};
 
     // 描述符集布局
     std::vector<DescriptorSetLayoutBindings> descriptorSetLayoutBindings {};
