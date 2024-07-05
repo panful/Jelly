@@ -27,9 +27,7 @@ class Renderer;
 class Viewer;
 class Pipeline;
 
-class JELLY_EXPORT Window
-    : public Object
-    , public std::enable_shared_from_this<Window>
+class JELLY_EXPORT Window : public Object
 {
 public:
     Window() noexcept;

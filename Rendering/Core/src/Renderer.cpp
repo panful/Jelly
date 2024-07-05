@@ -1,23 +1,22 @@
 #include "Renderer.h"
 #include "Actor.h"
 #include "Logger.h"
+#include "Viewer.h"
 #include "Window.h"
 
 using namespace Jelly;
 
-void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept
+void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept
 {
     Logger::GetInstance()->Trace();
 
-    auto window = m_window.lock(); // 如果 Renderer 存在，那么 Window 一定存在，此处不用判空
-
     auto offset = vk::Offset2D {
-        static_cast<int32_t>(window->GetSize().width * m_viewport[0]),
-        static_cast<int32_t>(window->GetSize().height * m_viewport[1])
+        static_cast<int32_t>(viewer->GetExtent().width * m_viewport[0]),
+        static_cast<int32_t>(viewer->GetExtent().height * m_viewport[1])
     };
     auto extent = vk::Extent2D {
-        static_cast<uint32_t>(window->GetSize().width * m_viewport[2]),
-        static_cast<uint32_t>(window->GetSize().height * m_viewport[3])
+        static_cast<uint32_t>(viewer->GetExtent().width * m_viewport[2]),
+        static_cast<uint32_t>(viewer->GetExtent().height * m_viewport[3])
     };
     auto viewport = vk::Viewport {
         static_cast<float>(offset.x),
@@ -43,7 +42,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, const vk::ra
     {
         if (actor->GetVisibility())
         {
-            actor->Render(commandBuffer, renderPass);
+            actor->Render(commandBuffer, viewer);
         }
     }
 }
@@ -61,11 +60,6 @@ void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
     {
         actor->SetDevice(m_device);
     }
-}
-
-void Renderer::SetWindow(std::shared_ptr<Window> window) noexcept
-{
-    m_window = window;
 }
 
 void Renderer::SetViewport(const std::array<double, 4>& viewport)

@@ -23,17 +23,23 @@ class Renderer;
 class JELLY_EXPORT Viewer : public Object
 {
 public:
-    void Init(std::shared_ptr<Device> device, const vk::Extent2D& extent);
+    void SetDevice(std::shared_ptr<Device> device);
+
+    void Init(const vk::Extent2D& extent);
 
     void Render(const vk::raii::CommandBuffer& commandBuffer);
 
     void AddRenderer(std::shared_ptr<Renderer> renderer);
 
+    const vk::Extent2D& GetExtent() const noexcept;
+    const vk::raii::RenderPass& GetRenderPass() const noexcept;
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;
+    uint32_t GetCurrentFrameIndex() const noexcept;
+    uint32_t GetMaximumOfFrames() const noexcept;
 
 private:
-    uint32_t m_currentImageIndex {0};
-    uint32_t m_numberOfImages {JELLY_MAX_FRAMES};
+    uint32_t m_currentFrameIndex {0};
+    uint32_t m_maximumOfFrames {JELLY_MAX_FRAMES};
     vk::Extent2D m_extent {};
     vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
     vk::Format m_depthFormat {vk::Format::eD16Unorm};

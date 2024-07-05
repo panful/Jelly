@@ -13,6 +13,7 @@ Window::Window() noexcept
     : m_device(std::make_shared<Device>())
     , m_viewer(std::make_unique<Viewer>())
 {
+    m_viewer->SetDevice(m_device);
 }
 
 Window::~Window() noexcept
@@ -22,8 +23,6 @@ Window::~Window() noexcept
 
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
-    renderer->SetDevice(m_device);
-    renderer->SetWindow(shared_from_this());
     m_viewer->AddRenderer(std::move(renderer));
 }
 
@@ -296,7 +295,7 @@ void Window::InitPipeline() noexcept
 
 void Window::InitViewer() noexcept
 {
-    m_viewer->Init(m_device, vk::Extent2D {m_width, m_height});
+    m_viewer->Init(vk::Extent2D {m_width, m_height});
 }
 
 void Window::InitDescriptorSets() noexcept

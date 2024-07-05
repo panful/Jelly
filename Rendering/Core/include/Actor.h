@@ -19,12 +19,12 @@
 namespace Jelly {
 class Device;
 class Mapper;
+class Viewer;
 
 class JELLY_EXPORT Actor : public Object
 {
 public:
-    virtual void
-    Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept = 0;
+    virtual void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept = 0;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
     void SetMapper(std::shared_ptr<Mapper> mapper) noexcept;

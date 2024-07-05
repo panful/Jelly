@@ -4,13 +4,16 @@
 
 using namespace Jelly;
 
-void Viewer::Init(std::shared_ptr<Device> device, const vk::Extent2D& extent)
+void Viewer::SetDevice(std::shared_ptr<Device> device)
 {
     m_device = std::move(device);
-    m_extent = extent;
+}
 
-    m_colorImageDatas.reserve(m_numberOfImages);
-    for (uint32_t i = 0; i < m_numberOfImages; ++i)
+void Viewer::Init(const vk::Extent2D& extent)
+{
+    m_extent = extent;
+    m_colorImageDatas.reserve(m_maximumOfFrames);
+    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas.emplace_back(ImageData(
             m_device,
@@ -60,8 +63,8 @@ void Viewer::Init(std::shared_ptr<Device> device, const vk::Extent2D& extent)
     );
     m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
 
-    m_framebuffers.reserve(m_numberOfImages);
-    for (uint32_t i = 0; i < m_numberOfImages; ++i)
+    m_framebuffers.reserve(m_maximumOfFrames);
+    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData.GetImageView()};
 
@@ -78,18 +81,18 @@ void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
     clearValues[0].color        = vk::ClearColorValue(0.1f, 0.2f, 0.3f, 1.f);
     clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
     vk::RenderPassBeginInfo renderPassBeginInfo(
-        m_renderPass, m_framebuffers[m_currentImageIndex], vk::Rect2D({0, 0}, m_extent), clearValues
+        m_renderPass, m_framebuffers[m_currentFrameIndex], vk::Rect2D({0, 0}, m_extent), clearValues
     );
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
     for (const auto& renderer : m_renderers)
     {
-        renderer->Render(commandBuffer, m_renderPass);
+        renderer->Render(commandBuffer, this);
     }
 
     commandBuffer.endRenderPass();
 
-    m_currentImageIndex = (m_currentImageIndex + 1) % m_numberOfImages;
+    m_currentFrameIndex = (m_currentFrameIndex + 1) % m_maximumOfFrames;
 }
 
 std::vector<vk::ImageView> Viewer::GetColorImageViews() const noexcept
@@ -102,7 +105,28 @@ std::vector<vk::ImageView> Viewer::GetColorImageViews() const noexcept
     return imageViews;
 }
 
+uint32_t Viewer::GetCurrentFrameIndex() const noexcept
+{
+    return m_currentFrameIndex;
+}
+
+uint32_t Viewer::GetMaximumOfFrames() const noexcept
+{
+    return m_maximumOfFrames;
+}
+
+const vk::Extent2D& Viewer::GetExtent() const noexcept
+{
+    return m_extent;
+}
+
+const vk::raii::RenderPass& Viewer::GetRenderPass() const noexcept
+{
+    return m_renderPass;
+}
+
 void Viewer::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
+    renderer->SetDevice(m_device);
     m_renderers.emplace_back(std::move(renderer));
 }

@@ -21,7 +21,7 @@ class DataSet;
 class JELLY_EXPORT DataSetMapper : public Mapper
 {
 public:
-    void Render(const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass) noexcept override;
+    void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept override;
 
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
 

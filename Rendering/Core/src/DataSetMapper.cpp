@@ -7,13 +7,12 @@
 #include "Pipeline.h"
 #include "PipelineCache.h"
 #include "SpvCreater.h"
+#include "Viewer.h"
 #include <format>
 
 using namespace Jelly;
 
-void DataSetMapper::Render(
-    const vk::raii::CommandBuffer& commandBuffer, const vk::raii::RenderPass& renderPass
-) noexcept
+void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept
 {
     Logger::GetInstance()->Debug();
 
@@ -79,10 +78,10 @@ void DataSetMapper::Render(
             .vertexShaderCode   = std::move(vertSpv.value()),
             .fragmentShaderCode = std::move(fragSpv.value()),
             .strides            = std::move(strides),
-            .renderPass         = renderPass
+            .renderPass         = viewer->GetRenderPass()
         };
 
-        BuildPipeline(renderPass, pipelineInfo);
+        BuildPipeline(pipelineInfo);
 
         m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
     }

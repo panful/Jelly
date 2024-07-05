@@ -9,7 +9,7 @@ void Mapper::SetDevice(std::shared_ptr<Device> device) noexcept
     m_device = std::move(device);
 }
 
-void Mapper::BuildPipeline(const vk::raii::RenderPass& renderPass, const PipelineInfo& pipelineInfo) noexcept
+void Mapper::BuildPipeline(const PipelineInfo& pipelineInfo) noexcept
 {
     m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 
