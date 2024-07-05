@@ -130,3 +130,48 @@ void main()
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
     EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());
 }
+
+TEST(Test_ShaderGenerator, addUniformColor)
+{
+    std::string vertCode = R"(// Vertex Shader
+#version 450
+
+layout(location = 0) in vec3 inPos;
+
+// Layout::Color
+
+// Layout::Normal
+
+// Layout::TexCoord
+
+void main()
+{
+    // VS::Main Begin
+    gl_Position = vec4(inPos, 1.);
+    // VS::Main End
+})";
+
+    std::string fragCode = R"(// Fragment Shader
+#version 450
+
+// FS::In
+layout(push_constant) uniform PushConstant {
+    vec3 color;
+} pcColor;
+
+// FS::Out
+layout(location = 0) out vec4 FragColor;
+
+void main()
+{
+    // FS::Main Begin
+    FragColor = vec4(pcColor.color, 1.);
+    // FS::Main End
+})";
+
+    Jelly::ShaderCreater generator {};
+    generator.AddUniformColor();
+
+    EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
+    EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());
+}

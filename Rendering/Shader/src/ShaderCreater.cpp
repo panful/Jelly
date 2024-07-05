@@ -84,6 +84,16 @@ void ShaderCreater::SetFragColor(const std::array<double, 3>& color)
     );
 }
 
+void ShaderCreater::AddUniformColor()
+{
+    ReplaceValue(
+        m_fragmentShaderCode,
+        "// FS::In",
+        "// FS::In\nlayout(push_constant) uniform PushConstant {\n    vec3 color;\n} pcColor;"
+    );
+    ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(pcColor.color, 1.)");
+}
+
 void ShaderCreater::ReplaceValue(
     std::string& str, const std::string& start, const std::string& end, const std::string& replacement
 )

@@ -28,6 +28,7 @@ public:
     void AddPointColor(uint32_t location);
     void RemovePointColor();
     void SetFragColor(const std::array<double, 3>& color);
+    void AddUniformColor();
 
 private:
     /// @brief 将str中start到end之间的字符全部使用replacement替换
