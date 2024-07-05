@@ -114,6 +114,16 @@ const vk::raii::Queue& Device::GetPresentQueue() const noexcept
     return m_presentQueue;
 }
 
+const vk::raii::CommandPool& Device::GetCommandPool() const noexcept
+{
+    return m_commandPool;
+}
+
+const vk::raii::DescriptorPool& Device::GetDescriptorPool() const noexcept
+{
+    return m_descriptorPool;
+}
+
 const std::unique_ptr<PipelineCache>& Device::GetPipelineCache() const noexcept
 {
     return m_pipelineCache;
@@ -186,6 +196,42 @@ std::pair<vk::Queue, vk::Queue> Device::InitQueues() noexcept
     m_presentQueue  = vk::raii::Queue(m_device, m_presentQueueIndex, 0);
 
     return {m_graphicsQueue, m_presentQueue};
+}
+
+vk::CommandPool Device::InitCommandPool() noexcept
+{
+    if (*m_commandPool)
+    {
+        return m_commandPool;
+    }
+
+    m_commandPool =
+        vk::raii::CommandPool(m_device, {{vk::CommandPoolCreateFlagBits::eResetCommandBuffer}, m_graphicsQueueIndex});
+
+    return m_commandPool;
+}
+
+vk::DescriptorPool Device::InitDescriptorPool() noexcept
+{
+    if (*m_descriptorPool)
+    {
+        return m_descriptorPool;
+    }
+
+    // TODO
+    std::vector<vk::DescriptorPoolSize> descriptorPoolSizes {
+        {vk::DescriptorType::eCombinedImageSampler, JELLY_MAX_FRAMES},
+        {vk::DescriptorType::eUniformBuffer,        JELLY_MAX_FRAMES}
+    };
+
+    m_descriptorPool = vk::raii::DescriptorPool(
+        m_device,
+        vk::DescriptorPoolCreateInfo {
+            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, JELLY_MAX_FRAMES, descriptorPoolSizes
+        }
+    );
+
+    return m_descriptorPool;
 }
 
 void Device::InitPipelineCache()

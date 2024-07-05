@@ -59,12 +59,10 @@ private:
     void InitRenderPass() noexcept;
     void InitFramebuffers() noexcept;
     void InitSyncObjects() noexcept;
-    void InitCommandPool() noexcept;
     void InitCommandBuffers() noexcept;
     void InitSampler() noexcept;
     void InitPipeline() noexcept;
     void InitViewer() noexcept;
-    void InitDescriptorPool() noexcept;
     void InitDescriptorSets() noexcept;
     void UpdateDescriptorSets() noexcept;
 
@@ -82,9 +80,6 @@ private:
     uint32_t m_currentImageIndex {0};
 
     std::unique_ptr<Viewer> m_viewer {};
-
-    vk::raii::CommandPool m_commandPool {nullptr};
-    vk::raii::DescriptorPool m_descriptorPool {nullptr};
 
     SwapChainData m_swapChainData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};

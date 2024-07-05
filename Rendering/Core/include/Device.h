@@ -32,16 +32,17 @@ public:
     const vk::raii::Device& GetDevice() const noexcept;
     const vk::raii::Queue& GetGraphicsQueue() const noexcept;
     const vk::raii::Queue& GetPresentQueue() const noexcept;
+    const vk::raii::CommandPool& GetCommandPool() const noexcept;
+    const vk::raii::DescriptorPool& GetDescriptorPool() const noexcept;
     const std::unique_ptr<PipelineCache>& GetPipelineCache() const noexcept;
 
 public:
     vk::Instance InitInstance() noexcept;
-
     vk::PhysicalDevice PickPhysicalDevice(const vk::raii::SurfaceKHR& surface) noexcept;
-
     vk::Device InitDevice() noexcept;
-
     std::pair<vk::Queue, vk::Queue> InitQueues() noexcept;
+    vk::CommandPool InitCommandPool() noexcept;
+    vk::DescriptorPool InitDescriptorPool() noexcept;
 
     void InitPipelineCache();
 
@@ -66,6 +67,9 @@ private:
 
     vk::raii::Queue m_graphicsQueue {nullptr};
     vk::raii::Queue m_presentQueue {nullptr};
+
+    vk::raii::CommandPool m_commandPool {nullptr};
+    vk::raii::DescriptorPool m_descriptorPool {nullptr};
 
     uint32_t m_graphicsQueueIndex {};
     uint32_t m_presentQueueIndex {};

@@ -148,6 +148,8 @@ void Window::InitWindow() noexcept
     m_device->PickPhysicalDevice(m_surface);
     m_device->InitDevice();
     m_device->InitQueues();
+    m_device->InitCommandPool();
+    m_device->InitDescriptorPool();
     m_device->InitPipelineCache();
 
     InitSwapChain();
@@ -156,10 +158,8 @@ void Window::InitWindow() noexcept
     InitPipeline();
     InitFramebuffers();
     InitSyncObjects();
-    InitCommandPool();
     InitCommandBuffers();
     InitSampler();
-    InitDescriptorPool();
     InitDescriptorSets();
     UpdateDescriptorSets();
 }
@@ -228,18 +228,11 @@ void Window::InitSyncObjects() noexcept
     }
 }
 
-void Window::InitCommandPool() noexcept
-{
-    m_commandPool = vk::raii::CommandPool(
-        m_device->GetDevice(), {{vk::CommandPoolCreateFlagBits::eResetCommandBuffer}, m_device->GetGraphicsQueueIndex()}
-    );
-}
-
 void Window::InitCommandBuffers() noexcept
 {
     m_commandBuffers = vk::raii::CommandBuffers(
         m_device->GetDevice(),
-        vk::CommandBufferAllocateInfo {m_commandPool, vk::CommandBufferLevel::ePrimary, m_numberOfFrames}
+        vk::CommandBufferAllocateInfo {m_device->GetCommandPool(), vk::CommandBufferLevel::ePrimary, m_numberOfFrames}
     );
 }
 
@@ -306,27 +299,12 @@ void Window::InitViewer() noexcept
     m_viewer->Init(m_device, vk::Extent2D {m_width, m_height});
 }
 
-void Window::InitDescriptorPool() noexcept
-{
-    // XXX 需要动态创建 Pool
-    std::array descriptorPoolSizes {
-        vk::DescriptorPoolSize {vk::DescriptorType::eCombinedImageSampler, m_numberOfFrames},
-    };
-
-    m_descriptorPool = vk::raii::DescriptorPool(
-        m_device->GetDevice(),
-        vk::DescriptorPoolCreateInfo {
-            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, m_numberOfFrames, descriptorPoolSizes
-        }
-    );
-}
-
 void Window::InitDescriptorSets() noexcept
 {
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(m_numberOfFrames, m_pipeline->GetDescriptorSetLayout());
 
     m_descriptorSets = vk::raii::DescriptorSets(
-        m_device->GetDevice(), vk::DescriptorSetAllocateInfo {m_descriptorPool, descriptorSetLayouts}
+        m_device->GetDevice(), vk::DescriptorSetAllocateInfo {m_device->GetDescriptorPool(), descriptorSetLayouts}
     );
 }
 
