@@ -73,17 +73,6 @@ void ShaderCreater::AddPointColor(uint32_t location)
     ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(fsInColor, 1.)");
 }
 
-void ShaderCreater::RemovePointColor()
-{
-}
-
-void ShaderCreater::SetFragColor(const std::array<double, 3>& color)
-{
-    ReplaceValue(
-        m_fragmentShaderCode, "FragColor = ", ";", std::format("vec4({}, {}, {}, 1.)", color[0], color[1], color[2])
-    );
-}
-
 void ShaderCreater::AddUniformColor()
 {
     ReplaceValue(

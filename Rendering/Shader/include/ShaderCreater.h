@@ -26,8 +26,6 @@ public:
     std::string GetFragmentShaderCode() const noexcept;
 
     void AddPointColor(uint32_t location);
-    void RemovePointColor();
-    void SetFragColor(const std::array<double, 3>& color);
     void AddUniformColor();
 
 private:
