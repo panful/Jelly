@@ -23,7 +23,8 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
 
     if (m_needUpdate)
     {
-        m_needUpdate = false;
+        m_needUpdate      = false;
+        m_useUniformColor = false;
 
         static constexpr uint32_t vertexDimension {3};
         static constexpr uint32_t colorComponents {3};
@@ -34,6 +35,7 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             strides.emplace_back(static_cast<uint32_t>(colorComponents * sizeof(float)));
         }
 
+        std::vector<PushConstantRange> pushConstantRange {};
         uint32_t location {1}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
         switch (m_colorMode)
         {
@@ -53,7 +55,11 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             case ColorMode::UniformColor:
                 [[fallthrough]];
             default:
-                m_shaderCreater->SetFragColor(m_color);
+                m_useUniformColor = true;
+                m_shaderCreater->AddUniformColor();
+                pushConstantRange.emplace_back(
+                    vk::ShaderStageFlagBits::eFragment, static_cast<uint32_t>(sizeof(m_color))
+                );
                 break;
         }
 
@@ -78,6 +84,7 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             .vertexShaderCode   = std::move(vertSpv.value()),
             .fragmentShaderCode = std::move(fragSpv.value()),
             .strides            = std::move(strides),
+            .pushConstantRanges = pushConstantRange,
             .renderPass         = viewer->GetRenderPass()
         };
 
@@ -89,6 +96,12 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
     auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
 
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
+    if (m_useUniformColor)
+    {
+        commandBuffer.pushConstants<float>(
+            pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0u, m_color
+        );
+    }
     commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
     commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());
     commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);

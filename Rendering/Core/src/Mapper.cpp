@@ -29,12 +29,12 @@ ColorMode Mapper::GetColorMode() const noexcept
     return m_colorMode;
 }
 
-void Mapper::SetColor(const std::array<double, 3>& color)
+void Mapper::SetColor(const std::array<float, 3>& color)
 {
     m_color = color;
 }
 
-std::array<double, 3> Mapper::GetColor() const noexcept
+std::array<float, 3> Mapper::GetColor() const noexcept
 {
     return m_color;
 }

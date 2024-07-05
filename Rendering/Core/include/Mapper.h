@@ -40,8 +40,8 @@ public:
     void SetColorMode(ColorMode colorMode) noexcept;
     ColorMode GetColorMode() const noexcept;
 
-    void SetColor(const std::array<double, 3>& color);
-    std::array<double, 3> GetColor() const noexcept;
+    void SetColor(const std::array<float, 3>& color);
+    std::array<float, 3> GetColor() const noexcept;
 
 protected:
     void BuildPipeline(const PipelineInfo& pipelineInfo) noexcept;
@@ -55,6 +55,6 @@ protected:
     std::atomic_bool m_needUpdate {true};
 
     ColorMode m_colorMode {ColorMode::UniformColor};
-    std::array<double, 3> m_color {1., 1., 1.};
+    std::array<float, 3> m_color {1., 1., 1.};
 };
 } // namespace Jelly

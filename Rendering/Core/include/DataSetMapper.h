@@ -28,5 +28,6 @@ public:
 private:
     std::shared_ptr<DataSet> m_dataSet {};
     std::unique_ptr<ShaderCreater> m_shaderCreater {std::make_unique<ShaderCreater>()};
+    bool m_useUniformColor {false};
 };
 } // namespace Jelly
