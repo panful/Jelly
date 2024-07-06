@@ -20,7 +20,7 @@ class Window;
 class JELLY_EXPORT Interactor : public Object
 {
 public:
-    virtual void Start() const noexcept = 0;
+    virtual void Start() noexcept = 0;
 
     void SetWindow(std::shared_ptr<Window> window) noexcept;
 
