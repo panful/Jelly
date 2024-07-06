@@ -39,9 +39,17 @@ public:
 
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
     void SetTitle(const std::string_view title) noexcept;
+    void SetEnableGetRenderingResult(bool enable) noexcept;
+
+    std::any GetNativeWindow() const noexcept;
 
     vk::Extent2D GetSize() const noexcept;
-    std::any GetNativeWindow() const noexcept;
+
+    /// @brief 返回上一帧的渲染结果
+    /// @return 格式为 RGBA 原点在左上角
+    /// @note 需要先将 EnableGetRenderingResult 开启
+    std::vector<uint8_t> GetLastRenderingResult() const noexcept;
+
     std::shared_ptr<Device> GetDevice() const noexcept;
 
 protected:
@@ -76,6 +84,7 @@ private:
     uint32_t m_numberOfFrames {JELLY_MAX_FRAMES};
     uint32_t m_currentFrameIndex {0};
     uint32_t m_currentImageIndex {0};
+    bool m_enableGetRenderingResult {false};
 
     std::unique_ptr<Viewer> m_viewer {};
 

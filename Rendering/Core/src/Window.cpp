@@ -1,11 +1,13 @@
 #include "Window.h"
 #include "Device.h"
 #include "Logger.h"
+#include "MemoryHelper.h"
 #include "Renderer.h"
 #include "SpvCreater.h"
 #include "Viewer.h"
 #include <array>
 #include <limits>
+#include <mutex>
 
 using namespace Jelly;
 
@@ -37,6 +39,11 @@ void Window::SetTitle(const std::string_view title) noexcept
     m_title = title;
 }
 
+void Window::SetEnableGetRenderingResult(bool enable) noexcept
+{
+    m_enableGetRenderingResult = enable;
+}
+
 vk::Extent2D Window::GetSize() const noexcept
 {
     return {m_width, m_height};
@@ -45,6 +52,108 @@ vk::Extent2D Window::GetSize() const noexcept
 std::any Window::GetNativeWindow() const noexcept
 {
     return m_window;
+}
+
+std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
+{
+    std::vector<uint8_t> retVal {};
+    if (!m_enableGetRenderingResult || vk::Format::eB8G8R8A8Unorm != m_swapChainData.GetColorFormat())
+    {
+        // 暂时只支持获取图像格式为 eB8G8R8A8Unorm 的交换链图像
+        return retVal;
+    }
+
+    ImageData imageData(
+        m_device,
+        m_swapChainData.GetColorFormat(),
+        vk::Extent2D {m_width, m_height},
+        vk::ImageTiling::eLinear,
+        vk::ImageUsageFlagBits::eTransferDst,
+        vk::ImageLayout::eUndefined,
+        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+        vk::ImageAspectFlagBits::eColor,
+        false
+    );
+
+    MemoryHelper::OneTimeSubmit(m_device, [&imageData, this](const vk::raii::CommandBuffer& cmd) {
+        auto&& format   = this->m_swapChainData.GetColorFormat();
+        auto&& inImage  = this->m_swapChainData.GetImage(this->m_currentImageIndex);
+        auto&& outImage = imageData.GetImage();
+
+        ImageData::SetImageLayout(
+            cmd, outImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal
+        );
+
+        ImageData::SetImageLayout(
+            cmd, inImage, format, vk::ImageLayout::ePresentSrcKHR, vk::ImageLayout::eTransferSrcOptimal
+        );
+
+        auto formatProperties = this->m_device->GetPhysicalDevice().getFormatProperties(format);
+
+        if ((formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
+            && (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst))
+        {
+            vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+            std::array<vk::Offset3D, 2> offsets {
+                vk::Offset3D(0, 0, 0),
+                vk::Offset3D(static_cast<int32_t>(this->m_width), static_cast<int32_t>(this->m_height), 1)
+            };
+            vk::ImageBlit imageBlit(imageSubresourceLayers, offsets, imageSubresourceLayers, offsets);
+            cmd.blitImage(
+                inImage,
+                vk::ImageLayout::eTransferSrcOptimal,
+                outImage,
+                vk::ImageLayout::eTransferDstOptimal,
+                imageBlit,
+                vk::Filter::eLinear
+            );
+        }
+        else
+        {
+            vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+            vk::ImageCopy imageCopy(
+                imageSubresourceLayers,
+                vk::Offset3D(),
+                imageSubresourceLayers,
+                vk::Offset3D(),
+                vk::Extent3D(this->m_width, this->m_height, 1)
+            );
+            cmd.copyImage(
+                inImage, vk::ImageLayout::eTransferSrcOptimal, outImage, vk::ImageLayout::eTransferDstOptimal, imageCopy
+            );
+        }
+
+        ImageData::SetImageLayout(
+            cmd, outImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral
+        );
+
+        ImageData::SetImageLayout(
+            cmd, inImage, format, vk::ImageLayout::eTransferSrcOptimal, vk::ImageLayout::ePresentSrcKHR
+        );
+    });
+
+    auto subResourceLayout = imageData.GetImage().getSubresourceLayout({vk::ImageAspectFlagBits::eColor, 0, 0});
+    auto pixels            = reinterpret_cast<uint8_t*>(imageData.GetDeviceMemory().mapMemory(0, vk::WholeSize, {}));
+    pixels += subResourceLayout.offset;
+
+    retVal.reserve(m_width * m_height * 4);
+    for (uint32_t y = 0; y < m_height; y++)
+    {
+        auto row = pixels;
+        for (uint32_t x = 0; x < m_width; x++)
+        {
+            retVal.emplace_back(*(row + 2));
+            retVal.emplace_back(*(row + 1));
+            retVal.emplace_back(*(row + 0));
+            retVal.emplace_back(*(row + 3));
+            row += 4;
+        }
+        pixels += subResourceLayout.rowPitch;
+    }
+
+    imageData.GetDeviceMemory().unmapMemory();
+
+    return retVal;
 }
 
 std::shared_ptr<Device> Window::GetDevice() const noexcept
@@ -115,7 +224,7 @@ void Window::PostRender() noexcept
 void Window::Present() const noexcept
 {
     std::array<vk::ClearValue, 1> clearValues {};
-    clearValues[0].color = vk::ClearColorValue(.1f, .2f, .3f, 1.f);
+    clearValues[0].color = vk::ClearColorValue(0.f, 0.f, 0.f, 0.f);
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
         m_renderPass,
@@ -165,9 +274,11 @@ void Window::InitWindow() noexcept
 
 void Window::InitSwapChain() noexcept
 {
-    m_swapChainData = SwapChainData(
-        m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, vk::ImageUsageFlagBits::eColorAttachment
-    );
+    auto usage = m_enableGetRenderingResult
+        ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
+        : vk::ImageUsageFlagBits::eColorAttachment;
+
+    m_swapChainData = SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, usage);
 }
 
 void Window::InitRenderPass() noexcept

@@ -21,6 +21,8 @@ class Device;
 class JELLY_EXPORT ImageData : public VkDataBase
 {
 public:
+    ImageData(std::nullptr_t);
+
     ImageData(
         std::shared_ptr<Device> device,
         vk::Format format,
@@ -33,9 +35,9 @@ public:
         bool createImageView = true
     );
 
-    ImageData(std::nullptr_t);
-
+    const vk::raii::Image& GetImage() const noexcept;
     const vk::raii::ImageView& GetImageView() const noexcept;
+    const vk::raii::DeviceMemory& GetDeviceMemory() const noexcept;
 
     static void SetImageLayout(
         const vk::raii::CommandBuffer& commandBuffer,

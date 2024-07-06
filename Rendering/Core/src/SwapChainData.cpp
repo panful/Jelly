@@ -115,6 +115,11 @@ uint32_t SwapChainData::GetNumberOfImages() const noexcept
     return static_cast<uint32_t>(m_images.size());
 }
 
+vk::Image SwapChainData::GetImage(uint32_t index) const noexcept
+{
+    return m_images[index];
+}
+
 const vk::raii::ImageView& SwapChainData::GetImageView(uint32_t index) const noexcept
 {
     return m_imageViews[index];

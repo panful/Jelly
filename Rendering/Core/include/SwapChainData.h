@@ -30,6 +30,7 @@ public:
 
     vk::Format GetColorFormat() const noexcept;
     uint32_t GetNumberOfImages() const noexcept;
+    vk::Image GetImage(uint32_t index) const noexcept;
     const vk::raii::ImageView& GetImageView(uint32_t index) const noexcept;
     const vk::raii::SwapchainKHR& GetSwapChain() const noexcept;
 

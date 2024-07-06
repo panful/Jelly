@@ -45,9 +45,19 @@ ImageData::ImageData(std::nullptr_t)
 {
 }
 
+const vk::raii::Image& ImageData::GetImage() const noexcept
+{
+    return m_image;
+}
+
 const vk::raii::ImageView& ImageData::GetImageView() const noexcept
 {
     return m_imageView;
+}
+
+const vk::raii::DeviceMemory& ImageData::GetDeviceMemory() const noexcept
+{
+    return m_deviceMemory;
 }
 
 void ImageData::SetImageLayout(
@@ -67,8 +77,15 @@ void ImageData::SetImageLayout(
         case vk::ImageLayout::ePreinitialized:
             sourceAccessMask = vk::AccessFlagBits::eHostWrite;
             break;
-        case vk::ImageLayout::eGeneral: // sourceAccessMask is empty
+        case vk::ImageLayout::ePresentSrcKHR:
+            sourceAccessMask = vk::AccessFlagBits::eMemoryRead;
+            break;
+        case vk::ImageLayout::eTransferSrcOptimal:
+            sourceAccessMask = vk::AccessFlagBits::eTransferRead;
+            break;
+        case vk::ImageLayout::eGeneral:
         case vk::ImageLayout::eUndefined:
+            sourceAccessMask = vk::AccessFlagBits::eNone;
             break;
         default:
             assert(false);
@@ -87,6 +104,13 @@ void ImageData::SetImageLayout(
             break;
         case vk::ImageLayout::eUndefined:
             sourceStage = vk::PipelineStageFlagBits::eTopOfPipe;
+            // sourceStage = vk::PipelineStageFlagBits::eTransfer;
+            break;
+        case vk::ImageLayout::ePresentSrcKHR:
+            sourceStage = vk::PipelineStageFlagBits::eTransfer;
+            break;
+        case vk::ImageLayout::eTransferSrcOptimal:
+            sourceStage = vk::PipelineStageFlagBits::eTransfer;
             break;
         default:
             assert(false);
@@ -103,8 +127,9 @@ void ImageData::SetImageLayout(
             destinationAccessMask =
                 vk::AccessFlagBits::eDepthStencilAttachmentRead | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
             break;
-        case vk::ImageLayout::eGeneral: // empty destinationAccessMask
+        case vk::ImageLayout::eGeneral:
         case vk::ImageLayout::ePresentSrcKHR:
+            destinationAccessMask = vk::AccessFlagBits::eMemoryRead;
             break;
         case vk::ImageLayout::eShaderReadOnlyOptimal:
             destinationAccessMask = vk::AccessFlagBits::eShaderRead;
@@ -131,9 +156,11 @@ void ImageData::SetImageLayout(
             break;
         case vk::ImageLayout::eGeneral:
             destinationStage = vk::PipelineStageFlagBits::eHost;
+            // destinationStage = vk::PipelineStageFlagBits::eTransfer;
             break;
         case vk::ImageLayout::ePresentSrcKHR:
             destinationStage = vk::PipelineStageFlagBits::eBottomOfPipe;
+            // destinationStage = vk::PipelineStageFlagBits::eTransfer;
             break;
         case vk::ImageLayout::eShaderReadOnlyOptimal:
             destinationStage = vk::PipelineStageFlagBits::eFragmentShader;
