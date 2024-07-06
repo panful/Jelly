@@ -16,6 +16,7 @@
 
 namespace Jelly {
 class Window;
+class InteractorStyle;
 
 class JELLY_EXPORT Interactor : public Object
 {
@@ -24,8 +25,11 @@ public:
 
     void SetWindow(std::shared_ptr<Window> window) noexcept;
 
+    void SetInteractorStyle(std::shared_ptr<InteractorStyle> interactorStyle) noexcept;
+
 protected:
     std::shared_ptr<Window> m_window {};
+    std::shared_ptr<InteractorStyle> m_interactorStyle {};
 };
 
 } // namespace Jelly
