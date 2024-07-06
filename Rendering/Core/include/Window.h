@@ -52,6 +52,8 @@ public:
 
     std::shared_ptr<Device> GetDevice() const noexcept;
 
+    bool HasInitialized() const noexcept;
+
 protected:
     virtual void InitSurface() noexcept = 0;
 
@@ -72,6 +74,8 @@ private:
     void InitDescriptorSets() noexcept;
     void UpdateDescriptorSets() noexcept;
 
+    void RecreateSwapChain() noexcept;
+
 protected:
     uint32_t m_width {800};
     uint32_t m_height {600};
@@ -85,6 +89,7 @@ private:
     uint32_t m_currentFrameIndex {0};
     uint32_t m_currentImageIndex {0};
     bool m_enableGetRenderingResult {false};
+    bool m_initialized {false};
 
     std::unique_ptr<Viewer> m_viewer {};
 

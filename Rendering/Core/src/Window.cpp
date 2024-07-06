@@ -30,8 +30,23 @@ void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 
 void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 {
+    if (width == m_width && height == m_height)
+    {
+        return;
+    }
+
     m_width  = width;
     m_height = height;
+
+    if (m_initialized)
+    {
+        m_device->GetDevice().waitIdle();
+        m_viewer->Resize(vk::Extent2D {width, height});
+
+        m_currentFrameIndex = 0;
+        RecreateSwapChain();
+        UpdateDescriptorSets();
+    }
 }
 
 void Window::SetTitle(const std::string_view title) noexcept
@@ -161,10 +176,18 @@ std::shared_ptr<Device> Window::GetDevice() const noexcept
     return m_device;
 }
 
+bool Window::HasInitialized() const noexcept
+{
+    return m_initialized;
+}
+
 void Window::Render() noexcept
 {
     static std::once_flag flag {};
-    std::call_once(flag, [this]() { InitWindow(); });
+    std::call_once(flag, [this]() {
+        this->InitWindow();
+        this->m_initialized = true;
+    });
 
     PreRender();
     m_viewer->Render(m_commandBuffers[m_currentFrameIndex]);
@@ -279,6 +302,26 @@ void Window::InitSwapChain() noexcept
         : vk::ImageUsageFlagBits::eColorAttachment;
 
     m_swapChainData = SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, usage);
+}
+
+void Window::RecreateSwapChain() noexcept
+{
+    auto usage = m_enableGetRenderingResult
+        ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
+        : vk::ImageUsageFlagBits::eColorAttachment;
+
+    m_swapChainData =
+        SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, &m_swapChainData.GetSwapChain(), usage);
+
+    const auto numberOfImages = m_swapChainData.GetNumberOfImages();
+    m_framebuffers.clear();
+    for (uint32_t i = 0; i < numberOfImages; ++i)
+    {
+        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
+        m_framebuffers.emplace_back(vk::raii::Framebuffer(
+            m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
+        ));
+    }
 }
 
 void Window::InitRenderPass() noexcept

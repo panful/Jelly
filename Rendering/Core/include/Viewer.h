@@ -31,6 +31,8 @@ public:
 
     void AddRenderer(std::shared_ptr<Renderer> renderer);
 
+    void Resize(const vk::Extent2D& extent);
+
     const vk::Extent2D& GetExtent() const noexcept;
     const vk::raii::RenderPass& GetRenderPass() const noexcept;
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;

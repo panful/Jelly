@@ -18,7 +18,7 @@ void Viewer::Init(const vk::Extent2D& extent)
         m_colorImageDatas.emplace_back(ImageData(
             m_device,
             m_colorFormat,
-            extent,
+            m_extent,
             vk::ImageTiling::eOptimal,
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
             vk::ImageLayout::eUndefined,
@@ -27,7 +27,7 @@ void Viewer::Init(const vk::Extent2D& extent)
         ));
     }
 
-    m_depthImageData = DepthImageData(m_device, m_depthFormat, extent);
+    m_depthImageData = DepthImageData(m_device, m_depthFormat, m_extent);
 
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
     vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -70,7 +70,42 @@ void Viewer::Init(const vk::Extent2D& extent)
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
-            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, extent.width, extent.height, 1)
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
+        ));
+    }
+}
+
+void Viewer::Resize(const vk::Extent2D& extent)
+{
+    m_extent            = extent;
+    m_currentFrameIndex = 0;
+    m_device->GetDevice().waitIdle();
+
+    m_colorImageDatas.clear();
+    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
+    {
+        m_colorImageDatas.emplace_back(ImageData(
+            m_device,
+            m_colorFormat,
+            m_extent,
+            vk::ImageTiling::eOptimal,
+            vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
+            vk::ImageLayout::eUndefined,
+            vk::MemoryPropertyFlagBits::eDeviceLocal,
+            vk::ImageAspectFlagBits::eColor
+        ));
+    }
+
+    m_depthImageData = DepthImageData(m_device, m_depthFormat, m_extent);
+
+    m_framebuffers.clear();
+    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
+    {
+        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData.GetImageView()};
+
+        m_framebuffers.emplace_back(vk::raii::Framebuffer(
+            m_device->GetDevice(),
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
 }

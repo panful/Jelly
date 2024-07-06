@@ -16,10 +16,29 @@ void InteractorGLFW::Start() noexcept
     glfwSetMouseButtonCallback(glfwWindow, MouseButtonCallback);
     glfwSetWindowSizeCallback(glfwWindow, WindowSizeCallback);
 
+    if (!m_window->HasInitialized())
+    {
+        m_window->Render();
+    }
+
     while (!glfwWindowShouldClose(glfwWindow))
     {
         glfwPollEvents();
+
+        if (m_windowResized)
+        {
+            m_window->SetSize(m_windowWidth, m_windowHeight);
+            m_window->Render();
+            m_windowResized = false;
+        }
     }
+}
+
+void InteractorGLFW::SetWindowResized(uint32_t width, uint32_t height) noexcept
+{
+    m_windowWidth   = width;
+    m_windowHeight  = height;
+    m_windowResized = true;
 }
 
 void InteractorGLFW::WindowSizeCallback(GLFWwindow* window, int width, int height) noexcept
@@ -31,6 +50,7 @@ void InteractorGLFW::WindowSizeCallback(GLFWwindow* window, int width, int heigh
 
     if (auto pInstance = static_cast<InteractorGLFW*>(glfwGetWindowUserPointer(window)))
     {
+        pInstance->SetWindowResized(static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     }
 }
 
