@@ -2,6 +2,11 @@
 
 using namespace Jelly;
 
+void InteractorStyle::SetInteractor(std::shared_ptr<Interactor> interactor) noexcept
+{
+    m_interactor = std::move(interactor);
+}
+
 void InteractorStyle::MouseMoveEvent()
 {
 }

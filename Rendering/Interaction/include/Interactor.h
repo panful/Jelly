@@ -13,12 +13,15 @@
 
 #include "Object.h"
 #include <memory>
+#include <array>
 
 namespace Jelly {
 class Window;
 class InteractorStyle;
 
-class JELLY_EXPORT Interactor : public Object
+class JELLY_EXPORT Interactor
+    : public Object
+    , public std::enable_shared_from_this<Interactor>
 {
 public:
     virtual void Start() noexcept = 0;
@@ -30,6 +33,8 @@ public:
 protected:
     std::shared_ptr<Window> m_window {};
     std::shared_ptr<InteractorStyle> m_interactorStyle {};
+
+    std::array<int, 2> m_mousePosition {};
 };
 
 } // namespace Jelly

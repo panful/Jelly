@@ -96,7 +96,7 @@ int main()
     window->SetTitle("Test window");
     window->Render();
 
-    auto interactor = std::make_unique<Jelly::InteractorGLFW>();
+    auto interactor = std::make_shared<Jelly::InteractorGLFW>();
     interactor->SetWindow(window);
     interactor->Start();
 }

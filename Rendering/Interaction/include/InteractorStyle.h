@@ -12,10 +12,16 @@
 #pragma once
 
 #include "Object.h"
+#include <memory>
 
 namespace Jelly {
+class Interactor;
+
 class JELLY_EXPORT InteractorStyle : public Object
 {
+public:
+    void SetInteractor(std::shared_ptr<Interactor> interactor) noexcept;
+
 public:
     virtual void MouseMoveEvent();
 
@@ -38,5 +44,8 @@ public:
 
     virtual void EnterEvent();
     virtual void LeaveEvent();
+
+protected:
+    std::weak_ptr<Interactor> m_interactor {};
 };
 } // namespace Jelly

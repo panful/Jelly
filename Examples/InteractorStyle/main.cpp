@@ -3,7 +3,7 @@
 #include "DataSetMapper.h"
 #include "FloatData.h"
 #include "InteractorGLFW.h"
-#include "InteractorStyle.h"
+#include "InteractorStyleTrackballCamera.h"
 #include "Renderer.h"
 #include "WindowGLFW.h"
 #include <iostream>
@@ -97,9 +97,9 @@ int main()
     window->SetTitle("Test window");
     window->Render();
 
-    auto style = std::make_shared<Jelly::InteractorStyle>();
+    auto style = std::make_shared<Jelly::InteractorStyleTrackballCamera>();
 
-    auto interactor = std::make_unique<Jelly::InteractorGLFW>();
+    auto interactor = std::make_shared<Jelly::InteractorGLFW>();
     interactor->SetInteractorStyle(style);
     interactor->SetWindow(window);
     interactor->Start();
