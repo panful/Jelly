@@ -26,18 +26,22 @@ class Viewer;
 class JELLY_EXPORT Renderer : public Object
 {
 public:
-    void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept;
+    void Render(const vk::raii::CommandBuffer& commandBuffer) noexcept;
 
     void AddActor(std::shared_ptr<Actor> actor);
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
+    void SetViewer(std::shared_ptr<Viewer> viewer) noexcept;
     void SetViewport(const std::array<double, 4>& viewport);
     void SetBackground(const std::array<float, 4>& background);
 
     std::shared_ptr<Camera> GetCamera() const noexcept;
 
+    bool IsInViewport(const std::array<int, 2>& position) const noexcept;
+
 private:
     std::shared_ptr<Device> m_device {};
+    std::weak_ptr<Viewer> m_viewer {};
     std::shared_ptr<Camera> m_camera {std::make_shared<Camera>()};
     std::vector<std::shared_ptr<Actor>> m_actors {};
 

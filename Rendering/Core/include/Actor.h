@@ -25,7 +25,9 @@ class Renderer;
 class JELLY_EXPORT Actor : public Object
 {
 public:
-    virtual void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer) noexcept = 0;
+    virtual void Render(
+        const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+    ) noexcept = 0;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
     void SetMapper(std::shared_ptr<Mapper> mapper) noexcept;

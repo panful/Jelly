@@ -6,14 +6,18 @@
 
 using namespace Jelly;
 
-void Mapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer) noexcept
+void Mapper::Render(
+    const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+) noexcept
 {
     Configure(viewer);
 
     DeviceRender(commandBuffer, viewer, renderer);
 }
 
-void Mapper::DeviceRender(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer)
+void Mapper::DeviceRender(
+    const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+)
 {
     auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
 
@@ -46,7 +50,7 @@ void Mapper::SetDevice(std::shared_ptr<Device> device) noexcept
     m_device = std::move(device);
 }
 
-void Mapper::BuildPipeline(Viewer* viewer, const PipelineInfo& pipelineInfo) noexcept
+void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const PipelineInfo& pipelineInfo) noexcept
 {
     m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 

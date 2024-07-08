@@ -1,10 +1,30 @@
 #include "InteractorStyle.h"
+#include "Interactor.h"
+#include "Renderer.h"
+#include "Window.h"
 
 using namespace Jelly;
 
 void InteractorStyle::SetInteractor(std::shared_ptr<Interactor> interactor) noexcept
 {
     m_interactor = std::move(interactor);
+}
+
+void InteractorStyle::FindPokedRenderer()
+{
+    if (auto interactor = m_interactor.lock())
+    {
+        for (const auto& renderer : interactor->GetWindow()->GetAllRenderers())
+        {
+            if (renderer->IsInViewport(interactor->GetMousePosition()))
+            {
+                m_currentRenderer = renderer;
+                return;
+            }
+        }
+    }
+
+    m_currentRenderer.reset();
 }
 
 void InteractorStyle::MouseMoveEvent()

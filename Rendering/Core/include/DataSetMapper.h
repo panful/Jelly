@@ -21,7 +21,7 @@ class DataSet;
 class JELLY_EXPORT DataSetMapper : public Mapper
 {
 public:
-    void Configure(Viewer* viewer) noexcept override;
+    void Configure(const std::shared_ptr<Viewer>& viewer) noexcept override;
 
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
 

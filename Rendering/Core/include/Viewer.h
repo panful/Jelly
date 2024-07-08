@@ -14,13 +14,16 @@
 #include "DepthImageData.h"
 #include "ImageData.h"
 #include "Object.h"
+#include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
 class Device;
 class Renderer;
 
-class JELLY_EXPORT Viewer : public Object
+class JELLY_EXPORT Viewer
+    : public Object
+    , public std::enable_shared_from_this<Viewer>
 {
 public:
     void SetDevice(std::shared_ptr<Device> device);
@@ -33,6 +36,7 @@ public:
 
     void Resize(const vk::Extent2D& extent);
 
+    const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
     const vk::Extent2D& GetExtent() const noexcept;
     const vk::raii::RenderPass& GetRenderPass() const noexcept;
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;

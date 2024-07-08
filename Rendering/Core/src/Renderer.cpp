@@ -6,9 +6,11 @@
 
 using namespace Jelly;
 
-void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept
+void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 {
     Logger::GetInstance()->Trace();
+
+    auto viewer = m_viewer.lock(); // 如果 Renderer 存在，Viewer 一定存在，此处无需判空
 
     auto offset = vk::Offset2D {
         static_cast<int32_t>(viewer->GetExtent().width * m_viewport[0]),
@@ -62,6 +64,11 @@ void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
     }
 }
 
+void Renderer::SetViewer(std::shared_ptr<Viewer> viewer) noexcept
+{
+    m_viewer = std::move(viewer);
+}
+
 void Renderer::SetViewport(const std::array<double, 4>& viewport)
 {
     m_viewport = viewport;
@@ -75,4 +82,27 @@ void Renderer::SetBackground(const std::array<float, 4>& background)
 std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
 {
     return m_camera;
+}
+
+bool Renderer::IsInViewport(const std::array<int, 2>& position) const noexcept
+{
+    if (position[0] < 0 || position[1] < 0)
+    {
+        return false;
+    }
+
+    if (auto viewer = m_viewer.lock())
+    {
+        auto&& extent = viewer->GetExtent();
+
+        if (static_cast<int>(extent.width * m_viewport[0]) <= position[0]
+            && static_cast<int>(extent.width * m_viewport[1]) <= position[1]
+            && static_cast<int>(extent.width * m_viewport[2]) >= position[0]
+            && static_cast<int>(extent.width * m_viewport[3]) >= position[1])
+        {
+            return true;
+        }
+    }
+
+    return false;
 }

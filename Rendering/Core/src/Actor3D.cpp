@@ -4,7 +4,9 @@
 
 using namespace Jelly;
 
-void Actor3D::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer) noexcept
+void Actor3D::Render(
+    const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+) noexcept
 {
     Logger::GetInstance()->Debug();
 

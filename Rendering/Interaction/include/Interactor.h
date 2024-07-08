@@ -12,8 +12,8 @@
 #pragma once
 
 #include "Object.h"
-#include <memory>
 #include <array>
+#include <memory>
 
 namespace Jelly {
 class Window;
@@ -27,8 +27,11 @@ public:
     virtual void Start() noexcept = 0;
 
     void SetWindow(std::shared_ptr<Window> window) noexcept;
+    std::shared_ptr<Window> GetWindow() const noexcept;
 
     void SetInteractorStyle(std::shared_ptr<InteractorStyle> interactorStyle) noexcept;
+
+    const std::array<int, 2>& GetMousePosition() const noexcept;
 
 protected:
     std::shared_ptr<Window> m_window {};

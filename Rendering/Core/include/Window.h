@@ -41,6 +41,8 @@ public:
     void SetTitle(const std::string_view title) noexcept;
     void SetEnableGetRenderingResult(bool enable) noexcept;
 
+    const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
+
     std::any GetNativeWindow() const noexcept;
 
     vk::Extent2D GetSize() const noexcept;
@@ -91,7 +93,7 @@ private:
     bool m_enableGetRenderingResult {false};
     bool m_initialized {false};
 
-    std::unique_ptr<Viewer> m_viewer {};
+    std::shared_ptr<Viewer> m_viewer {};
 
     SwapChainData m_swapChainData {nullptr};
     vk::raii::RenderPass m_renderPass {nullptr};

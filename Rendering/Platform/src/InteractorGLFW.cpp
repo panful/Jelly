@@ -1,4 +1,5 @@
 #include "InteractorGLFW.h"
+#include "InteractorStyle.h"
 #include "WindowGLFW.h"
 #include <GLFW/glfw3.h>
 #include <any>
@@ -58,6 +59,8 @@ void InteractorGLFW::CursorPosCallback(GLFWwindow* window, double xpos, double y
 {
     if (auto pInstance = static_cast<InteractorGLFW*>(glfwGetWindowUserPointer(window)))
     {
+        pInstance->m_mousePosition = {static_cast<int>(xpos), static_cast<int>(ypos)};
+        pInstance->m_interactorStyle->MouseMoveEvent();
     }
 }
 
@@ -72,10 +75,15 @@ void InteractorGLFW::MouseButtonCallback(GLFWwindow* window, int button, int act
                 switch (button)
                 {
                     case GLFW_MOUSE_BUTTON_LEFT:
+                        pInstance->m_interactorStyle->LeftButtonPressEvent();
                         break;
                     case GLFW_MOUSE_BUTTON_MIDDLE:
+                        pInstance->m_interactorStyle->MiddleButtonPressEvent();
                         break;
                     case GLFW_MOUSE_BUTTON_RIGHT:
+                        pInstance->m_interactorStyle->RightButtonPressEvent();
+                        break;
+                    default:
                         break;
                 }
                 break;
@@ -85,14 +93,21 @@ void InteractorGLFW::MouseButtonCallback(GLFWwindow* window, int button, int act
                 switch (button)
                 {
                     case GLFW_MOUSE_BUTTON_LEFT:
+                        pInstance->m_interactorStyle->LeftButtonReleaseEvent();
                         break;
                     case GLFW_MOUSE_BUTTON_MIDDLE:
+                        pInstance->m_interactorStyle->MiddleButtonReleaseEvent();
                         break;
                     case GLFW_MOUSE_BUTTON_RIGHT:
+                        pInstance->m_interactorStyle->RightButtonReleaseEvent();
+                        break;
+                    default:
                         break;
                 }
                 break;
             }
+            default:
+                break;
         }
     }
 }
@@ -103,9 +118,11 @@ void InteractorGLFW::ScrollCallback(GLFWwindow* window, double xoffset, double y
     {
         if (yoffset > 0.0)
         {
+            pInstance->m_interactorStyle->MouseWheelForwardEvent();
         }
         else if (yoffset < 0.0)
         {
+            pInstance->m_interactorStyle->MouseWheelBackwardEvent();
         }
     }
 }

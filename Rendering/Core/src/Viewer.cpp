@@ -122,12 +122,17 @@ void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
 
     for (const auto& renderer : m_renderers)
     {
-        renderer->Render(commandBuffer, this);
+        renderer->Render(commandBuffer);
     }
 
     commandBuffer.endRenderPass();
 
     m_currentFrameIndex = (m_currentFrameIndex + 1) % m_maximumOfFrames;
+}
+
+const std::vector<std::shared_ptr<Renderer>>& Viewer::GetAllRenderers() const noexcept
+{
+    return m_renderers;
 }
 
 std::vector<vk::ImageView> Viewer::GetColorImageViews() const noexcept
@@ -163,5 +168,6 @@ const vk::raii::RenderPass& Viewer::GetRenderPass() const noexcept
 void Viewer::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
     renderer->SetDevice(m_device);
+    renderer->SetViewer(shared_from_this());
     m_renderers.emplace_back(std::move(renderer));
 }

@@ -36,9 +36,11 @@ enum class ColorMode : uint8_t
 class JELLY_EXPORT Mapper : public Object
 {
 public:
-    void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer) noexcept;
+    void Render(
+        const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+    ) noexcept;
 
-    virtual void Configure(Viewer* viewer) noexcept = 0;
+    virtual void Configure(const std::shared_ptr<Viewer>& viewer) noexcept = 0;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
 
@@ -49,10 +51,12 @@ public:
     std::array<float, 3> GetColor() const noexcept;
 
 protected:
-    void BuildPipeline(Viewer* viewer, const PipelineInfo& pipelineInfo) noexcept;
+    void BuildPipeline(const std::shared_ptr<Viewer>& viewer, const PipelineInfo& pipelineInfo) noexcept;
 
 private:
-    void DeviceRender(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer);
+    void DeviceRender(
+        const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+    );
 
 protected:
     std::shared_ptr<Device> m_device {};

@@ -13,7 +13,7 @@ using namespace Jelly;
 
 Window::Window() noexcept
     : m_device(std::make_shared<Device>())
-    , m_viewer(std::make_unique<Viewer>())
+    , m_viewer(std::make_shared<Viewer>())
 {
     m_viewer->SetDevice(m_device);
 }
@@ -57,6 +57,11 @@ void Window::SetTitle(const std::string_view title) noexcept
 void Window::SetEnableGetRenderingResult(bool enable) noexcept
 {
     m_enableGetRenderingResult = enable;
+}
+
+const std::vector<std::shared_ptr<Renderer>>& Window::GetAllRenderers() const noexcept
+{
+    return m_viewer->GetAllRenderers();
 }
 
 vk::Extent2D Window::GetSize() const noexcept
