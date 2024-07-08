@@ -35,8 +35,13 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             strides.emplace_back(static_cast<uint32_t>(colorComponents * sizeof(float)));
         }
 
+        static constexpr uint32_t sizeOfTransformMats = static_cast<uint32_t>(sizeof(float) * 16 * 3); // Mat4 -> MVP
+        std::vector<PushConstantRange> pushConstantRange {
+            {vk::ShaderStageFlagBits::eVertex, sizeOfTransformMats}
+        };
+
         std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
-        std::vector<PushConstantRange> pushConstantRange {};
+
         uint32_t location {1}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
         uint32_t binding {0};  // 描述符集的绑定点
         switch (m_colorMode)
@@ -109,6 +114,16 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             nullptr
         );
     }
+
+    std::array<float, 16 * 3> transformMat {
+        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
+        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
+        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
+    };
+
+    commandBuffer.pushConstants<float>(
+        pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, transformMat
+    );
     commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
     commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());
     commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);

@@ -16,11 +16,17 @@ layout(location = 1) out vec3 vsOutColor;
 
 // Layout::TexCoord
 
+layout(push_constant) uniform PushConstant {
+    mat4 model;
+    mat4 view;
+    mat4 proj;
+} pcMVP;
+
 void main()
 {
     // VS::Main Begin
     vsOutColor = inColor;
-    gl_Position = vec4(inPos, 1.);
+    gl_Position = pcMVP.proj * pcMVP.view * pcMVP.model * vec4(inPos, 1.);
     // VS::Main End
 })";
 
@@ -60,10 +66,16 @@ layout(location = 0) in vec3 inPos;
 
 // Layout::TexCoord
 
+layout(push_constant) uniform PushConstant {
+    mat4 model;
+    mat4 view;
+    mat4 proj;
+} pcMVP;
+
 void main()
 {
     // VS::Main Begin
-    gl_Position = vec4(inPos, 1.);
+    gl_Position = pcMVP.proj * pcMVP.view * pcMVP.model * vec4(inPos, 1.);
     // VS::Main End
 })";
 
