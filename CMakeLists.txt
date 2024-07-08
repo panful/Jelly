@@ -23,6 +23,8 @@ option(BUILD_SHARED_LIBRARIES "build shared libraries(dlls)" ON)
 option(USE_GLFW_WINDOW "display using glfw dindow" ON)
 
 add_definitions(-DJELLY_MAX_FRAMES=3)
+add_definitions(-DGLM_FORCE_RADIANS)            # glm 的参数使用弧度制
+add_definitions(-DGLM_FORCE_DEPTH_ZERO_TO_ONE)  # 透视矩阵深度值范围设置为 [0.0, 1.0]
 
 find_package(Vulkan REQUIRED)
 

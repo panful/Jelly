@@ -1,5 +1,6 @@
 #include "Mapper.h"
 #include "Device.h"
+#include "Renderer.h"
 #include "Viewer.h"
 #include <functional>
 
@@ -28,14 +29,12 @@ void Mapper::DeviceRender(const vk::raii::CommandBuffer& commandBuffer, Viewer* 
         );
     }
 
-    std::array<float, 16 * 3> transformMat {
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-    };
+    std::array<float, 16> model {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
+    auto camera = renderer->GetCamera();
+    std::vector<std::array<float, 16>> transform {model, camera->GetViewMatrix(), camera->GetProjectMatrix()};
 
-    commandBuffer.pushConstants<float>(
-        pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, transformMat
+    commandBuffer.pushConstants<std::array<float, 16>>(
+        pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, std::move(transform)
     );
     commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
     commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());

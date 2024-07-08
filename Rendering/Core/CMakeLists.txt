@@ -11,6 +11,7 @@ target_include_directories(${target_name} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 
+target_include_directories(${target_name} PRIVATE ${PROJECT_SOURCE_DIR}/External)
 target_include_directories(${target_name} PUBLIC ${Vulkan_INCLUDE_DIR})
 
 add_library(${PROJECT_NAME}::${target_name} ALIAS ${target_name})        

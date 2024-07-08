@@ -71,3 +71,8 @@ void Renderer::SetBackground(const std::array<float, 4>& background)
 {
     m_background = background;
 }
+
+std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
+{
+    return m_camera;
+}

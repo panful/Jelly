@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "Camera.h"
 #include "Object.h"
 #include <array>
 #include <memory>
@@ -33,8 +34,11 @@ public:
     void SetViewport(const std::array<double, 4>& viewport);
     void SetBackground(const std::array<float, 4>& background);
 
+    std::shared_ptr<Camera> GetCamera() const noexcept;
+
 private:
     std::shared_ptr<Device> m_device {};
+    std::shared_ptr<Camera> m_camera {std::make_shared<Camera>()};
     std::vector<std::shared_ptr<Actor>> m_actors {};
 
     std::array<double, 4> m_viewport {0., 0., 1., 1.}; // 起始位置以及宽高
