@@ -21,13 +21,12 @@ class DataSet;
 class JELLY_EXPORT DataSetMapper : public Mapper
 {
 public:
-    void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept override;
+    void Configure(Viewer* viewer) noexcept override;
 
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
 
 private:
     std::shared_ptr<DataSet> m_dataSet {};
     std::unique_ptr<ShaderCreater> m_shaderCreater {std::make_unique<ShaderCreater>()};
-    bool m_useUniformColor {false};
 };
 } // namespace Jelly

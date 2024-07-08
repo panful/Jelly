@@ -24,6 +24,7 @@
 namespace Jelly {
 class Device;
 class Viewer;
+class Renderer;
 
 enum class ColorMode : uint8_t
 {
@@ -35,7 +36,9 @@ enum class ColorMode : uint8_t
 class JELLY_EXPORT Mapper : public Object
 {
 public:
-    virtual void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept = 0;
+    void Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer) noexcept;
+
+    virtual void Configure(Viewer* viewer) noexcept = 0;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
 
@@ -48,6 +51,9 @@ public:
 protected:
     void BuildPipeline(Viewer* viewer, const PipelineInfo& pipelineInfo) noexcept;
 
+private:
+    void DeviceRender(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer, Renderer* renderer);
+
 protected:
     std::shared_ptr<Device> m_device {};
     std::unique_ptr<Drawable> m_drawable {};
@@ -57,6 +63,7 @@ protected:
     std::atomic_bool m_needUpdate {true};
 
     ColorMode m_colorMode {ColorMode::UniformColor};
+    bool m_useUniformColor {false};
     std::array<float, 3> m_color {1., 1., 1.};
     vk::raii::DescriptorSets m_descriptorSets {nullptr};
     std::vector<BufferData> m_uniformBufferObjects {};

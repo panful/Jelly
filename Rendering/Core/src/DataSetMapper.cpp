@@ -12,7 +12,7 @@
 
 using namespace Jelly;
 
-void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* viewer) noexcept
+void DataSetMapper::Configure(Viewer* viewer) noexcept
 {
     Logger::GetInstance()->Debug();
 
@@ -100,33 +100,6 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
 
         m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
     }
-
-    auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
-
-    commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
-    if (m_useUniformColor)
-    {
-        commandBuffer.bindDescriptorSets(
-            vk::PipelineBindPoint::eGraphics,
-            pipeline->GetPipelineLayout(),
-            0,
-            {m_descriptorSets[viewer->GetCurrentFrameIndex()]},
-            nullptr
-        );
-    }
-
-    std::array<float, 16 * 3> transformMat {
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f,
-    };
-
-    commandBuffer.pushConstants<float>(
-        pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, transformMat
-    );
-    commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());
-    commandBuffer.bindIndexBuffer(m_drawable->GetIndexBuffer(), 0, m_drawable->GetIndexType());
-    commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);
 }
 
 void DataSetMapper::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept

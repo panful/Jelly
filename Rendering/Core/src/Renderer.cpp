@@ -42,7 +42,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer* view
     {
         if (actor->GetVisibility())
         {
-            actor->Render(commandBuffer, viewer);
+            actor->Render(commandBuffer, viewer, this);
         }
     }
 }
