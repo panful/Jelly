@@ -35,8 +35,10 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
             strides.emplace_back(static_cast<uint32_t>(colorComponents * sizeof(float)));
         }
 
+        std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
         std::vector<PushConstantRange> pushConstantRange {};
         uint32_t location {1}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
+        uint32_t binding {0};  // 描述符集的绑定点
         switch (m_colorMode)
         {
             case ColorMode::ColorMap:
@@ -56,9 +58,9 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
                 [[fallthrough]];
             default:
                 m_useUniformColor = true;
-                m_shaderCreater->AddUniformColor();
-                pushConstantRange.emplace_back(
-                    vk::ShaderStageFlagBits::eFragment, static_cast<uint32_t>(sizeof(m_color))
+                m_shaderCreater->AddUniformColor(binding);
+                descriptorSetLayoutBindings.emplace_back(
+                    binding, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment
                 );
                 break;
         }
@@ -81,14 +83,15 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
         }
 
         PipelineInfo pipelineInfo {
-            .vertexShaderCode   = std::move(vertSpv.value()),
-            .fragmentShaderCode = std::move(fragSpv.value()),
-            .strides            = std::move(strides),
-            .pushConstantRanges = pushConstantRange,
-            .renderPass         = viewer->GetRenderPass()
+            .vertexShaderCode            = std::move(vertSpv.value()),
+            .fragmentShaderCode          = std::move(fragSpv.value()),
+            .strides                     = std::move(strides),
+            .pushConstantRanges          = pushConstantRange,
+            .descriptorSetLayoutBindings = descriptorSetLayoutBindings,
+            .renderPass                  = viewer->GetRenderPass()
         };
 
-        BuildPipeline(pipelineInfo);
+        BuildPipeline(viewer, pipelineInfo);
 
         m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
     }
@@ -98,8 +101,12 @@ void DataSetMapper::Render(const vk::raii::CommandBuffer& commandBuffer, Viewer*
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
     if (m_useUniformColor)
     {
-        commandBuffer.pushConstants<float>(
-            pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eFragment, 0u, m_color
+        commandBuffer.bindDescriptorSets(
+            vk::PipelineBindPoint::eGraphics,
+            pipeline->GetPipelineLayout(),
+            0,
+            {m_descriptorSets[viewer->GetCurrentFrameIndex()]},
+            nullptr
         );
     }
     commandBuffer.bindVertexBuffers(0, m_drawable->GetVertexBuffers(), m_drawable->GetVertexOffsets());

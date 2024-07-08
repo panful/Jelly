@@ -11,12 +11,14 @@
 
 #pragma once
 
+#include "BufferData.h"
 #include "Drawable.h"
 #include "Object.h"
 #include "Pipeline.h"
 #include <array>
 #include <atomic>
 #include <memory>
+#include <vector>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
@@ -44,7 +46,7 @@ public:
     std::array<float, 3> GetColor() const noexcept;
 
 protected:
-    void BuildPipeline(const PipelineInfo& pipelineInfo) noexcept;
+    void BuildPipeline(Viewer* viewer, const PipelineInfo& pipelineInfo) noexcept;
 
 protected:
     std::shared_ptr<Device> m_device {};
@@ -56,5 +58,7 @@ protected:
 
     ColorMode m_colorMode {ColorMode::UniformColor};
     std::array<float, 3> m_color {1., 1., 1.};
+    vk::raii::DescriptorSets m_descriptorSets {nullptr};
+    std::vector<BufferData> m_uniformBufferObjects {};
 };
 } // namespace Jelly

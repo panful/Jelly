@@ -26,7 +26,7 @@ public:
     std::string GetFragmentShaderCode() const noexcept;
 
     void AddPointColor(uint32_t location);
-    void AddUniformColor();
+    void AddUniformColor(uint32_t location);
 
 private:
     /// @brief 将str中start到end之间的字符全部使用replacement替换

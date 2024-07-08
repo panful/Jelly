@@ -73,14 +73,14 @@ void ShaderCreater::AddPointColor(uint32_t location)
     ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(fsInColor, 1.)");
 }
 
-void ShaderCreater::AddUniformColor()
+void ShaderCreater::AddUniformColor(uint32_t location)
 {
     ReplaceValue(
         m_fragmentShaderCode,
         "// FS::In",
-        "// FS::In\nlayout(push_constant) uniform PushConstant {\n    vec3 color;\n} pcColor;"
+        std::format("// FS::In\nlayout(binding = {}) uniform UBO {{\n    vec3 color;\n}} uColor;", location)
     );
-    ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(pcColor.color, 1.)");
+    ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(uColor.color, 1.)");
 }
 
 void ShaderCreater::ReplaceValue(

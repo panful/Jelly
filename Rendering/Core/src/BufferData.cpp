@@ -21,7 +21,12 @@ BufferData::BufferData(
     m_buffer.bindMemory(m_deviceMemory, 0);
 }
 
-vk::Buffer BufferData::GetBuffer() const noexcept
+const vk::raii::Buffer& BufferData::GetBuffer() const noexcept
 {
     return m_buffer;
+}
+
+const vk::raii::DeviceMemory& BufferData::GetDeviceMemory() const noexcept
+{
+    return m_deviceMemory;
 }

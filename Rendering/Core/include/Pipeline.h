@@ -20,7 +20,7 @@
 namespace Jelly {
 class Device;
 
-struct DescriptorSetLayoutBindings
+struct DescriptorSetLayoutBinding
 {
     uint32_t binding {};
     vk::DescriptorType descriptorType {};
@@ -73,7 +73,7 @@ struct PipelineInfo
     std::vector<PushConstantRange> pushConstantRanges {};
 
     // 描述符集布局
-    std::vector<DescriptorSetLayoutBindings> descriptorSetLayoutBindings {};
+    std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
 
     vk::RenderPass renderPass {nullptr};
 };

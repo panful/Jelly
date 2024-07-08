@@ -71,9 +71,9 @@ void main()
 #version 450
 
 // FS::In
-layout(push_constant) uniform PushConstant {
+layout(binding = 9) uniform UBO {
     vec3 color;
-} pcColor;
+} uColor;
 
 // FS::Out
 layout(location = 0) out vec4 FragColor;
@@ -81,12 +81,12 @@ layout(location = 0) out vec4 FragColor;
 void main()
 {
     // FS::Main Begin
-    FragColor = vec4(pcColor.color, 1.);
+    FragColor = vec4(uColor.color, 1.);
     // FS::Main End
 })";
 
     Jelly::ShaderCreater generator {};
-    generator.AddUniformColor();
+    generator.AddUniformColor(9);
 
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
     EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());

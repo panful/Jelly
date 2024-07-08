@@ -31,7 +31,8 @@ public:
         vk::MemoryPropertyFlags propertyFlags
     );
 
-    vk::Buffer GetBuffer() const noexcept;
+    const vk::raii::Buffer& GetBuffer() const noexcept;
+    const vk::raii::DeviceMemory& GetDeviceMemory() const noexcept;
 
     /// @brief 将CPU端的数据拷贝到GPU缓冲
     /// @details 保证数据被立即复制到缓冲关联的内存

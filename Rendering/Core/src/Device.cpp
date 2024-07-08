@@ -227,7 +227,7 @@ vk::DescriptorPool Device::InitDescriptorPool() noexcept
     m_descriptorPool = vk::raii::DescriptorPool(
         m_device,
         vk::DescriptorPoolCreateInfo {
-            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, JELLY_MAX_FRAMES, descriptorPoolSizes
+            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, JELLY_MAX_FRAMES * 2, descriptorPoolSizes
         }
     );
 
