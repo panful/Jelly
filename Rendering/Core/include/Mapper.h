@@ -42,6 +42,8 @@ public:
 
     virtual void Configure(const std::shared_ptr<Viewer>& viewer) noexcept = 0;
 
+    virtual std::array<double, 6> GetBounds() const noexcept = 0;
+
     void SetDevice(std::shared_ptr<Device> device) noexcept;
 
     void SetColorMode(ColorMode colorMode) noexcept;

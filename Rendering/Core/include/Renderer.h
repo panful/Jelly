@@ -37,6 +37,8 @@ public:
 
     std::shared_ptr<Camera> GetCamera() const noexcept;
 
+    std::array<double, 6> GetVisibleActorBounds() const noexcept;
+
     bool IsInViewport(const std::array<int, 2>& position) const noexcept;
 
 private:

@@ -23,6 +23,8 @@ class JELLY_EXPORT DataSetMapper : public Mapper
 public:
     void Configure(const std::shared_ptr<Viewer>& viewer) noexcept override;
 
+    std::array<double, 6> GetBounds() const noexcept override;
+
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
 
 private:

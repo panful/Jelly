@@ -28,3 +28,13 @@ bool Actor::GetVisibility() const noexcept
 {
     return m_visibility;
 }
+
+std::array<double, 6> Actor::GetBounds() const noexcept
+{
+    if (m_mapper)
+    {
+        return m_mapper->GetBounds();
+    }
+
+    return {-1., 1., -1., 1., -1., 1.};
+}

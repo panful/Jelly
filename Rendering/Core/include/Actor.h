@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Object.h"
+#include <array>
 #include <atomic>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
@@ -35,10 +36,13 @@ public:
     void SetVisibility(bool visible) noexcept;
     bool GetVisibility() const noexcept;
 
+    std::array<double, 6> GetBounds() const noexcept;
+
 protected:
     std::shared_ptr<Device> m_device {};
     std::shared_ptr<Mapper> m_mapper {};
 
+private:
     std::atomic_bool m_needUpdate {true};
     bool m_visibility {true};
 };

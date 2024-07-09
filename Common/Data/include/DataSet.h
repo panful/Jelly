@@ -12,8 +12,10 @@
 #pragma once
 
 #include "Object.h"
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <atomic>
 
 namespace Jelly {
 class DataArray;
@@ -46,11 +48,18 @@ public:
     std::shared_ptr<DataArray> GetColors() const noexcept;
     std::shared_ptr<DataArray> GetIndices() const noexcept;
 
+    /// @brief 获取 AABB(Axis-Aligned Bounding Box)
+    /// @return {xMin xMax yMin yMax zMin zMax}
+    std::array<double, 6> GetBounds() noexcept;
+
 private:
     std::shared_ptr<DataArray> m_points {};
     std::shared_ptr<DataArray> m_colors {};
     std::shared_ptr<DataArray> m_indices {};
 
     PrimitiveType m_primitiveType {PrimitiveType::Triangle};
+    std::atomic_bool m_needUpdate {true};
+
+    std::array<double, 6> m_bounds {-1., 1., -1., 1., -1., 1.};
 };
 } // namespace Jelly

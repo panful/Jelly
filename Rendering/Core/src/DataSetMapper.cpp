@@ -12,6 +12,16 @@
 
 using namespace Jelly;
 
+std::array<double, 6> DataSetMapper::GetBounds() const noexcept
+{
+    if (m_dataSet)
+    {
+        return m_dataSet->GetBounds();
+    }
+    
+    return {-1., 1., -1., 1., -1., 1.};
+}
+
 void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
 {
     Logger::GetInstance()->Debug();

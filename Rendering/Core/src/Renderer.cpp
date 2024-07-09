@@ -51,7 +51,11 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 
 void Renderer::AddActor(std::shared_ptr<Actor> actor)
 {
-    actor->SetDevice(m_device);
+    if (m_device)
+    {
+        actor->SetDevice(m_device);
+    }
+
     m_actors.emplace_back(std::move(actor));
 }
 
@@ -82,6 +86,42 @@ void Renderer::SetBackground(const std::array<float, 4>& background)
 std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
 {
     return m_camera;
+}
+
+std::array<double, 6> Renderer::GetVisibleActorBounds() const noexcept
+{
+    std::array<double, 6> allBounds {
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::lowest(),
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::lowest(),
+        std::numeric_limits<double>::max(),
+        std::numeric_limits<double>::lowest()
+    };
+
+    bool nothingVisivle {true};
+    for (const auto& actor : m_actors)
+    {
+        if (actor->GetVisibility())
+        {
+            nothingVisivle = false;
+
+            auto bounds  = actor->GetBounds();
+            allBounds[0] = std::min(bounds[0], allBounds[0]);
+            allBounds[1] = std::max(bounds[1], allBounds[1]);
+            allBounds[2] = std::min(bounds[2], allBounds[2]);
+            allBounds[3] = std::max(bounds[3], allBounds[3]);
+            allBounds[4] = std::min(bounds[4], allBounds[4]);
+            allBounds[5] = std::max(bounds[5], allBounds[5]);
+        }
+    }
+
+    if (nothingVisivle)
+    {
+        allBounds = {-1., 1., -1., 1., -1., 1.};
+    }
+
+    return allBounds;
 }
 
 bool Renderer::IsInViewport(const std::array<int, 2>& position) const noexcept
