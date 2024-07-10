@@ -28,6 +28,17 @@ void InteractorGLFW::Start() noexcept
 
         if (m_windowResized)
         {
+            int width {0}, height {0};
+            glfwGetFramebufferSize(glfwWindow, &width, &height);
+            while (0 >= width || 0 >= height)
+            {
+                glfwGetFramebufferSize(glfwWindow, &width, &height);
+                glfwWaitEvents();
+            }
+
+            m_windowWidth  = static_cast<uint32_t>(width);
+            m_windowHeight = static_cast<uint32_t>(height);
+
             m_window->SetSize(m_windowWidth, m_windowHeight);
             m_window->Render();
             m_windowResized = false;

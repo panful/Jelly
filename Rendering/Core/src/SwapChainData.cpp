@@ -2,6 +2,7 @@
 #include "Logger.h"
 #include <algorithm>
 #include <array>
+#include <format>
 
 using namespace Jelly;
 
@@ -43,7 +44,13 @@ SwapChainData::SwapChainData(
 
     if (m_swapchainExtent != extent)
     {
-        Logger::GetInstance()->Error("Surface extent incompatible");
+        Logger::GetInstance()->Warn(std::format(
+            "Surface extent incompatible, need extent: ({}, {}), current surface extent: ({} ,{})",
+            extent.width,
+            extent.height,
+            m_swapchainExtent.width,
+            m_swapchainExtent.height
+        ));
     }
 
     vk::SurfaceTransformFlagBitsKHR preTransform =
@@ -118,6 +125,11 @@ uint32_t SwapChainData::GetNumberOfImages() const noexcept
 vk::Image SwapChainData::GetImage(uint32_t index) const noexcept
 {
     return m_images[index];
+}
+
+const vk::Extent2D& SwapChainData::GetExtent() const noexcept
+{
+    return m_swapchainExtent;
 }
 
 const vk::raii::ImageView& SwapChainData::GetImageView(uint32_t index) const noexcept

@@ -30,7 +30,7 @@ void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 
 void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 {
-    if (width == m_width && height == m_height)
+    if ((width == m_width && height == m_height) || width == 0 || height == 0)
     {
         return;
     }
@@ -307,6 +307,10 @@ void Window::InitSwapChain() noexcept
         : vk::ImageUsageFlagBits::eColorAttachment;
 
     m_swapChainData = SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, usage);
+
+    // 创建的窗口大小可能不等于期望的大小
+    m_width  = m_swapChainData.GetExtent().width;
+    m_height = m_swapChainData.GetExtent().height;
 }
 
 void Window::RecreateSwapChain() noexcept
