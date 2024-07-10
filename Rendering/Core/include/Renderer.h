@@ -35,6 +35,9 @@ public:
     void SetViewport(const std::array<double, 4>& viewport);
     void SetBackground(const std::array<float, 4>& background);
 
+    /// @brief 重置相机，使所有Actor居中显示
+    void ResetCamera() const noexcept;
+
     std::shared_ptr<Camera> GetCamera() const noexcept;
 
     std::array<double, 6> GetVisibleActorBounds() const noexcept;

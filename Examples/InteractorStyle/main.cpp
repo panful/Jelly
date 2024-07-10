@@ -13,17 +13,17 @@
 namespace {
 // clang-format off
 std::vector<float> points1 {
-    -.5f, -.5f,  0.f,
-    -.5f,  .2f,  0.f,
-     .2f,  .2f,  0.f,
-     .2f, -.5f,  0.f,
+    -3.f, -3.f, -3.f,
+    -3.f,  1.f, -3.f,
+     1.f,  1.f, -3.f,
+     1.f, -3.f, -3.f,
 };
 
 std::vector<float> points2 {
-    -.2f, -.2f,  .1f,
-    -.2f,  .5f,  .1f,
-     .5f,  .5f,  .1f,
-     .5f, -.2f,  .1f,
+    -1.f, -1.f,  3.f,
+    -1.f,  5.f,  3.f,
+     3.f,  5.f,  3.f,
+     3.f, -1.f,  3.f,
 };
 
 std::vector<float> colors1 {
@@ -90,6 +90,7 @@ int main()
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);
     renderer->AddActor(actor2);
+    renderer->ResetCamera();
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer);

@@ -113,7 +113,7 @@ void Viewer::Resize(const vk::Extent2D& extent)
 void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
 {
     std::array<vk::ClearValue, 2> clearValues;
-    clearValues[0].color        = vk::ClearColorValue(0.1f, 0.2f, 0.3f, 1.f);
+    clearValues[0].color        = vk::ClearColorValue(0.f, 0.f, 0.f, 0.f);
     clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
     vk::RenderPassBeginInfo renderPassBeginInfo(
         m_renderPass, m_framebuffers[m_currentFrameIndex], vk::Rect2D({0, 0}, m_extent), clearValues

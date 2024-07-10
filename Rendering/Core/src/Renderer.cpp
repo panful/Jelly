@@ -3,6 +3,8 @@
 #include "Logger.h"
 #include "Viewer.h"
 #include "Window.h"
+#include <cmath>
+#include <numeric>
 
 using namespace Jelly;
 
@@ -28,6 +30,8 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
         0.0f,
         1.0f
     };
+
+    m_camera->SetAspectRatio(static_cast<double>(extent.width) / static_cast<double>(extent.height));
 
     vk::ClearValue clearValue {m_background};
     vk::ClearAttachment attachment {vk::ImageAspectFlagBits::eColor, 0, clearValue};
@@ -81,6 +85,33 @@ void Renderer::SetViewport(const std::array<double, 4>& viewport)
 void Renderer::SetBackground(const std::array<float, 4>& background)
 {
     m_background = background;
+}
+
+void Renderer::ResetCamera() const noexcept
+{
+    auto bounds = GetVisibleActorBounds();
+
+    std::array center = {
+        std::midpoint(bounds[0], bounds[1]), std::midpoint(bounds[2], bounds[3]), std::midpoint(bounds[4], bounds[5])
+    };
+
+    auto radius = std::hypot(bounds[1] - bounds[0], bounds[3] - bounds[2], bounds[5] - bounds[4]) * 0.5;
+
+    // 如果仅仅只有一个点，将半径设置为 0.5
+    radius = radius == 0.0 ? 0.5 : radius;
+
+    auto distance = radius / std::sin(m_camera->GetViewAngle() * 0.5);
+    auto vpNormal = m_camera->GetViewPlaneNormal();
+
+    m_camera->SetFocalPos(center);
+    m_camera->SetEyePos(
+        {center[0] + distance * vpNormal[0], center[1] + distance * vpNormal[1], center[2] + distance * vpNormal[2]}
+    );
+
+    m_camera->SetOrthographicScale(radius);
+
+    static constexpr double extraRatio {1.01}; // 留出来一点空间，不要让前后裁剪平面紧贴着包围盒球体
+    m_camera->SetClipRange({distance - radius * extraRatio, distance + radius * extraRatio});
 }
 
 std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
