@@ -149,8 +149,19 @@ void Camera::Update()
         break;
         case CameraType::Perspective:
         {
-            auto perspectiveMat = glm::perspective(glm::radians(45.f), static_cast<float>(m_aspectRatio), .1f, 100.f);
-            dMat4TofArr16(perspectiveMat, m_projectMatrix);
+            auto tmp    = std::tan(m_viewAngle / 2.);
+            auto width  = m_clipRange[0] * tmp * m_aspectRatio;
+            auto height = m_clipRange[0] * tmp;
+
+            auto left   = static_cast<float>(width * m_viewRange[0]);
+            auto right  = static_cast<float>(width * m_viewRange[1]);
+            auto top    = static_cast<float>(height * m_viewRange[2]);
+            auto bottom = static_cast<float>(height * m_viewRange[3]);
+            auto near   = static_cast<float>(m_clipRange[0]);
+            auto far    = static_cast<float>(m_clipRange[1]);
+
+            auto frustum = glm::frustum(left, right, bottom, top, near, far);
+            dMat4TofArr16(frustum, m_projectMatrix);
         }
         break;
         default:

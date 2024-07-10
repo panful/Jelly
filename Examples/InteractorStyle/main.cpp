@@ -90,6 +90,7 @@ int main()
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);
     renderer->AddActor(actor2);
+    renderer->GetCamera()->SetCameraType(Jelly::CameraType::Perspective);
     renderer->ResetCamera();
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
