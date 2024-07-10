@@ -86,8 +86,15 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
         for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
         {
             vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i].GetBuffer(), 0, sizeof(m_color));
+
+            // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个
             std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
-                vk::WriteDescriptorSet {m_descriptorSets[i], 0, 0, vk::DescriptorType::eUniformBuffer, nullptr, dbInfo}
+                vk::WriteDescriptorSet {
+                                        m_descriptorSets[i],
+                                        pipelineInfo.descriptorSetLayoutBindings[0].binding,
+                                        0, vk::DescriptorType::eUniformBuffer,
+                                        nullptr, dbInfo
+                }
             };
             m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
         }
