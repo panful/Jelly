@@ -57,6 +57,102 @@ void Camera::SetFocalPos(const std::array<double, 3>& focalPos) noexcept
     m_focalPos = focalPos;
 }
 
+void Camera::Pitch(double angle) noexcept
+{
+    glm::dvec3 viewUp   = glm::make_vec3(m_viewUp.data());
+    glm::dvec3 eyePos   = glm::make_vec3(m_eyePos.data());
+    glm::dvec3 focalPos = glm::make_vec3(m_focalPos.data());
+    glm::dvec3 axis     = glm::normalize(glm::cross(focalPos - eyePos, viewUp));
+
+    glm::dmat4 transform(1.);
+    transform = glm::translate(transform, eyePos);
+    transform = glm::rotate(transform, angle, axis);
+    transform = glm::translate(transform, -eyePos);
+
+    focalPos = glm::dvec3(transform * glm::dvec4(focalPos, 1.));
+    viewUp   = glm::normalize(glm::cross(axis, focalPos - eyePos));
+
+    m_focalPos = {focalPos[0], focalPos[1], focalPos[2]};
+    m_viewUp   = {viewUp[0], viewUp[1], viewUp[2]};
+
+    m_needUpdate = true;
+}
+
+void Camera::Yaw(double angle) noexcept
+{
+    glm::dvec3 viewUp   = glm::make_vec3(m_viewUp.data());
+    glm::dvec3 eyePos   = glm::make_vec3(m_eyePos.data());
+    glm::dvec3 focalPos = glm::make_vec3(m_focalPos.data());
+    glm::dvec3 axis     = glm::normalize(viewUp);
+
+    glm::dmat4 transform(1.);
+    transform = glm::translate(transform, eyePos);
+    transform = glm::rotate(transform, angle, axis);
+    transform = glm::translate(transform, -eyePos);
+
+    focalPos   = glm::dvec3(transform * glm::dvec4(focalPos, 1.));
+    m_focalPos = {focalPos[0], focalPos[1], focalPos[2]};
+
+    m_needUpdate = true;
+}
+
+void Camera::Roll(double angle) noexcept
+{
+    glm::dvec3 viewUp   = glm::make_vec3(m_viewUp.data());
+    glm::dvec3 eyePos   = glm::make_vec3(m_eyePos.data());
+    glm::dvec3 focalPos = glm::make_vec3(m_focalPos.data());
+    glm::dvec3 axis     = glm::normalize(focalPos - eyePos);
+
+    glm::dmat4 transform(1.);
+    transform = glm::translate(transform, eyePos);
+    transform = glm::rotate(transform, angle, axis);
+    transform = glm::translate(transform, -eyePos);
+
+    viewUp   = glm::dvec3(transform * glm::dvec4(viewUp, 1.));
+    m_viewUp = {viewUp[0], viewUp[1], viewUp[2]};
+
+    m_needUpdate = true;
+}
+
+void Camera::Azimuth(double angle) noexcept
+{
+    glm::dvec3 viewUp   = glm::make_vec3(m_viewUp.data());
+    glm::dvec3 eyePos   = glm::make_vec3(m_eyePos.data());
+    glm::dvec3 focalPos = glm::make_vec3(m_focalPos.data());
+    glm::dvec3 axis     = glm::normalize(viewUp);
+
+    glm::dmat4 transform(1.);
+    transform = glm::translate(transform, focalPos);
+    transform = glm::rotate(transform, angle, axis);
+    transform = glm::translate(transform, -focalPos);
+
+    eyePos   = glm::dvec3(transform * glm::dvec4(eyePos, 1.));
+    m_eyePos = {eyePos[0], eyePos[1], eyePos[2]};
+
+    m_needUpdate = true;
+}
+
+void Camera::Elevation(double angle) noexcept
+{
+    glm::dvec3 viewUp   = glm::make_vec3(m_viewUp.data());
+    glm::dvec3 eyePos   = glm::make_vec3(m_eyePos.data());
+    glm::dvec3 focalPos = glm::make_vec3(m_focalPos.data());
+    glm::dvec3 axis     = glm::normalize(glm::cross(focalPos - eyePos, viewUp));
+
+    glm::dmat4 transform(1.);
+    transform = glm::translate(transform, focalPos);
+    transform = glm::rotate(transform, angle, axis);
+    transform = glm::translate(transform, -focalPos);
+
+    eyePos = glm::dvec3(transform * glm::dvec4(eyePos, 1.));
+    viewUp = glm::normalize(glm::cross(axis, focalPos - eyePos));
+
+    m_eyePos = {eyePos[0], eyePos[1], eyePos[2]};
+    m_viewUp = {viewUp[0], viewUp[1], viewUp[2]};
+
+    m_needUpdate = true;
+}
+
 void Camera::SetViewAngle(double viewAngle) noexcept
 {
     m_viewAngle = viewAngle;

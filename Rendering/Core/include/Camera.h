@@ -53,6 +53,31 @@ public:
 
     void SetFocalPos(const std::array<double, 3>& focalPos) noexcept;
 
+    /// @brief 俯仰
+    /// @details 绕相机的X轴旋转，即相机投影方向和朝上方向的叉乘，以相机位置为旋转中心
+    /// @param angle 旋转角度，单位是弧度
+    void Pitch(double angle) noexcept;
+
+    /// @brief 偏航
+    /// @details 绕相机的Y轴旋转，即相机朝上的方向，以相机位置为旋转中心
+    /// @param angle 旋转角度，单位是弧度
+    void Yaw(double angle) noexcept;
+
+    /// @brief 横滚
+    /// @details 绕相机的Z轴旋转，即相机投影方向，以相机位置为旋转中心
+    /// @param angle 旋转角度，单位是弧度
+    void Roll(double angle) noexcept;
+
+    /// @brief 方位角
+    /// @details 绕相机的Y轴旋转，以焦点为旋转中心
+    /// @param angle 旋转角度，单位是弧度
+    void Azimuth(double angle) noexcept;
+
+    /// @brief 高度角
+    /// @details 绕相机的X轴旋转，以焦点为旋转中心
+    /// @param angle 旋转角度，单位是弧度
+    void Elevation(double angle) noexcept;
+
     /// @brief 设置相机的视角角度
     /// @param viewAngle 单位是弧度
     void SetViewAngle(double viewAngle) noexcept;
