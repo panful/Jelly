@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "Logger.h"
+#include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -34,7 +35,11 @@ const std::array<double, 3>& Camera::GetViewUp() const noexcept
 
 void Camera::SetViewUp(const std::array<double, 3>& viewUp) noexcept
 {
-    m_viewUp = viewUp;
+    if (m_viewUp != viewUp)
+    {
+        m_viewUp     = viewUp;
+        m_needUpdate = true;
+    }
 }
 
 const std::array<double, 3>& Camera::GetEyePos() const noexcept
@@ -44,7 +49,11 @@ const std::array<double, 3>& Camera::GetEyePos() const noexcept
 
 void Camera::SetEyePos(const std::array<double, 3>& eyePos) noexcept
 {
-    m_eyePos = eyePos;
+    if (m_eyePos != eyePos)
+    {
+        m_eyePos     = eyePos;
+        m_needUpdate = true;
+    }
 }
 
 const std::array<double, 3>& Camera::GetFocalPos() const noexcept
@@ -54,7 +63,11 @@ const std::array<double, 3>& Camera::GetFocalPos() const noexcept
 
 void Camera::SetFocalPos(const std::array<double, 3>& focalPos) noexcept
 {
-    m_focalPos = focalPos;
+    if (m_focalPos != focalPos)
+    {
+        m_focalPos   = focalPos;
+        m_needUpdate = true;
+    }
 }
 
 void Camera::Pitch(double angle) noexcept
@@ -155,7 +168,11 @@ void Camera::Elevation(double angle) noexcept
 
 void Camera::SetViewAngle(double viewAngle) noexcept
 {
-    m_viewAngle = viewAngle;
+    if (m_viewAngle != viewAngle)
+    {
+        m_viewAngle  = viewAngle;
+        m_needUpdate = true;
+    }
 }
 
 double Camera::GetViewAngle() const noexcept
@@ -165,12 +182,25 @@ double Camera::GetViewAngle() const noexcept
 
 void Camera::SetClipRange(const std::array<double, 2>& clipRange) noexcept
 {
-    m_clipRange = clipRange;
+    if (m_clipRange != clipRange)
+    {
+        m_clipRange  = clipRange;
+        m_needUpdate = true;
+    }
+}
+
+const std::array<double, 2>& Camera::GetClipRange() const noexcept
+{
+    return m_clipRange;
 }
 
 void Camera::SetOrthographicScale(double orthographicScale) noexcept
 {
-    m_orthographicScale = orthographicScale;
+    if (m_orthographicScale != orthographicScale)
+    {
+        m_orthographicScale = orthographicScale;
+        m_needUpdate        = true;
+    }
 }
 
 double Camera::GetOrthographicScale() const noexcept
@@ -207,7 +237,16 @@ void Camera::SetAspectRatio(double aspectRatio) noexcept
 
 void Camera::SetCameraType(CameraType cameraType) noexcept
 {
-    m_cameraType = cameraType;
+    if (m_cameraType != cameraType)
+    {
+        m_cameraType = cameraType;
+        m_needUpdate = true;
+    }
+}
+
+CameraType Camera::GetCameraType() const noexcept
+{
+    return m_cameraType;
 }
 
 void Camera::Update()

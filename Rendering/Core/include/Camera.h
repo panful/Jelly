@@ -102,11 +102,15 @@ public:
     /// @param clipRange 第一个值为近裁剪平面，第二个值为远裁剪平面
     void SetClipRange(const std::array<double, 2>& clipRange) noexcept;
 
+    const std::array<double, 2>& GetClipRange() const noexcept;
+
     /// @brief 设置视口的宽高比
     /// @param aspectRatio
     void SetAspectRatio(double aspectRatio) noexcept;
 
     void SetCameraType(CameraType cameraType) noexcept;
+
+    CameraType GetCameraType() const noexcept;
 
 private:
     void Update();
