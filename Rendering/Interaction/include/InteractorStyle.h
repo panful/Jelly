@@ -58,6 +58,10 @@ public:
 protected:
     void FindPokedRenderer();
 
+    /// @brief 推拉相机实现场景缩放
+    /// @param factor 小于1缩小，大于1放大，小于等于0无效
+    void Dolly(double factor) const noexcept;
+
 protected:
     InteractorState m_state {InteractorState::None};
 
