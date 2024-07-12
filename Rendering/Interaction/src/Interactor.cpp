@@ -16,7 +16,7 @@ std::shared_ptr<Window> Interactor::GetWindow() const noexcept
 void Interactor::SetInteractorStyle(std::shared_ptr<InteractorStyle> interactorStyle) noexcept
 {
     m_interactorStyle = std::move(interactorStyle);
-    m_interactorStyle->SetInteractor(shared_from_this());
+    m_interactorStyle->SetInteractor(weak_from_this());
 }
 
 const std::array<int, 2>& Interactor::GetMousePosition() const noexcept

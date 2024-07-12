@@ -31,7 +31,7 @@ public:
     void AddActor(std::shared_ptr<Actor> actor);
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
-    void SetViewer(std::shared_ptr<Viewer> viewer) noexcept;
+    void SetViewer(std::weak_ptr<Viewer> viewer) noexcept;
     void SetViewport(const std::array<double, 4>& viewport);
     void SetBackground(const std::array<float, 4>& background);
 

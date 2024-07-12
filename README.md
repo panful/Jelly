@@ -18,7 +18,7 @@
 - [ ] 添加ShaderGeneratorCache，着色器代码相同时不用重复生成SPV
 - [ ] 共享vk::Buffer，而不仅仅是共享 DataArray
 - [x] Actor颜色应该使用描述符设置，不能在shader中写死
-- [ ] weak_from_this
+- [x] shared_from_this 修改为 weak_from_this
 - [ ] Object类添加 Modified needUpdate 类似变量
 - [ ] 窗口较小时，图元某些片段没有像素 commit de5ed317ecd33d57cc4e45c866a6a7aa108f821e 之后才出现这个问题
 - [ ] uniform 使用 CopyToDevice 设置数据时，应该只 mapMemory 一次，保证释放 uniform 之前 unMapMemory 就行

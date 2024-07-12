@@ -72,7 +72,7 @@ void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
     }
 }
 
-void Renderer::SetViewer(std::shared_ptr<Viewer> viewer) noexcept
+void Renderer::SetViewer(std::weak_ptr<Viewer> viewer) noexcept
 {
     m_viewer = std::move(viewer);
 }

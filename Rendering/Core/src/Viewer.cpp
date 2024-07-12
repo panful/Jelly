@@ -168,6 +168,6 @@ const vk::raii::RenderPass& Viewer::GetRenderPass() const noexcept
 void Viewer::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
     renderer->SetDevice(m_device);
-    renderer->SetViewer(shared_from_this());
+    renderer->SetViewer(weak_from_this());
     m_renderers.emplace_back(std::move(renderer));
 }

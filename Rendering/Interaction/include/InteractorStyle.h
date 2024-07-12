@@ -30,7 +30,7 @@ enum class InteractorState : uint8_t
 class JELLY_EXPORT InteractorStyle : public Object
 {
 public:
-    void SetInteractor(std::shared_ptr<Interactor> interactor) noexcept;
+    void SetInteractor(std::weak_ptr<Interactor> interactor) noexcept;
 
 public:
     virtual void MouseMoveEvent();

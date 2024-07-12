@@ -8,7 +8,7 @@
 
 using namespace Jelly;
 
-void InteractorStyle::SetInteractor(std::shared_ptr<Interactor> interactor) noexcept
+void InteractorStyle::SetInteractor(std::weak_ptr<Interactor> interactor) noexcept
 {
     m_interactor = std::move(interactor);
 }
