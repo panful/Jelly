@@ -47,6 +47,16 @@ public:
 
     bool IsInViewport(const std::array<int, 2>& position) const noexcept;
 
+    /// @brief 世界坐标转换为窗口坐标
+    /// @param worldPoint
+    /// @return 左上角为窗口原点
+    std::array<int, 2> WorldToDisplay(const std::array<double, 3>& worldPoint) const noexcept;
+
+    /// @brief 窗口坐标转换为世界坐标
+    /// @param displayPoint
+    /// @return
+    std::array<double, 3> DisplayToWorld(const std::array<int, 2>& displayPoint) const noexcept;
+
 private:
     std::shared_ptr<Device> m_device {};
     std::weak_ptr<Viewer> m_viewer {};

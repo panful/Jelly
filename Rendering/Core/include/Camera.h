@@ -112,6 +112,17 @@ public:
 
     CameraType GetCameraType() const noexcept;
 
+    /// @brief NDC坐标转换为世界坐标
+    /// @param ndcPoint Normalized Device Coordinates
+    /// @note Vulkan的NDC坐标范围是 X:[-1,1], Y:[-1,1], Z:[0,1]
+    /// @return
+    std::array<double, 3> NDCToWorld(const std::array<double, 3>& ndcPoint) const noexcept;
+
+    /// @brief 世界坐标转换为观察坐标
+    /// @param worldPoint
+    /// @return
+    std::array<double, 3> WorldToView(const std::array<double, 3>& worldPoint) const noexcept;
+
 private:
     void Update();
 

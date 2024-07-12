@@ -222,3 +222,46 @@ bool Renderer::IsInViewport(const std::array<int, 2>& position) const noexcept
 
     return false;
 }
+
+std::array<int, 2> Renderer::WorldToDisplay(const std::array<double, 3>& worldPoint) const noexcept
+{
+    if (auto viewer = m_viewer.lock())
+    {
+        auto&& extent = viewer->GetExtent();
+        auto startX   = extent.width * m_viewport[0];
+        auto startY   = extent.height * m_viewport[1];
+        auto width    = extent.width * m_viewport[2];
+        auto height   = extent.height * m_viewport[3];
+
+        auto ndc = m_camera->WorldToView(worldPoint);
+
+        std::array<double, 2> viewportPoint = {(ndc[0] + 1.0) / 2.0, (ndc[1] + 1.0) / 2.0};
+
+        return {
+            static_cast<int>(startX + width * viewportPoint[0]), static_cast<int>(startY + height * viewportPoint[1])
+        };
+    }
+
+    Logger::GetInstance()->Error("invalid viewer");
+    return {};
+}
+
+std::array<double, 3> Renderer::DisplayToWorld(const std::array<int, 2>& displayPoint) const noexcept
+{
+    if (auto viewer = m_viewer.lock())
+    {
+        auto&& extent = viewer->GetExtent();
+        auto width    = extent.width * m_viewport[2];
+        auto height   = extent.height * m_viewport[3];
+
+        static constexpr double minZvalueForVulkan {0.};
+        std::array<double, 3> ndc {
+            (displayPoint[0] * 2. - width) / width, (displayPoint[1] * 2. - height) / height, minZvalueForVulkan
+        };
+
+        return m_camera->NDCToWorld(ndc);
+    }
+
+    Logger::GetInstance()->Error("invalid viewer");
+    return {};
+}
