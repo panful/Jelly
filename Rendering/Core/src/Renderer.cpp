@@ -209,10 +209,12 @@ bool Renderer::IsInViewport(const std::array<int, 2>& position) const noexcept
     {
         auto&& extent = viewer->GetExtent();
 
-        if (static_cast<int>(extent.width * m_viewport[0]) <= position[0]
-            && static_cast<int>(extent.width * m_viewport[1]) <= position[1]
-            && static_cast<int>(extent.width * m_viewport[2]) >= position[0]
-            && static_cast<int>(extent.width * m_viewport[3]) >= position[1])
+        auto startX = static_cast<int>(extent.width * m_viewport[0]);
+        auto startY = static_cast<int>(extent.height * m_viewport[1]);
+        auto endX   = startX + static_cast<int>(extent.width * m_viewport[2]);
+        auto endY   = startY + static_cast<int>(extent.height * m_viewport[3]);
+
+        if (startX <= position[0] && startY <= position[1] && position[0] <= endX && position[1] <= endY)
         {
             return true;
         }
