@@ -1,4 +1,5 @@
 #include "Actor3D.h"
+#include "Camera.h"
 #include "DataSet.h"
 #include "DataSetMapper.h"
 #include "FloatData.h"
@@ -20,10 +21,10 @@ std::vector<float> points1 {
 };
 
 std::vector<float> points2 {
-    -1.f, -1.f,  3.f,
-    -1.f,  5.f,  3.f,
-     3.f,  5.f,  3.f,
-     3.f, -1.f,  3.f,
+    -1.f, -1.f,  1.f,
+    -1.f,  5.f,  1.f,
+     3.f,  5.f,  1.f,
+     3.f, -1.f,  1.f,
 };
 
 std::vector<float> colors1 {
@@ -90,12 +91,12 @@ int main()
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);
     renderer->AddActor(actor2);
-    renderer->GetCamera()->SetCameraType(Jelly::CameraType::Perspective);
+    renderer->GetCamera()->SetCameraType(Jelly::CameraType::Orthographic);
     renderer->ResetCamera();
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer);
-    window->SetSize(400, 300);
+    window->SetSize(800, 600);
     window->SetTitle("Test window");
     window->Render();
 

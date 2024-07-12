@@ -12,8 +12,10 @@
 #pragma once
 
 #include "InteractorStyle.h"
+#include <array>
 
 namespace Jelly {
+/// @brief 右键旋转、左键移动、滚轮缩放
 class JELLY_EXPORT InteractorStyleTrackballCamera : public InteractorStyle
 {
 protected:
@@ -30,5 +32,9 @@ protected:
 
     void MouseWheelForwardEvent() override;
     void MouseWheelBackwardEvent() override;
+
+protected:
+    std::array<int, 2> m_lastMousePosition {};
+    double m_zoomFactor {0.1};
 };
 } // namespace Jelly
