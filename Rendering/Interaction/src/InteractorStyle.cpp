@@ -37,9 +37,9 @@ void InteractorStyle::Dolly(double factor) const noexcept
         return;
     }
 
-    if (auto render = m_currentRenderer.lock())
+    if (auto renderer = m_currentRenderer.lock())
     {
-        auto camera = render->GetCamera();
+        auto camera = renderer->GetCamera();
         switch (camera->GetCameraType())
         {
             case CameraType::Orthographic:
@@ -55,14 +55,13 @@ void InteractorStyle::Dolly(double factor) const noexcept
                 auto x = focalPos[0] - eyePos[0];
                 auto y = focalPos[1] - eyePos[1];
                 auto z = focalPos[2] - eyePos[2];
-                auto d = std::hypot(x, y, z);
 
-                x /= d;
-                y /= d;
-                z /= d;
-                d /= factor;
+                std::array<double, 3> newEyePos = {
+                    focalPos[0] - x / factor, focalPos[1] - y / factor, focalPos[2] - z / factor
+                };
 
-                camera->SetEyePos({focalPos[0] - d * x, focalPos[1] - d * y, focalPos[2] - d * z});
+                camera->SetEyePos(newEyePos);
+                renderer->ResetCameraClipRange();
             }
             break;
             default:

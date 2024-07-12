@@ -38,6 +38,9 @@ public:
     /// @brief 重置相机，使所有Actor居中显示
     void ResetCamera() const noexcept;
 
+    /// @brief 根据包围盒以及相机位置重置相机的裁剪面
+    void ResetCameraClipRange() const noexcept;
+
     std::shared_ptr<Camera> GetCamera() const noexcept;
 
     std::array<double, 6> GetVisibleActorBounds() const noexcept;

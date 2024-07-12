@@ -110,8 +110,51 @@ void Renderer::ResetCamera() const noexcept
 
     m_camera->SetOrthographicScale(radius);
 
-    static constexpr double extraRatio {1.01}; // 留出来一点空间，不要让前后裁剪平面紧贴着包围盒球体
-    m_camera->SetClipRange({distance - radius * extraRatio, distance + radius * extraRatio});
+    static constexpr double expandRatio {1.1}; // 留出来一点空间，不要让前后裁剪平面紧贴着包围盒球体
+    m_camera->SetClipRange({distance - radius * expandRatio, distance + radius * expandRatio});
+}
+
+void Renderer::ResetCameraClipRange() const noexcept
+{
+    auto bounds   = GetVisibleActorBounds();
+    auto vpNormal = m_camera->GetViewPlaneNormal();
+    auto& eyePos  = m_camera->GetEyePos();
+
+    auto a = -vpNormal[0];
+    auto b = -vpNormal[1];
+    auto c = -vpNormal[2];
+    auto d = -(a * eyePos[0] + b * eyePos[1] + c * eyePos[2]);
+
+    std::array<double, 2> range {};
+
+    range[0] = a * bounds[0] + b * bounds[2] + c * bounds[4] + d;
+    range[1] = std::numeric_limits<double>::min();
+
+    for (auto k = 0u; k < 2; ++k)
+    {
+        for (auto j = 0u; j < 2; ++j)
+        {
+            for (auto i = 0u; i < 2; ++i)
+            {
+                auto dist = a * bounds[i] + b * bounds[2 + j] + c * bounds[4 + k] + d;
+                range[0]  = range[0] > dist ? dist : range[0];
+                range[1]  = range[1] < dist ? dist : range[1];
+            }
+        }
+    }
+
+    static constexpr double expandRadio {0.1}; // 留出来一点空间，不要让前后裁剪平面紧贴着包围盒球体
+    range[0] = range[0] - range[0] * expandRadio;
+    range[1] = range[1] + range[1] * expandRadio;
+
+    // 保证近裁剪面在相机的前面
+    if (range[0] <= 0.0)
+    {
+        static constexpr double nearClipPlaneTolerance {0.01}; // 可以根据深度缓冲的字节数调整
+        range[0] = range[1] * nearClipPlaneTolerance;
+    }
+
+    m_camera->SetClipRange(range);
 }
 
 std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
