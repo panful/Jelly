@@ -15,7 +15,6 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <atomic>
 
 namespace Jelly {
 class DataArray;
@@ -58,7 +57,6 @@ private:
     std::shared_ptr<DataArray> m_indices {};
 
     PrimitiveType m_primitiveType {PrimitiveType::Triangle};
-    std::atomic_bool m_needUpdate {true};
 
     std::array<double, 6> m_bounds {-1., 1., -1., 1., -1., 1.};
 };

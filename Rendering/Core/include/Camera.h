@@ -13,7 +13,6 @@
 
 #include "Object.h"
 #include <array>
-#include <atomic>
 #include <cstdint>
 #include <numbers>
 
@@ -128,7 +127,6 @@ private:
 
 private:
     CameraType m_cameraType {CameraType::Orthographic};
-    std::atomic_bool m_needUpdate {true};
 
     double m_aspectRatio {1.};
     double m_viewAngle {std::numbers::pi_v<double> / 180. * 30.}; // 视角角度默认30度

@@ -16,7 +16,6 @@
 #include "Object.h"
 #include "Pipeline.h"
 #include <array>
-#include <atomic>
 #include <memory>
 #include <vector>
 #include <vulkan/vulkan_raii.hpp>
@@ -65,8 +64,6 @@ protected:
     std::unique_ptr<Drawable> m_drawable {};
 
     size_t m_pipelineKey {};
-
-    std::atomic_bool m_needUpdate {true};
 
     ColorMode m_colorMode {ColorMode::UniformColor};
     bool m_useUniformColor {false};

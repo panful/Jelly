@@ -12,6 +12,7 @@
 #pragma once
 
 #include "GlobalExport.h"
+#include <atomic>
 
 namespace Jelly {
 class JELLY_EXPORT Object
@@ -21,5 +22,12 @@ public:
     virtual ~Object() noexcept       = default;
     Object(const Object&)            = delete;
     Object& operator=(const Object&) = delete;
+
+    void Changed() noexcept;
+    bool IsChanged() const noexcept;
+    void ResetChanged() noexcept;
+
+private:
+    std::atomic_bool m_isChanged {true};
 };
 } // namespace Jelly

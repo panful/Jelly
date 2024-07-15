@@ -13,7 +13,6 @@
 
 #include "Object.h"
 #include <array>
-#include <atomic>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -43,7 +42,6 @@ protected:
     std::shared_ptr<Mapper> m_mapper {};
 
 private:
-    std::atomic_bool m_needUpdate {true};
     bool m_visibility {true};
 };
 } // namespace Jelly

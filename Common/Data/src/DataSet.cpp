@@ -63,7 +63,7 @@ std::shared_ptr<DataArray> DataSet::GetIndices() const noexcept
 std::array<double, 6> DataSet::GetBounds() noexcept
 {
     static constexpr uint32_t pointComponents {3};
-    if (m_points && m_points->GetElementCount() % pointComponents == 0 && m_needUpdate)
+    if (m_points && m_points->GetElementCount() % pointComponents == 0 && IsChanged())
     {
         // XXX 其他类型需要补充
         if (m_points->GetDataType() == DataType::Float)
@@ -88,7 +88,7 @@ std::array<double, 6> DataSet::GetBounds() noexcept
             }
         }
 
-        m_needUpdate = false;
+        ResetChanged();
     }
 
     return m_bounds;

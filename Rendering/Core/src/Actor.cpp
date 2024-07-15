@@ -20,7 +20,7 @@ void Actor::SetVisibility(bool visible) noexcept
     if (m_visibility != visible)
     {
         m_visibility = visible;
-        m_needUpdate = true;
+        Changed();
     }
 }
 

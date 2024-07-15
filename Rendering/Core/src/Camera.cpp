@@ -8,10 +8,9 @@ using namespace Jelly;
 
 const std::array<float, 16>& Camera::GetViewMatrix() noexcept
 {
-    if (m_needUpdate)
+    if (IsChanged())
     {
         Update();
-        m_needUpdate = false;
     }
 
     return m_viewMatrix;
@@ -19,10 +18,9 @@ const std::array<float, 16>& Camera::GetViewMatrix() noexcept
 
 const std::array<float, 16>& Camera::GetProjectMatrix() noexcept
 {
-    if (m_needUpdate)
+    if (IsChanged())
     {
         Update();
-        m_needUpdate = false;
     }
 
     return m_projectMatrix;
@@ -37,8 +35,8 @@ void Camera::SetViewUp(const std::array<double, 3>& viewUp) noexcept
 {
     if (m_viewUp != viewUp)
     {
-        m_viewUp     = viewUp;
-        m_needUpdate = true;
+        m_viewUp = viewUp;
+        Changed();
     }
 }
 
@@ -51,8 +49,8 @@ void Camera::SetEyePos(const std::array<double, 3>& eyePos) noexcept
 {
     if (m_eyePos != eyePos)
     {
-        m_eyePos     = eyePos;
-        m_needUpdate = true;
+        m_eyePos = eyePos;
+        Changed();
     }
 }
 
@@ -65,8 +63,8 @@ void Camera::SetFocalPos(const std::array<double, 3>& focalPos) noexcept
 {
     if (m_focalPos != focalPos)
     {
-        m_focalPos   = focalPos;
-        m_needUpdate = true;
+        m_focalPos = focalPos;
+        Changed();
     }
 }
 
@@ -88,7 +86,7 @@ void Camera::Pitch(double angle) noexcept
     m_focalPos = {focalPos[0], focalPos[1], focalPos[2]};
     m_viewUp   = {viewUp[0], viewUp[1], viewUp[2]};
 
-    m_needUpdate = true;
+    Changed();
 }
 
 void Camera::Yaw(double angle) noexcept
@@ -106,7 +104,7 @@ void Camera::Yaw(double angle) noexcept
     focalPos   = glm::dvec3(transform * glm::dvec4(focalPos, 1.));
     m_focalPos = {focalPos[0], focalPos[1], focalPos[2]};
 
-    m_needUpdate = true;
+    Changed();
 }
 
 void Camera::Roll(double angle) noexcept
@@ -124,7 +122,7 @@ void Camera::Roll(double angle) noexcept
     viewUp   = glm::dvec3(transform * glm::dvec4(viewUp, 1.));
     m_viewUp = {viewUp[0], viewUp[1], viewUp[2]};
 
-    m_needUpdate = true;
+    Changed();
 }
 
 void Camera::Azimuth(double angle) noexcept
@@ -142,7 +140,7 @@ void Camera::Azimuth(double angle) noexcept
     eyePos   = glm::dvec3(transform * glm::dvec4(eyePos, 1.));
     m_eyePos = {eyePos[0], eyePos[1], eyePos[2]};
 
-    m_needUpdate = true;
+    Changed();
 }
 
 void Camera::Elevation(double angle) noexcept
@@ -163,15 +161,15 @@ void Camera::Elevation(double angle) noexcept
     m_eyePos = {eyePos[0], eyePos[1], eyePos[2]};
     m_viewUp = {viewUp[0], viewUp[1], viewUp[2]};
 
-    m_needUpdate = true;
+    Changed();
 }
 
 void Camera::SetViewAngle(double viewAngle) noexcept
 {
     if (m_viewAngle != viewAngle)
     {
-        m_viewAngle  = viewAngle;
-        m_needUpdate = true;
+        m_viewAngle = viewAngle;
+        Changed();
     }
 }
 
@@ -184,8 +182,8 @@ void Camera::SetClipRange(const std::array<double, 2>& clipRange) noexcept
 {
     if (m_clipRange != clipRange)
     {
-        m_clipRange  = clipRange;
-        m_needUpdate = true;
+        m_clipRange = clipRange;
+        Changed();
     }
 }
 
@@ -199,7 +197,7 @@ void Camera::SetOrthographicScale(double orthographicScale) noexcept
     if (m_orthographicScale != orthographicScale)
     {
         m_orthographicScale = orthographicScale;
-        m_needUpdate        = true;
+        Changed();
     }
 }
 
@@ -231,7 +229,7 @@ void Camera::SetAspectRatio(double aspectRatio) noexcept
     if (m_aspectRatio != aspectRatio)
     {
         m_aspectRatio = aspectRatio;
-        m_needUpdate  = true;
+        Changed();
     }
 }
 
@@ -240,7 +238,7 @@ void Camera::SetCameraType(CameraType cameraType) noexcept
     if (m_cameraType != cameraType)
     {
         m_cameraType = cameraType;
-        m_needUpdate = true;
+        Changed();
     }
 }
 
@@ -329,4 +327,6 @@ void Camera::Update()
         }
         break;
     }
+
+    ResetChanged();
 }

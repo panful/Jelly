@@ -18,7 +18,7 @@ std::array<double, 6> DataSetMapper::GetBounds() const noexcept
     {
         return m_dataSet->GetBounds();
     }
-    
+
     return {-1., 1., -1., 1., -1., 1.};
 }
 
@@ -31,9 +31,8 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
         return;
     }
 
-    if (m_needUpdate)
+    if (IsChanged())
     {
-        m_needUpdate      = false;
         m_useUniformColor = false;
 
         static constexpr uint32_t vertexDimension {3};
@@ -109,11 +108,13 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
         BuildPipeline(viewer, pipelineInfo);
 
         m_drawable = std::make_unique<Drawable>(m_device, m_dataSet);
+
+        ResetChanged();
     }
 }
 
 void DataSetMapper::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept
 {
-    m_dataSet    = std::move(dataSet);
-    m_needUpdate = true;
+    m_dataSet = std::move(dataSet);
+    Changed();
 }
