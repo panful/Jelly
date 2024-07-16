@@ -1,5 +1,5 @@
 #include "InteractorGLFW.h"
-#include "InteractorStyle.h"
+#include "InteractorStyleTrackballCamera.h"
 #include "WindowGLFW.h"
 #include <GLFW/glfw3.h>
 #include <any>
@@ -16,6 +16,12 @@ void InteractorGLFW::Start() noexcept
     glfwSetScrollCallback(glfwWindow, ScrollCallback);
     glfwSetMouseButtonCallback(glfwWindow, MouseButtonCallback);
     glfwSetWindowSizeCallback(glfwWindow, WindowSizeCallback);
+
+    if (!m_interactorStyle)
+    {
+        m_interactorStyle = std::make_shared<InteractorStyleTrackballCamera>();
+        m_interactorStyle->SetInteractor(weak_from_this());
+    }
 
     if (!m_window->HasInitialized())
     {
