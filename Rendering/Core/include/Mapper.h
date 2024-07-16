@@ -51,6 +51,9 @@ public:
     void SetColor(const std::array<float, 3>& color);
     std::array<float, 3> GetColor() const noexcept;
 
+    void SetEnableLighting(bool enableLighting) noexcept;
+    bool GetEnableLighting() const noexcept;
+
 protected:
     void BuildPipeline(const std::shared_ptr<Viewer>& viewer, const PipelineInfo& pipelineInfo) noexcept;
 
@@ -70,5 +73,6 @@ protected:
     std::array<float, 3> m_color {1., 1., 1.};
     vk::raii::DescriptorSets m_descriptorSets {nullptr};
     std::vector<BufferData> m_uniformBufferObjects {};
+    bool m_enableLighting {true};
 };
 } // namespace Jelly

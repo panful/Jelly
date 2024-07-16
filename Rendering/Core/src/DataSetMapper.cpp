@@ -51,7 +51,7 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
 
         std::vector<DescriptorSetLayoutBinding> descriptorSetLayoutBindings {};
 
-        uint32_t location {1}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
+        uint32_t location {0}; // 0 是 inPos, 其他输入(inColor inNormal...)从1开始
         uint32_t binding {0};  // 描述符集的绑定点
         switch (m_colorMode)
         {
@@ -61,7 +61,7 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
             case ColorMode::VertexColoring:
                 if (m_dataSet->HasColorData())
                 {
-                    m_shaderCreater->AddVertexColor(location);
+                    m_shaderCreater->AddVertexColor(++location);
                     break;
                 }
                 else
@@ -77,6 +77,11 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
                     binding, vk::DescriptorType::eUniformBuffer, vk::ShaderStageFlagBits::eFragment
                 );
                 break;
+        }
+
+        if (m_enableLighting)
+        {
+            m_shaderCreater->AddFollowCameraLight(++location);
         }
 
         auto vertCode = m_shaderCreater->GetVertexShaderCode();

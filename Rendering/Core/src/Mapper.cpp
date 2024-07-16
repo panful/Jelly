@@ -120,3 +120,13 @@ std::array<float, 3> Mapper::GetColor() const noexcept
 {
     return m_color;
 }
+
+void Mapper::SetEnableLighting(bool enableLighting) noexcept
+{
+    m_enableLighting = enableLighting;
+}
+
+bool Mapper::GetEnableLighting() const noexcept
+{
+    return m_enableLighting;
+}
