@@ -12,36 +12,34 @@
 namespace {
 // clang-format off
 std::vector<float> points1 {
-    -.0001f, -.0002f,   0.f,
-    -.0001f,   100.f,   0.f,
-      100.f,   100.f,   0.f,
-      100.f, -.0002f,   0.f,
+    -.5f, -.5f,  0.f,
+    -.5f,  .2f,  0.f,
+     .2f,  .2f,  0.f,
+     .2f, -.5f,  0.f,
+};
 
-    -.0001f, -.0002f, 500.f,
-    -.0001f,   100.f, 500.f,
-      100.f,   100.f, 500.f,
-      100.f, -.0002f, 500.f,
+std::vector<float> points2 {
+    -.2f, -.2f,  .1f,
+    -.2f,  .5f,  .1f,
+     .5f,  .5f,  .1f,
+     .5f, -.2f,  .1f,
 };
 
 std::vector<float> colors1 {
     1.f, 0.f, 0.f,
-    1.f, 0.f, 0.f,
-    1.f, 0.f, 0.f,
-    1.f, 0.f, 0.f,
     0.f, 1.f, 0.f,
-    0.f, 1.f, 0.f,
-    0.f, 1.f, 0.f,
-    0.f, 1.f, 0.f,
+    0.f, 0.f, 1.f,
+    1.f, 1.f, 1.f,
 };
 
-std::vector<uint32_t> triangles {
-    0, 1, 2, 0, 2, 3,
-    3, 2, 6, 3, 6, 7,
-    7, 6, 5, 7, 5, 4,
-    4, 5, 1, 4, 1, 0,
-    4, 0, 3, 4, 3, 7,
-    1, 5, 6, 1, 6, 2,
+std::vector<float> colors2 {
+    1.f, 1.f, 0.f,
+    1.f, 0.f, 1.f,
+    0.f, 1.f, 1.f,
+    1.f, 1.f, 1.f,
 };
+
+std::vector<uint32_t> triangles {0, 1, 2, 0, 2, 3};
 // clang-format on
 } // namespace
 
@@ -50,8 +48,14 @@ int main()
     auto pointData1 = std::make_shared<Jelly::FloatData>();
     pointData1->SetData(std::move(points1));
 
+    auto pointData2 = std::make_shared<Jelly::FloatData>();
+    pointData2->SetData(std::move(points2));
+
     auto colorData1 = std::make_shared<Jelly::FloatData>();
     colorData1->SetData(std::move(colors1));
+
+    auto colorData2 = std::make_shared<Jelly::FloatData>();
+    colorData2->SetData(std::move(colors2));
 
     auto indexData = std::make_shared<Jelly::DataArrayTemplate<uint32_t>>();
     indexData->SetData(std::move(triangles));
@@ -61,22 +65,34 @@ int main()
     dataSet1->SetColors(colorData1);
     dataSet1->SetIndices(indexData);
 
+    auto dataSet2 = std::make_shared<Jelly::DataSet>();
+    dataSet2->SetPoints(pointData2);
+    dataSet2->SetColors(colorData2);
+    dataSet2->SetIndices(indexData);
+
     auto mapper1 = std::make_shared<Jelly::DataSetMapper>();
     mapper1->SetDataSet(dataSet1);
     mapper1->SetColor({1.f, 0.f, 1.f});
     mapper1->SetColorMode(Jelly::ColorMode::VertexColoring);
 
+    auto mapper2 = std::make_shared<Jelly::DataSetMapper>();
+    mapper2->SetDataSet(dataSet2);
+    mapper2->SetColor({1.f, 1.f, 0.f});
+    mapper2->SetColorMode(Jelly::ColorMode::UniformColor);
+
     auto actor1 = std::make_shared<Jelly::Actor3D>();
     actor1->SetMapper(mapper1);
 
+    auto actor2 = std::make_shared<Jelly::Actor3D>();
+    actor2->SetMapper(mapper2);
+
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);
-    renderer->GetCamera()->SetCameraType(Jelly::CameraType::Perspective);
-    renderer->ResetCamera();
+    renderer->AddActor(actor2);
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer);
-    window->SetSize(800, 600);
+    window->SetSize(400, 300);
     window->SetTitle("Test window");
     window->Render();
 
