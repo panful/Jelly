@@ -61,7 +61,7 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
             case ColorMode::VertexColoring:
                 if (m_dataSet->HasColorData())
                 {
-                    m_shaderCreater->AddPointColor(location);
+                    m_shaderCreater->AddVertexColor(location);
                     break;
                 }
                 else

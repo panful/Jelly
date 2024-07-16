@@ -14,6 +14,8 @@ layout(location = 0) in vec3 inPos;
 
 // Layout::TexCoord
 
+// VS::Out
+
 layout(push_constant) uniform PushConstant {
     mat4 model;
     mat4 view;
@@ -61,7 +63,7 @@ std::string ShaderCreater::GetFragmentShaderCode() const noexcept
     return m_fragmentShaderCode;
 }
 
-void ShaderCreater::AddPointColor(uint32_t location)
+void ShaderCreater::AddVertexColor(uint32_t location)
 {
     ReplaceValue(
         m_vertexShaderCode,
@@ -87,6 +89,34 @@ void ShaderCreater::AddUniformColor(uint32_t location)
         std::format("// FS::In\nlayout(binding = {}) uniform UBO {{\n    vec3 color;\n}} uColor;", location)
     );
     ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(uColor.color, 1.)");
+}
+
+void ShaderCreater::AddFollowCameraLight(uint32_t location)
+{
+    ReplaceValue(
+        m_vertexShaderCode,
+        "// VS::Out",
+        std::format("// VS::Out\nlayout(location = {}) out vec3 vsOutViewPos;", location)
+    );
+
+    ReplaceValue(
+        m_vertexShaderCode,
+        "// VS::Main Begin",
+        "// VS::Main Begin\n    vsOutViewPos = vec3(pcMVP.view * pcMVP.model * vec4(inPos, 1.));"
+    );
+
+    ReplaceValue(
+        m_fragmentShaderCode,
+        "// FS::In",
+        std::format("// FS::In\nlayout(location = {}) in vec3 fsInViewPos;", location)
+    );
+
+    ReplaceValue(
+        m_fragmentShaderCode,
+        "// FS::Main End",
+        "vec3 dx = dFdx(fsInViewPos);\n    vec3 dy = dFdy(fsInViewPos);\n    vec3 normal = "
+        "normalize(cross(dx, dy));\n    vec3 lightColor = vec3(1.);\n    lightColor *= max(0., -normal.z);\n\n    FragColor = vec4(FragColor.xyz * lightColor, 1.);\n    // FS::Main End"
+    );
 }
 
 void ShaderCreater::ReplaceValue(
