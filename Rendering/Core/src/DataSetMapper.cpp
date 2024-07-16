@@ -100,8 +100,8 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
             .vertexShaderCode            = std::move(vertSpv.value()),
             .fragmentShaderCode          = std::move(fragSpv.value()),
             .strides                     = std::move(strides),
-            .pushConstantRanges          = pushConstantRange,
-            .descriptorSetLayoutBindings = descriptorSetLayoutBindings,
+            .pushConstantRanges          = std::move(pushConstantRange),
+            .descriptorSetLayoutBindings = std::move(descriptorSetLayoutBindings),
             .renderPass                  = viewer->GetRenderPass()
         };
 

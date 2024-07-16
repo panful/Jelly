@@ -12,6 +12,7 @@
 #pragma once
 
 #include "Device.h"
+#include "GlobalExport.h"
 #include "Logger.h"
 #include "MemoryHelper.h"
 #include <format>
@@ -19,7 +20,7 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class BufferData
+class JELLY_EXPORT BufferData
 {
 public:
     BufferData(std::nullptr_t) noexcept;
@@ -28,11 +29,23 @@ public:
         std::shared_ptr<Device> device,
         vk::DeviceSize size,
         vk::BufferUsageFlags usage,
-        vk::MemoryPropertyFlags propertyFlags
+        vk::MemoryPropertyFlags propertyFlags,
+        bool mapMemory = false
     );
+
+    BufferData(BufferData&&) noexcept = default;
+
+    BufferData& operator=(BufferData&&) noexcept = default;
+
+    BufferData(const BufferData&) = delete;
+
+    BufferData& operator=(const BufferData&) = delete;
+
+    ~BufferData() noexcept;
 
     const vk::raii::Buffer& GetBuffer() const noexcept;
     const vk::raii::DeviceMemory& GetDeviceMemory() const noexcept;
+    void* GetMemoryPointer() const noexcept;
 
     /// @brief 将CPU端的数据拷贝到GPU缓冲
     /// @details 保证数据被立即复制到缓冲关联的内存
@@ -63,6 +76,7 @@ public:
 private:
     vk::raii::DeviceMemory m_deviceMemory {nullptr};
     vk::raii::Buffer m_buffer {nullptr};
+    void* m_memoryPointer {nullptr};
 
     vk::DeviceSize m_size {};
     vk::BufferUsageFlags m_usage {};

@@ -35,6 +35,7 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
         return {};
     };
 
+    // 顶点属性（vertex attributes）使用位置、颜色、纹理分开的方式设置
     uint32_t locationBinding {0};
     std::vector<vk::VertexInputAttributeDescription> inputAttributes {};
     std::vector<vk::VertexInputBindingDescription> inputBindings {};

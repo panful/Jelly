@@ -68,11 +68,11 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                 m_device,
                 sizeof(m_color),
                 vk::BufferUsageFlagBits::eUniformBuffer,
-                vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
+                vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+                true
             );
-            MemoryHelper::CopyToDevice(
-                m_uniformBufferObjects[i].GetDeviceMemory(), m_color.data(), m_color.size(), sizeof(float)
-            );
+
+            std::memcpy(m_uniformBufferObjects[i].GetMemoryPointer(), m_color.data(), sizeof(m_color));
         }
 
         std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
