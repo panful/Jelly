@@ -12,10 +12,9 @@
 #pragma once
 
 #include "Device.h"
-#include "VkDataBase.h"
 
 namespace Jelly {
-class SwapChainData : public VkDataBase
+class SwapChainData
 {
 public:
     SwapChainData(std::nullptr_t);
@@ -27,6 +26,16 @@ public:
         const vk::raii::SwapchainKHR* pOldSwapchain,
         vk::ImageUsageFlags usage
     );
+
+    SwapChainData(SwapChainData&&) noexcept = default;
+
+    SwapChainData& operator=(SwapChainData&&) noexcept = default;
+
+    SwapChainData(const SwapChainData&) = delete;
+
+    SwapChainData& operator=(const SwapChainData&) = delete;
+
+    ~SwapChainData() noexcept = default;
 
     uint32_t GetNumberOfImages() const noexcept;
     vk::Format GetColorFormat() const noexcept;
