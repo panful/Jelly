@@ -220,14 +220,14 @@ vk::DescriptorPool Device::InitDescriptorPool() noexcept
 
     // TODO
     std::vector<vk::DescriptorPoolSize> descriptorPoolSizes {
-        {vk::DescriptorType::eCombinedImageSampler, JELLY_MAX_FRAMES},
-        {vk::DescriptorType::eUniformBuffer,        JELLY_MAX_FRAMES}
+        {vk::DescriptorType::eCombinedImageSampler, JELLY_MAX_FRAMES * 100},
+        {vk::DescriptorType::eUniformBuffer,        JELLY_MAX_FRAMES * 100}
     };
 
     m_descriptorPool = vk::raii::DescriptorPool(
         m_device,
         vk::DescriptorPoolCreateInfo {
-            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, JELLY_MAX_FRAMES * 2, descriptorPoolSizes
+            vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet, JELLY_MAX_FRAMES * 100, descriptorPoolSizes
         }
     );
 
