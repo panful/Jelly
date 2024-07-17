@@ -53,6 +53,12 @@ ShaderCreater::ShaderCreater()
 {
 }
 
+void ShaderCreater::Reset()
+{
+    m_vertexShaderCode   = VertexShaderTemplateString;
+    m_fragmentShaderCode = FragmentShaderTemplateString;
+}
+
 std::string ShaderCreater::GetVertexShaderCode() const noexcept
 {
     return m_vertexShaderCode;

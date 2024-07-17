@@ -30,6 +30,9 @@ public:
     void AddTexture2DColor(uint32_t location, uint32_t binding);
     void AddFollowCameraLight(uint32_t location);
 
+    /// @brief 将着色器代码恢复到最初状态
+    void Reset();
+
 private:
     /// @brief 将str中start到end之间的字符全部使用replacement替换
     /// @details start和end保留
