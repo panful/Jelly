@@ -1,9 +1,10 @@
 #include "Mapper.h"
 #include "Device.h"
+#include "Drawable.h"
 #include "Renderer.h"
+#include "Texture.h"
 #include "Viewer.h"
 #include <functional>
-
 using namespace Jelly;
 
 void Mapper::Render(
@@ -22,7 +23,7 @@ void Mapper::DeviceRender(
     auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
 
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
-    if (m_useUniformColor)
+    if (ColorMode::Texture == m_colorMode || ColorMode::Uniform == m_colorMode)
     {
         commandBuffer.bindDescriptorSets(
             vk::PipelineBindPoint::eGraphics,
@@ -59,7 +60,34 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
         m_device->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(m_device, pipelineInfo));
     }
 
-    if (ColorMode::UniformColor == m_colorMode)
+    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
+        viewer->GetMaximumOfFrames(), m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+    );
+
+    m_descriptorSets =
+        vk::raii::DescriptorSets(m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts});
+
+    if (ColorMode::Texture == m_colorMode)
+    {
+        vk::DescriptorImageInfo descriptorImageInfo(
+            m_texture->GetSampler(), m_texture->GetImageData().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
+        );
+
+        for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+        {
+            std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
+                vk::WriteDescriptorSet {
+                                        m_descriptorSets[i],
+                                        pipelineInfo.descriptorSetLayoutBindings[0].binding,
+                                        0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
+                                        descriptorImageInfo, nullptr
+                }
+            };
+            m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+        }
+    }
+
+    if (ColorMode::Uniform == m_colorMode)
     {
         m_uniformBufferObjects.reserve(viewer->GetMaximumOfFrames());
         for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
@@ -75,24 +103,16 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
             std::memcpy(m_uniformBufferObjects[i].GetMemoryPointer(), m_color.data(), sizeof(m_color));
         }
 
-        std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-            viewer->GetMaximumOfFrames(),
-            m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
-        );
-
-        m_descriptorSets =
-            vk::raii::DescriptorSets(m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts});
-
         for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
         {
             vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i].GetBuffer(), 0, sizeof(m_color));
 
-            // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个
+            // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
             std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
                 vk::WriteDescriptorSet {
                                         m_descriptorSets[i],
                                         pipelineInfo.descriptorSetLayoutBindings[0].binding,
-                                        0, vk::DescriptorType::eUniformBuffer,
+                                        0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
                                         nullptr, dbInfo
                 }
             };
@@ -119,6 +139,11 @@ void Mapper::SetColor(const std::array<float, 3>& color)
 std::array<float, 3> Mapper::GetColor() const noexcept
 {
     return m_color;
+}
+
+void Mapper::SetTexture(std::shared_ptr<Texture> texture)
+{
+    m_texture = std::move(texture);
 }
 
 void Mapper::SetEnableLighting(bool enableLighting) noexcept

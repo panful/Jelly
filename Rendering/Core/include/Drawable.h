@@ -19,14 +19,22 @@
 namespace Jelly {
 class Device;
 class DataSet;
+enum class ColorMode : uint8_t;
 
 class Drawable
 {
 public:
-    Drawable(std::shared_ptr<Device> device, std::shared_ptr<DataSet> dataSet);
+    Drawable(std::shared_ptr<Device> device, std::shared_ptr<DataSet> dataSet, ColorMode colorMode);
 
-    Drawable(const Drawable&)            = delete;
+    Drawable(Drawable&&) noexcept = default;
+
+    Drawable& operator=(Drawable&&) noexcept = default;
+
+    Drawable(const Drawable&) = delete;
+
     Drawable& operator=(const Drawable&) = delete;
+
+    ~Drawable() noexcept = default;
 
     std::vector<vk::Buffer> GetVertexBuffers() const noexcept;
     std::vector<vk::DeviceSize> GetVertexOffsets() const noexcept;

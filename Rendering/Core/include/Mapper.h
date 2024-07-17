@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "Drawable.h"
 #include "BufferData.h"
+#include "Drawable.h"
 #include "Object.h"
 #include "Pipeline.h"
 #include <array>
@@ -24,12 +24,13 @@ namespace Jelly {
 class Device;
 class Viewer;
 class Renderer;
+class Texture;
 
 enum class ColorMode : uint8_t
 {
-    VertexColoring, // 顶点着色
-    UniformColor,   // 单色填充
-    ColorMap,       // 颜色映射表
+    Vertex,  // 顶点着色
+    Uniform, // 单色填充
+    Texture, // 2D纹理映射
 };
 
 class JELLY_EXPORT Mapper : public Object
@@ -51,6 +52,8 @@ public:
     void SetColor(const std::array<float, 3>& color);
     std::array<float, 3> GetColor() const noexcept;
 
+    void SetTexture(std::shared_ptr<Texture> texture);
+
     void SetEnableLighting(bool enableLighting) noexcept;
     bool GetEnableLighting() const noexcept;
 
@@ -67,12 +70,12 @@ protected:
     std::unique_ptr<Drawable> m_drawable {};
 
     size_t m_pipelineKey {};
+    bool m_enableLighting {true};
 
-    ColorMode m_colorMode {ColorMode::UniformColor};
-    bool m_useUniformColor {false};
+    ColorMode m_colorMode {ColorMode::Uniform};
     std::array<float, 3> m_color {1., 1., 1.};
     vk::raii::DescriptorSets m_descriptorSets {nullptr};
     std::vector<BufferData> m_uniformBufferObjects {};
-    bool m_enableLighting {true};
+    std::shared_ptr<Texture> m_texture {};
 };
 } // namespace Jelly

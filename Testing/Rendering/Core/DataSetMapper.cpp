@@ -73,13 +73,13 @@ TEST(Test_DataSetMapper, renderingResult)
     auto mapper1 = std::make_shared<Jelly::DataSetMapper>();
     mapper1->SetDataSet(dataSet1);
     mapper1->SetColor({1.f, 0.f, 1.f});
-    mapper1->SetColorMode(Jelly::ColorMode::VertexColoring);
+    mapper1->SetColorMode(Jelly::ColorMode::Vertex);
     mapper1->SetEnableLighting(false);
 
     auto mapper2 = std::make_shared<Jelly::DataSetMapper>();
     mapper2->SetDataSet(dataSet2);
     mapper2->SetColor({1.f, 1.f, 0.f});
-    mapper2->SetColorMode(Jelly::ColorMode::UniformColor);
+    mapper2->SetColorMode(Jelly::ColorMode::Uniform);
     mapper2->SetEnableLighting(false);
 
     auto actor1 = std::make_shared<Jelly::Actor3D>();
