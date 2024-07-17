@@ -43,7 +43,7 @@ public:
     /// @brief 根据包围盒以及相机位置重置相机的裁剪面
     void ResetCameraClipRange() const noexcept;
 
-    std::shared_ptr<Camera> GetCamera() const noexcept;
+    const std::shared_ptr<Camera>& GetCamera() const noexcept;
 
     std::array<double, 6> GetVisibleActorBounds() const noexcept;
 

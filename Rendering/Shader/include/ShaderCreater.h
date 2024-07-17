@@ -22,8 +22,8 @@ class JELLY_EXPORT ShaderCreater : public Object
 public:
     ShaderCreater();
 
-    std::string GetVertexShaderCode() const noexcept;
-    std::string GetFragmentShaderCode() const noexcept;
+    const std::string& GetVertexShaderCode() const noexcept;
+    const std::string& GetFragmentShaderCode() const noexcept;
 
     void AddVertexColor(uint32_t location);
     void AddUniformColor(uint32_t location);

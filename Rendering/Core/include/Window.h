@@ -43,16 +43,16 @@ public:
 
     const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
 
-    std::any GetNativeWindow() const noexcept;
+    const std::any& GetNativeWindow() const noexcept;
 
-    vk::Extent2D GetSize() const noexcept;
+    const vk::Extent2D& GetSize() const noexcept;
 
     /// @brief 返回上一帧的渲染结果
     /// @return 格式为 RGBA 原点在左上角
     /// @note 需要先将 EnableGetRenderingResult 开启
     std::vector<uint8_t> GetLastRenderingResult() const noexcept;
 
-    std::shared_ptr<Device> GetDevice() const noexcept;
+    const std::shared_ptr<Device>& GetDevice() const noexcept;
 
     bool HasInitialized() const noexcept;
 
@@ -79,10 +79,9 @@ private:
     void RecreateSwapChain() noexcept;
 
 protected:
-    uint32_t m_width {800};
-    uint32_t m_height {600};
     std::any m_window {};
     std::string m_title {"Jelly"};
+    vk::Extent2D m_extent {800, 600};
     std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
 

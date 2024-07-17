@@ -56,7 +56,7 @@ public:
     ColorMode GetColorMode() const noexcept;
 
     void SetColor(const std::array<float, 3>& color);
-    std::array<float, 3> GetColor() const noexcept;
+    const std::array<float, 3>& GetColor() const noexcept;
 
     void SetTexture(std::shared_ptr<Texture> texture);
 

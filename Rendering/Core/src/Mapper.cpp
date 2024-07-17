@@ -188,7 +188,7 @@ void Mapper::SetColor(const std::array<float, 3>& color)
     }
 }
 
-std::array<float, 3> Mapper::GetColor() const noexcept
+const std::array<float, 3>& Mapper::GetColor() const noexcept
 {
     return m_color;
 }

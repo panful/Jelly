@@ -30,13 +30,12 @@ void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
 
 void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 {
-    if ((width == m_width && height == m_height) || width == 0 || height == 0)
+    if ((width == m_extent.width && height == m_extent.height) || width == 0 || height == 0)
     {
         return;
     }
 
-    m_width  = width;
-    m_height = height;
+    m_extent = vk::Extent2D {width, height};
 
     if (m_initialized)
     {
@@ -64,12 +63,12 @@ const std::vector<std::shared_ptr<Renderer>>& Window::GetAllRenderers() const no
     return m_viewer->GetAllRenderers();
 }
 
-vk::Extent2D Window::GetSize() const noexcept
+const vk::Extent2D& Window::GetSize() const noexcept
 {
-    return {m_width, m_height};
+    return m_extent;
 }
 
-std::any Window::GetNativeWindow() const noexcept
+const std::any& Window::GetNativeWindow() const noexcept
 {
     return m_window;
 }
@@ -86,7 +85,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     ImageData imageData(
         m_device,
         m_swapChainData.GetColorFormat(),
-        vk::Extent2D {m_width, m_height},
+        m_extent,
         vk::ImageTiling::eLinear,
         vk::ImageUsageFlagBits::eTransferDst,
         vk::ImageLayout::eUndefined,
@@ -116,7 +115,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
             vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
             std::array<vk::Offset3D, 2> offsets {
                 vk::Offset3D(0, 0, 0),
-                vk::Offset3D(static_cast<int32_t>(this->m_width), static_cast<int32_t>(this->m_height), 1)
+                vk::Offset3D(static_cast<int32_t>(this->m_extent.width), static_cast<int32_t>(this->m_extent.height), 1)
             };
             vk::ImageBlit imageBlit(imageSubresourceLayers, offsets, imageSubresourceLayers, offsets);
             cmd.blitImage(
@@ -136,7 +135,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
                 vk::Offset3D(),
                 imageSubresourceLayers,
                 vk::Offset3D(),
-                vk::Extent3D(this->m_width, this->m_height, 1)
+                vk::Extent3D(this->m_extent, 1)
             );
             cmd.copyImage(
                 inImage, vk::ImageLayout::eTransferSrcOptimal, outImage, vk::ImageLayout::eTransferDstOptimal, imageCopy
@@ -156,11 +155,11 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     auto pixels            = reinterpret_cast<uint8_t*>(imageData.GetDeviceMemory().mapMemory(0, vk::WholeSize, {}));
     pixels += subResourceLayout.offset;
 
-    retVal.reserve(m_width * m_height * 4);
-    for (uint32_t y = 0; y < m_height; y++)
+    retVal.reserve(m_extent.width * m_extent.height * 4);
+    for (uint32_t y = 0; y < m_extent.height; y++)
     {
         auto row = pixels;
-        for (uint32_t x = 0; x < m_width; x++)
+        for (uint32_t x = 0; x < m_extent.width; x++)
         {
             retVal.emplace_back(*(row + 2));
             retVal.emplace_back(*(row + 1));
@@ -176,7 +175,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     return retVal;
 }
 
-std::shared_ptr<Device> Window::GetDevice() const noexcept
+const std::shared_ptr<Device>& Window::GetDevice() const noexcept
 {
     return m_device;
 }
@@ -255,17 +254,16 @@ void Window::Present() const noexcept
     clearValues[0].color = vk::ClearColorValue(0.f, 0.f, 0.f, 0.f);
 
     vk::RenderPassBeginInfo renderPassBeginInfo(
-        m_renderPass,
-        m_framebuffers[m_currentFrameIndex],
-        vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)),
-        clearValues
+        m_renderPass, m_framebuffers[m_currentFrameIndex], vk::Rect2D(vk::Offset2D(0, 0), m_extent), clearValues
     );
 
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
     cmd.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
     cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, m_pipeline->GetPipeline());
-    cmd.setViewport(0, vk::Viewport(0.0f, 0.0f, static_cast<float>(m_width), static_cast<float>(m_height), 0.f, 1.f));
-    cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), vk::Extent2D(m_width, m_height)));
+    cmd.setViewport(
+        0, vk::Viewport(0.0f, 0.0f, static_cast<float>(m_extent.width), static_cast<float>(m_extent.height), 0.f, 1.f)
+    );
+    cmd.setScissor(0, vk::Rect2D(vk::Offset2D(0, 0), m_extent));
     cmd.bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics,
         m_pipeline->GetPipelineLayout(),
@@ -306,11 +304,10 @@ void Window::InitSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData = SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, nullptr, usage);
+    m_swapChainData = SwapChainData(m_device, m_surface, m_extent, nullptr, usage);
 
     // 创建的窗口大小可能不等于期望的大小
-    m_width  = m_swapChainData.GetExtent().width;
-    m_height = m_swapChainData.GetExtent().height;
+    m_extent = vk::Extent2D {m_swapChainData.GetExtent().width, m_swapChainData.GetExtent().height};
 }
 
 void Window::RecreateSwapChain() noexcept
@@ -319,8 +316,7 @@ void Window::RecreateSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData =
-        SwapChainData(m_device, m_surface, vk::Extent2D {m_width, m_height}, &m_swapChainData.GetSwapChain(), usage);
+    m_swapChainData = SwapChainData(m_device, m_surface, m_extent, &m_swapChainData.GetSwapChain(), usage);
 
     const auto numberOfImages = m_swapChainData.GetNumberOfImages();
     m_framebuffers.clear();
@@ -328,7 +324,8 @@ void Window::RecreateSwapChain() noexcept
     {
         std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
+            m_device->GetDevice(),
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
 }
@@ -372,7 +369,8 @@ void Window::InitFramebuffers() noexcept
     {
         std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(), vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_width, m_height, 1)
+            m_device->GetDevice(),
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
 }
@@ -458,7 +456,7 @@ void Window::InitPipeline() noexcept
 
 void Window::InitViewer() noexcept
 {
-    m_viewer->Init(vk::Extent2D {m_width, m_height});
+    m_viewer->Init(m_extent);
 }
 
 void Window::InitDescriptorSets() noexcept

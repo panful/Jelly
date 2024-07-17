@@ -46,10 +46,10 @@ public:
     bool HasTexCoordData() const noexcept;
     bool HasIndexData() const noexcept;
 
-    std::shared_ptr<DataArray> GetPoints() const noexcept;
-    std::shared_ptr<DataArray> GetColors() const noexcept;
-    std::shared_ptr<DataArray> GetIndices() const noexcept;
-    std::shared_ptr<DataArray> GetTexCoords() const noexcept;
+    const std::shared_ptr<DataArray>& GetPoints() const noexcept;
+    const std::shared_ptr<DataArray>& GetColors() const noexcept;
+    const std::shared_ptr<DataArray>& GetIndices() const noexcept;
+    const std::shared_ptr<DataArray>& GetTexCoords() const noexcept;
 
     /// @brief 获取 AABB(Axis-Aligned Bounding Box)
     /// @return {xMin xMax yMin yMax zMin zMax}

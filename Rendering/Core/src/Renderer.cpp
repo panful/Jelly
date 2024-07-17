@@ -162,7 +162,7 @@ void Renderer::ResetCameraClipRange() const noexcept
     m_camera->SetClipRange(range);
 }
 
-std::shared_ptr<Camera> Renderer::GetCamera() const noexcept
+const std::shared_ptr<Camera>& Renderer::GetCamera() const noexcept
 {
     return m_camera;
 }

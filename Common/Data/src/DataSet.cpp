@@ -55,22 +55,22 @@ bool DataSet::HasIndexData() const noexcept
     return m_indices != nullptr && !m_indices->Empty();
 }
 
-std::shared_ptr<DataArray> DataSet::GetPoints() const noexcept
+const std::shared_ptr<DataArray>& DataSet::GetPoints() const noexcept
 {
     return m_points;
 }
 
-std::shared_ptr<DataArray> DataSet::GetColors() const noexcept
+const std::shared_ptr<DataArray>& DataSet::GetColors() const noexcept
 {
     return m_colors;
 }
 
-std::shared_ptr<DataArray> DataSet::GetTexCoords() const noexcept
+const std::shared_ptr<DataArray>& DataSet::GetTexCoords() const noexcept
 {
     return m_texCoords;
 }
 
-std::shared_ptr<DataArray> DataSet::GetIndices() const noexcept
+const std::shared_ptr<DataArray>& DataSet::GetIndices() const noexcept
 {
     return m_indices;
 }

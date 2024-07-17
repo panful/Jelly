@@ -8,7 +8,7 @@ void Interactor::SetWindow(std::shared_ptr<Window> window) noexcept
     m_window = std::move(window);
 }
 
-std::shared_ptr<Window> Interactor::GetWindow() const noexcept
+const std::shared_ptr<Window>& Interactor::GetWindow() const noexcept
 {
     return m_window;
 }

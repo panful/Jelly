@@ -94,8 +94,8 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
         m_shaderCreater->AddFollowCameraLight(location++);
     }
 
-    auto vertCode = m_shaderCreater->GetVertexShaderCode();
-    auto fragCode = m_shaderCreater->GetFragmentShaderCode();
+    auto&& vertCode = m_shaderCreater->GetVertexShaderCode();
+    auto&& fragCode = m_shaderCreater->GetFragmentShaderCode();
 
     auto vertSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
     auto fragSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);

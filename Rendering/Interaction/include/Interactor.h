@@ -27,7 +27,7 @@ public:
     virtual void Start() noexcept = 0;
 
     void SetWindow(std::shared_ptr<Window> window) noexcept;
-    std::shared_ptr<Window> GetWindow() const noexcept;
+    const std::shared_ptr<Window>& GetWindow() const noexcept;
 
     void SetInteractorStyle(std::shared_ptr<InteractorStyle> interactorStyle) noexcept;
 
