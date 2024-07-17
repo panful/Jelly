@@ -24,3 +24,4 @@
 - [x] uniform 使用 CopyToDevice 设置数据时，应该只 mapMemory 一次，保证释放 uniform 之前 unMapMemory 就行
 - [ ] 当相机到特殊位置后，actor 还是会被相机近平面裁剪，导致一部分看不到
 - [ ] 跟随相机的光照，在某些时候会有颜色值为(1,1,1,,1)的片段，白色的光点
+- [ ] 参数为 std::nullptr_t 的构造函数标记为 = default
