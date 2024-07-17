@@ -91,6 +91,34 @@ void ShaderCreater::AddUniformColor(uint32_t location)
     ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "vec4(uColor.color, 1.)");
 }
 
+void ShaderCreater::AddTexture2DColor(uint32_t location, uint32_t binding)
+{
+    ReplaceValue(
+        m_vertexShaderCode,
+        "// Layout::TexCoord",
+        std::format(
+            "layout(location = {}) in vec2 inTexCoord;\nlayout(location = {}) out vec2 vsOutTexCoord;",
+            location,
+            location
+        )
+    );
+
+    ReplaceValue(m_vertexShaderCode, "// VS::Main Begin", "// VS::Main Begin\n    vsOutTexCoord = inTexCoord;");
+
+    ReplaceValue(
+        m_fragmentShaderCode,
+        "// FS::In",
+        std::format(
+            "// FS::In\nlayout(location = {}) in vec2 fsInTexCoord;\nlayout(binding = {}) uniform sampler2D "
+            "uTexSampler2D;",
+            location,
+            binding
+        )
+    );
+
+    ReplaceValue(m_fragmentShaderCode, "FragColor = ", ";", "texture(uTexSampler2D, fsInTexCoord)");
+}
+
 void ShaderCreater::AddFollowCameraLight(uint32_t location)
 {
     ReplaceValue(
@@ -115,7 +143,8 @@ void ShaderCreater::AddFollowCameraLight(uint32_t location)
         m_fragmentShaderCode,
         "// FS::Main End",
         "vec3 dx = dFdx(fsInViewPos);\n    vec3 dy = dFdy(fsInViewPos);\n    vec3 normal = "
-        "normalize(cross(dx, dy));\n    vec3 lightColor = vec3(1.);\n    lightColor *= max(0., -normal.z);\n\n    FragColor = vec4(FragColor.xyz * lightColor, 1.);\n    // FS::Main End"
+        "normalize(cross(dx, dy));\n    vec3 lightColor = vec3(1.);\n    lightColor *= max(0., -normal.z);\n\n    "
+        "FragColor = vec4(FragColor.xyz * lightColor, 1.);\n    // FS::Main End"
     );
 }
 

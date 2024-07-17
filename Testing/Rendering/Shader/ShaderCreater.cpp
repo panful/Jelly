@@ -423,3 +423,122 @@ void main()
     EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
     EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());
 }
+
+TEST(Test_ShaderGenerator, addTexture2DColor)
+{
+    std::string vertCode = R"(// Vertex Shader
+#version 450
+
+layout(location = 0) in vec3 inPos;
+
+// Layout::Color
+
+// Layout::Normal
+
+layout(location = 7) in vec2 inTexCoord;
+layout(location = 7) out vec2 vsOutTexCoord;
+
+// VS::Out
+
+layout(push_constant) uniform PushConstant {
+    mat4 model;
+    mat4 view;
+    mat4 proj;
+} pcMVP;
+
+void main()
+{
+    // VS::Main Begin
+    vsOutTexCoord = inTexCoord;
+    gl_Position = pcMVP.proj * pcMVP.view * pcMVP.model * vec4(inPos, 1.);
+    // VS::Main End
+})";
+
+    std::string fragCode = R"(// Fragment Shader
+#version 450
+
+// FS::In
+layout(location = 7) in vec2 fsInTexCoord;
+layout(binding = 3) uniform sampler2D uTexSampler2D;
+
+// FS::Out
+layout(location = 0) out vec4 FragColor;
+
+void main()
+{
+    // FS::Main Begin
+    FragColor = texture(uTexSampler2D, fsInTexCoord);
+    // FS::Main End
+})";
+
+    Jelly::ShaderCreater generator {};
+    generator.AddTexture2DColor(7, 3);
+
+    EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
+    EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());
+}
+
+TEST(Test_ShaderGenerator, addTexture2DColor_addFollowCameraLight)
+{
+    std::string vertCode = R"(// Vertex Shader
+#version 450
+
+layout(location = 0) in vec3 inPos;
+
+// Layout::Color
+
+// Layout::Normal
+
+layout(location = 2) in vec2 inTexCoord;
+layout(location = 2) out vec2 vsOutTexCoord;
+
+// VS::Out
+layout(location = 5) out vec3 vsOutViewPos;
+
+layout(push_constant) uniform PushConstant {
+    mat4 model;
+    mat4 view;
+    mat4 proj;
+} pcMVP;
+
+void main()
+{
+    // VS::Main Begin
+    vsOutViewPos = vec3(pcMVP.view * pcMVP.model * vec4(inPos, 1.));
+    vsOutTexCoord = inTexCoord;
+    gl_Position = pcMVP.proj * pcMVP.view * pcMVP.model * vec4(inPos, 1.);
+    // VS::Main End
+})";
+
+    std::string fragCode = R"(// Fragment Shader
+#version 450
+
+// FS::In
+layout(location = 5) in vec3 fsInViewPos;
+layout(location = 2) in vec2 fsInTexCoord;
+layout(binding = 3) uniform sampler2D uTexSampler2D;
+
+// FS::Out
+layout(location = 0) out vec4 FragColor;
+
+void main()
+{
+    // FS::Main Begin
+    FragColor = texture(uTexSampler2D, fsInTexCoord);
+    vec3 dx = dFdx(fsInViewPos);
+    vec3 dy = dFdy(fsInViewPos);
+    vec3 normal = normalize(cross(dx, dy));
+    vec3 lightColor = vec3(1.);
+    lightColor *= max(0., -normal.z);
+
+    FragColor = vec4(FragColor.xyz * lightColor, 1.);
+    // FS::Main End
+})";
+
+    Jelly::ShaderCreater generator {};
+    generator.AddTexture2DColor(2, 3);
+    generator.AddFollowCameraLight(5);
+
+    EXPECT_EQ(vertCode, generator.GetVertexShaderCode());
+    EXPECT_EQ(fragCode, generator.GetFragmentShaderCode());
+}

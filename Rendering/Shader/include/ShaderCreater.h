@@ -27,6 +27,7 @@ public:
 
     void AddVertexColor(uint32_t location);
     void AddUniformColor(uint32_t location);
+    void AddTexture2DColor(uint32_t location, uint32_t binding);
     void AddFollowCameraLight(uint32_t location);
 
 private:
