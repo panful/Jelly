@@ -15,6 +15,11 @@ void DataSet::SetColors(std::shared_ptr<DataArray> colors) noexcept
     m_colors = std::move(colors);
 }
 
+void DataSet::SetTexCoords(std::shared_ptr<DataArray> texCoords) noexcept
+{
+    m_texCoords = std::move(texCoords);
+}
+
 void DataSet::SetIndices(std::shared_ptr<DataArray> indices) noexcept
 {
     m_indices = std::move(indices);
@@ -40,6 +45,11 @@ bool DataSet::HasColorData() const noexcept
     return m_colors != nullptr && !m_colors->Empty();
 }
 
+bool DataSet::HasTexCoordData() const noexcept
+{
+    return m_texCoords != nullptr && !m_texCoords->Empty();
+}
+
 bool DataSet::HasIndexData() const noexcept
 {
     return m_indices != nullptr && !m_indices->Empty();
@@ -53,6 +63,11 @@ std::shared_ptr<DataArray> DataSet::GetPoints() const noexcept
 std::shared_ptr<DataArray> DataSet::GetColors() const noexcept
 {
     return m_colors;
+}
+
+std::shared_ptr<DataArray> DataSet::GetTexCoords() const noexcept
+{
+    return m_texCoords;
 }
 
 std::shared_ptr<DataArray> DataSet::GetIndices() const noexcept
