@@ -35,6 +35,12 @@ enum class ColorMode : uint8_t
 
 class JELLY_EXPORT Mapper : public Object
 {
+    struct DescriptorSets
+    {
+        bool initialized {false};
+        vk::raii::DescriptorSets descriptorSets {nullptr};
+    };
+
 public:
     void Render(
         const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
@@ -72,9 +78,10 @@ protected:
     size_t m_pipelineKey {};
     bool m_enableLighting {true};
 
-    ColorMode m_colorMode {ColorMode::Uniform};
     std::array<float, 3> m_color {1., 1., 1.};
-    vk::raii::DescriptorSets m_descriptorSets {nullptr};
+    ColorMode m_colorMode {ColorMode::Uniform};
+    DescriptorSets m_uniformColorDescriptorSets {};
+    DescriptorSets m_textureColorDescriptorSets {};
     std::vector<BufferData> m_uniformBufferObjects {};
     std::shared_ptr<Texture> m_texture {};
 };

@@ -26,3 +26,4 @@
 - [ ] 跟随相机的光照，在某些时候会有颜色值为(1,1,1,,1)的片段，白色的光点
 - [ ] 参数为 std::nullptr_t 的构造函数标记为 = default
 - [ ] DataSet 暂时只支持 float
+- [ ] Mapper 中的 Drawable 不需要每次 Changed 之后都创建

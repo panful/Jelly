@@ -11,7 +11,11 @@ void Mapper::Render(
     const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
 ) noexcept
 {
-    Configure(viewer);
+    if (IsChanged())
+    {
+        Configure(viewer);
+        ResetChanged();
+    }
 
     DeviceRender(commandBuffer, viewer, renderer);
 }
@@ -21,17 +25,30 @@ void Mapper::DeviceRender(
 )
 {
     auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
-
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
-    if (ColorMode::Texture == m_colorMode || ColorMode::Uniform == m_colorMode)
+
+    switch (m_colorMode)
     {
-        commandBuffer.bindDescriptorSets(
-            vk::PipelineBindPoint::eGraphics,
-            pipeline->GetPipelineLayout(),
-            0,
-            {m_descriptorSets[viewer->GetCurrentFrameIndex()]},
-            nullptr
-        );
+        case ColorMode::Texture:
+            commandBuffer.bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics,
+                pipeline->GetPipelineLayout(),
+                0,
+                {m_textureColorDescriptorSets.descriptorSets[viewer->GetCurrentFrameIndex()]},
+                nullptr
+            );
+            break;
+        case ColorMode::Uniform:
+            commandBuffer.bindDescriptorSets(
+                vk::PipelineBindPoint::eGraphics,
+                pipeline->GetPipelineLayout(),
+                0,
+                {m_uniformColorDescriptorSets.descriptorSets[viewer->GetCurrentFrameIndex()]},
+                nullptr
+            );
+            break;
+        default:
+            break;
     }
 
     std::array<float, 16> model {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
@@ -60,70 +77,101 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
         m_device->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(m_device, pipelineInfo));
     }
 
-    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-        viewer->GetMaximumOfFrames(), m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
-    );
-
-    m_descriptorSets =
-        vk::raii::DescriptorSets(m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts});
-
-    if (ColorMode::Texture == m_colorMode)
+    switch (m_colorMode)
     {
-        vk::DescriptorImageInfo descriptorImageInfo(
-            m_texture->GetSampler(), m_texture->GetImageData().GetImageView(), vk::ImageLayout::eShaderReadOnlyOptimal
-        );
+        case ColorMode::Texture:
+            if (!m_textureColorDescriptorSets.initialized)
+            {
+                std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
+                    viewer->GetMaximumOfFrames(),
+                    m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                );
 
-        for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
-        {
-            std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
-                vk::WriteDescriptorSet {
-                                        m_descriptorSets[i],
-                                        pipelineInfo.descriptorSetLayoutBindings[0].binding,
-                                        0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
-                                        descriptorImageInfo, nullptr
+                m_textureColorDescriptorSets.descriptorSets = vk::raii::DescriptorSets(
+                    m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
+                );
+
+                vk::DescriptorImageInfo descriptorImageInfo(
+                    m_texture->GetSampler(),
+                    m_texture->GetImageData().GetImageView(),
+                    vk::ImageLayout::eShaderReadOnlyOptimal
+                );
+
+                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                {
+                    // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
+                    std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
+                        vk::WriteDescriptorSet {
+                                                m_textureColorDescriptorSets.descriptorSets[i],
+                                                pipelineInfo.descriptorSetLayoutBindings[0].binding,
+                                                0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
+                                                descriptorImageInfo, nullptr
+                        }
+                    };
+                    m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
                 }
-            };
-            m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
-        }
-    }
 
-    if (ColorMode::Uniform == m_colorMode)
-    {
-        m_uniformBufferObjects.reserve(viewer->GetMaximumOfFrames());
-        for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
-        {
-            m_uniformBufferObjects.emplace_back(
-                m_device,
-                sizeof(m_color),
-                vk::BufferUsageFlagBits::eUniformBuffer,
-                vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
-                true
-            );
+                m_textureColorDescriptorSets.initialized = true;
+            }
+            break;
+        case ColorMode::Uniform:
+            if (!m_uniformColorDescriptorSets.initialized)
+            {
+                std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
+                    viewer->GetMaximumOfFrames(),
+                    m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                );
 
-            std::memcpy(m_uniformBufferObjects[i].GetMemoryPointer(), m_color.data(), sizeof(m_color));
-        }
+                m_uniformColorDescriptorSets.descriptorSets = vk::raii::DescriptorSets(
+                    m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
+                );
 
-        for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
-        {
-            vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i].GetBuffer(), 0, sizeof(m_color));
+                m_uniformBufferObjects.clear();
+                m_uniformBufferObjects.reserve(viewer->GetMaximumOfFrames());
+                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                {
+                    m_uniformBufferObjects.emplace_back(
+                        m_device,
+                        sizeof(m_color),
+                        vk::BufferUsageFlagBits::eUniformBuffer,
+                        vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
+                        true
+                    );
 
-            // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
-            std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
-                vk::WriteDescriptorSet {
-                                        m_descriptorSets[i],
-                                        pipelineInfo.descriptorSetLayoutBindings[0].binding,
-                                        0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
-                                        nullptr, dbInfo
+                    std::memcpy(m_uniformBufferObjects[i].GetMemoryPointer(), m_color.data(), sizeof(m_color));
                 }
-            };
-            m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
-        }
+
+                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                {
+                    vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i].GetBuffer(), 0, sizeof(m_color));
+
+                    // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
+                    std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
+                        vk::WriteDescriptorSet {
+                                                m_uniformColorDescriptorSets.descriptorSets[i],
+                                                pipelineInfo.descriptorSetLayoutBindings[0].binding,
+                                                0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
+                                                nullptr, dbInfo
+                        }
+                    };
+                    m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+                }
+
+                m_uniformColorDescriptorSets.initialized = true;
+            }
+            break;
+        default:
+            break;
     }
 }
 
 void Mapper::SetColorMode(ColorMode colorMode) noexcept
 {
-    m_colorMode = colorMode;
+    if (m_colorMode != colorMode)
+    {
+        m_colorMode = colorMode;
+        Changed();
+    }
 }
 
 ColorMode Mapper::GetColorMode() const noexcept
@@ -133,7 +181,11 @@ ColorMode Mapper::GetColorMode() const noexcept
 
 void Mapper::SetColor(const std::array<float, 3>& color)
 {
-    m_color = color;
+    if (m_color != color)
+    {
+        m_color = color;
+        Changed();
+    }
 }
 
 std::array<float, 3> Mapper::GetColor() const noexcept
@@ -143,12 +195,20 @@ std::array<float, 3> Mapper::GetColor() const noexcept
 
 void Mapper::SetTexture(std::shared_ptr<Texture> texture)
 {
-    m_texture = std::move(texture);
+    if (m_texture != texture)
+    {
+        m_texture = std::move(texture);
+        Changed();
+    }
 }
 
 void Mapper::SetEnableLighting(bool enableLighting) noexcept
 {
-    m_enableLighting = enableLighting;
+    if (m_enableLighting != enableLighting)
+    {
+        m_enableLighting = enableLighting;
+        Changed();
+    }
 }
 
 bool Mapper::GetEnableLighting() const noexcept
