@@ -29,3 +29,4 @@
 - [ ] Mapper 中的 Drawable 不需要每次 Changed 之后都创建
 - [ ] 将所有类都继承自 Object 确实没必要继承的都改为私有类
 - [ ] 所有栈上的成员变量改为 std::unique_ptr
+- [ ] 所有 Get 函数，如果返回的是成员变量，返回类型都改为 常引用 const&

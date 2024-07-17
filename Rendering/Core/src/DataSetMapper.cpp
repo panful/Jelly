@@ -138,3 +138,8 @@ void DataSetMapper::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept
     m_dataSet = std::move(dataSet);
     Changed();
 }
+
+const std::shared_ptr<DataSet>& DataSetMapper::GetDataSet() const noexcept
+{
+    return m_dataSet;
+}

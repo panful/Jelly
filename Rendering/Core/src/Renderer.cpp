@@ -63,6 +63,11 @@ void Renderer::AddActor(std::shared_ptr<Actor> actor)
     m_actors.emplace_back(std::move(actor));
 }
 
+const std::vector<std::shared_ptr<Actor>>& Renderer::GetAllActors() const noexcept
+{
+    return m_actors;
+}
+
 void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
 {
     m_device = std::move(device);

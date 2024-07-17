@@ -30,7 +30,9 @@ public:
     ) noexcept = 0;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
+
     void SetMapper(std::shared_ptr<Mapper> mapper) noexcept;
+    const std::shared_ptr<Mapper>& GetMapper() const noexcept;
 
     void SetVisibility(bool visible) noexcept;
     bool GetVisibility() const noexcept;

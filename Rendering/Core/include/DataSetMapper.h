@@ -27,6 +27,8 @@ public:
 
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
 
+    const std::shared_ptr<DataSet>& GetDataSet() const noexcept;
+
 private:
     std::shared_ptr<DataSet> m_dataSet {};
     std::unique_ptr<ShaderCreater> m_shaderCreater {std::make_unique<ShaderCreater>()};

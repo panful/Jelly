@@ -15,6 +15,11 @@ void Actor::SetMapper(std::shared_ptr<Mapper> mapper) noexcept
     m_mapper->SetDevice(m_device);
 }
 
+const std::shared_ptr<Mapper>& Actor::GetMapper() const noexcept
+{
+    return m_mapper;
+}
+
 void Actor::SetVisibility(bool visible) noexcept
 {
     if (m_visibility != visible)
