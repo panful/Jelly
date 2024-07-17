@@ -12,6 +12,7 @@
 #pragma once
 
 #include "BufferData.h"
+#include "Object.h"
 #include <memory>
 #include <vector>
 #include <vulkan/vulkan_raii.hpp>
@@ -21,32 +22,37 @@ class Device;
 class DataSet;
 enum class ColorMode : uint8_t;
 
-class Drawable
+class JELLY_EXPORT Drawable : public Object
 {
+    struct PrivateBufferData
+    {
+        bool initialized {false};
+        std::unique_ptr<BufferData> bufferData {};
+    };
+
 public:
-    Drawable(std::shared_ptr<Device> device, std::shared_ptr<DataSet> dataSet, ColorMode colorMode);
-
-    Drawable(Drawable&&) noexcept = default;
-
-    Drawable& operator=(Drawable&&) noexcept = default;
-
-    Drawable(const Drawable&) = delete;
-
-    Drawable& operator=(const Drawable&) = delete;
-
-    ~Drawable() noexcept = default;
-
     std::vector<vk::Buffer> GetVertexBuffers() const noexcept;
     std::vector<vk::DeviceSize> GetVertexOffsets() const noexcept;
 
     vk::Buffer GetIndexBuffer() const noexcept;
-
     uint32_t GetIndexCount() const noexcept;
     vk::IndexType GetIndexType() const noexcept;
 
+    void SetDevice(std::shared_ptr<Device> device) noexcept;
+    void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
+    void SetColorMode(ColorMode colorMode) noexcept;
+
+    void Update();
+
 private:
-    std::vector<std::unique_ptr<BufferData>> m_vertexBufferDatas {};
-    std::unique_ptr<BufferData> m_indexBufferData {};
+    std::shared_ptr<Device> m_device {};
+    std::shared_ptr<DataSet> m_dataSet {};
+    ColorMode m_colorMode {};
+
+    std::unique_ptr<PrivateBufferData> m_vertexBufferData {std::make_unique<PrivateBufferData>()};
+    std::unique_ptr<PrivateBufferData> m_colorBufferData {std::make_unique<PrivateBufferData>()};
+    std::unique_ptr<PrivateBufferData> m_texCoordBufferData {std::make_unique<PrivateBufferData>()};
+    std::unique_ptr<PrivateBufferData> m_indexBufferData {std::make_unique<PrivateBufferData>()};
 
     uint32_t m_indexCount {};
     vk::IndexType m_indexType {};

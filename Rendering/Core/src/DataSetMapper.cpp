@@ -121,7 +121,16 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
     };
 
     BuildPipeline(viewer, pipelineInfo);
-    m_drawable = std::make_unique<Drawable>(m_device, m_dataSet, m_colorMode);
+
+    if (!m_drawable)
+    {
+        m_drawable = std::make_unique<Drawable>();
+    }
+
+    m_drawable->SetDevice(m_device);
+    m_drawable->SetDataSet(m_dataSet);
+    m_drawable->SetColorMode(m_colorMode);
+    m_drawable->Update();
 }
 
 void DataSetMapper::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept

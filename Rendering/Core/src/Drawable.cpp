@@ -8,90 +8,138 @@
 
 using namespace Jelly;
 
-Drawable::Drawable(std::shared_ptr<Device> device, std::shared_ptr<DataSet> dataSet, ColorMode colorMode)
-    : m_indexBufferData(std::make_unique<BufferData>(
-          device,
-          dataSet->GetIndices()->GetDataTypeSize() * dataSet->GetIndices()->GetElementCount(),
-          vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-          vk::MemoryPropertyFlagBits::eDeviceLocal
-      ))
-    , m_indexCount(dataSet->GetIndices()->GetElementCount())
+void Drawable::SetDevice(std::shared_ptr<Device> device) noexcept
 {
-    auto pointVertexBufferData = std::make_unique<BufferData>(
-        device,
-        dataSet->GetPoints()->GetElementCount() * sizeof(float),
-        vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-        vk::MemoryPropertyFlagBits::eDeviceLocal
-    );
-    pointVertexBufferData->Upload(
-        device,
-        static_cast<const float*>(dataSet->GetPoints()->GetVoidPointer()),
-        dataSet->GetPoints()->GetElementCount()
-    );
+    m_device = std::move(device);
+}
 
-    m_vertexBufferDatas.emplace_back(std::move(pointVertexBufferData));
-
-    if (ColorMode::Vertex == colorMode && dataSet->HasColorData())
+void Drawable::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept
+{
+    if (m_dataSet != dataSet)
     {
-        auto colorVertexBufferData = std::make_unique<BufferData>(
-            device,
-            dataSet->GetColors()->GetElementCount() * sizeof(float),
-            vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        );
-        colorVertexBufferData->Upload(
-            device,
-            static_cast<const float*>(dataSet->GetColors()->GetVoidPointer()),
-            dataSet->GetColors()->GetElementCount()
-        );
-
-        m_vertexBufferDatas.emplace_back(std::move(colorVertexBufferData));
+        m_dataSet = std::move(dataSet);
+        Changed();
     }
-    else if (ColorMode::Vertex == colorMode && !dataSet->HasColorData())
+}
+
+void Drawable::SetColorMode(ColorMode colorMode) noexcept
+{
+    if (m_colorMode != colorMode)
     {
-        Logger::GetInstance()->Error("Color mode is Vertex, but not have color data");
+        m_colorMode = colorMode;
+        Changed();
     }
+}
 
-    if (ColorMode::Texture == colorMode && dataSet->HasTexCoordData())
+void Drawable::Update()
+{
+    if (IsChanged())
     {
-        auto texCoordVertexBufferData = std::make_unique<BufferData>(
-            device,
-            dataSet->GetTexCoords()->GetElementCount() * sizeof(float),
-            vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
-            vk::MemoryPropertyFlagBits::eDeviceLocal
-        );
-        texCoordVertexBufferData->Upload(
-            device,
-            static_cast<const float*>(dataSet->GetTexCoords()->GetVoidPointer()),
-            dataSet->GetTexCoords()->GetElementCount()
-        );
+        if (!m_indexBufferData->initialized)
+        {
+            m_indexBufferData->bufferData = std::make_unique<BufferData>(
+                m_device,
+                m_dataSet->GetIndices()->GetDataTypeSize() * m_dataSet->GetIndices()->GetElementCount(),
+                vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal
+            );
 
-        m_vertexBufferDatas.emplace_back(std::move(texCoordVertexBufferData));
-    }
-    else if (ColorMode::Texture == colorMode && !dataSet->HasTexCoordData())
-    {
-        Logger::GetInstance()->Error("Color mode is Texture, but not have color data");
-    }
+            m_indexBufferData->bufferData->Upload(
+                m_device,
+                static_cast<const uint32_t*>(m_dataSet->GetIndices()->GetVoidPointer()),
+                m_dataSet->GetIndices()->GetElementCount()
+            );
 
-    m_indexBufferData->Upload(
-        device,
-        static_cast<const uint32_t*>(dataSet->GetIndices()->GetVoidPointer()),
-        dataSet->GetIndices()->GetElementCount()
-    );
+            if (DataType::UnsignedInt != m_dataSet->GetIndices()->GetDataType())
+            {
+                Logger::GetInstance()->Error("Currently, only uint32_t type is supported");
+            }
 
-    if (DataType::UnsignedInt != dataSet->GetIndices()->GetDataType())
-    {
-        Logger::GetInstance()->Error("Currently, only uint32_t type is supported");
+            m_indexCount = m_dataSet->GetIndices()->GetElementCount();
+            m_indexType  = vk::IndexType::eUint32;
+
+            m_indexBufferData->initialized = true;
+        }
+
+        if (!m_vertexBufferData->initialized)
+        {
+            m_vertexBufferData->bufferData = std::make_unique<BufferData>(
+                m_device,
+                m_dataSet->GetPoints()->GetElementCount() * sizeof(float),
+                vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal
+            );
+
+            m_vertexBufferData->bufferData->Upload(
+                m_device,
+                static_cast<const float*>(m_dataSet->GetPoints()->GetVoidPointer()),
+                m_dataSet->GetPoints()->GetElementCount()
+            );
+
+            m_vertexBufferData->initialized = true;
+        }
+
+        if (!m_colorBufferData->initialized && ColorMode::Vertex == m_colorMode && m_dataSet->HasColorData())
+        {
+            m_colorBufferData->bufferData = std::make_unique<BufferData>(
+                m_device,
+                m_dataSet->GetColors()->GetElementCount() * sizeof(float),
+                vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal
+            );
+            m_colorBufferData->bufferData->Upload(
+                m_device,
+                static_cast<const float*>(m_dataSet->GetColors()->GetVoidPointer()),
+                m_dataSet->GetColors()->GetElementCount()
+            );
+
+            m_colorBufferData->initialized = true;
+        }
+        else if (ColorMode::Vertex == m_colorMode && !m_dataSet->HasColorData())
+        {
+            Logger::GetInstance()->Error("Color mode is Vertex, but not have color data");
+        }
+
+        if (!m_texCoordBufferData->initialized && ColorMode::Texture == m_colorMode && m_dataSet->HasTexCoordData())
+        {
+            m_texCoordBufferData->bufferData = std::make_unique<BufferData>(
+                m_device,
+                m_dataSet->GetTexCoords()->GetElementCount() * sizeof(float),
+                vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
+                vk::MemoryPropertyFlagBits::eDeviceLocal
+            );
+            m_texCoordBufferData->bufferData->Upload(
+                m_device,
+                static_cast<const float*>(m_dataSet->GetTexCoords()->GetVoidPointer()),
+                m_dataSet->GetTexCoords()->GetElementCount()
+            );
+
+            m_texCoordBufferData->initialized = true;
+        }
+        else if (ColorMode::Texture == m_colorMode && !m_dataSet->HasTexCoordData())
+        {
+            Logger::GetInstance()->Error("Color mode is Texture, but not have color data");
+        }
+
+        ResetChanged();
     }
-    m_indexType = vk::IndexType::eUint32;
 }
 
 std::vector<vk::Buffer> Drawable::GetVertexBuffers() const noexcept
 {
     std::vector<vk::Buffer> buffers {};
-    for (auto& vertexBufferData : m_vertexBufferDatas)
+    buffers.emplace_back(m_vertexBufferData->bufferData->GetBuffer());
+
+    switch (m_colorMode)
     {
-        buffers.emplace_back(vertexBufferData->GetBuffer());
+        case ColorMode::Texture:
+            buffers.emplace_back(m_texCoordBufferData->bufferData->GetBuffer());
+            break;
+        case ColorMode::Vertex:
+            buffers.emplace_back(m_colorBufferData->bufferData->GetBuffer());
+            break;
+        default:
+            break;
     }
 
     return buffers;
@@ -99,14 +147,24 @@ std::vector<vk::Buffer> Drawable::GetVertexBuffers() const noexcept
 
 std::vector<vk::DeviceSize> Drawable::GetVertexOffsets() const noexcept
 {
-    std::vector<vk::DeviceSize> offsets {};
-    offsets.resize(m_vertexBufferDatas.size(), 0);
+    std::vector<vk::DeviceSize> offsets {0};
+    switch (m_colorMode)
+    {
+        case ColorMode::Texture:
+            [[fallthrough]];
+        case ColorMode::Vertex:
+            offsets.emplace_back(0);
+            break;
+        default:
+            break;
+    }
+
     return offsets;
 }
 
 vk::Buffer Drawable::GetIndexBuffer() const noexcept
 {
-    return m_indexBufferData->GetBuffer();
+    return m_indexBufferData->bufferData->GetBuffer();
 }
 
 uint32_t Drawable::GetIndexCount() const noexcept
