@@ -32,3 +32,4 @@
 - [x] 所有栈上的成员变量改为 std::unique_ptr
 - [x] 所有 Get 函数，如果返回的是成员变量，返回类型都改为 常引用 const&
 - [x] 将Mapper的部分属性移动到Actor，Mapper执行Render()时，将Actor当作参数传入
+- [ ] 不支持动态修改 Actor 的纹理

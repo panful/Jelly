@@ -121,6 +121,17 @@ void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass&
         .renderPass                  = renderPass
     };
 
+    // FIXME 修改所有的uniform可能会有一些问题，也许上一帧还没绘制完，uniform 还需使用就被修改了
+    if (ColorMode::Uniform == m_colorMode && m_uniformColorDescriptorSets && m_uniformColorDescriptorSets->initialized)
+    {
+        for (auto i = 0u; i < maximumOfFrames; ++i)
+        {
+            std::memcpy(
+                m_uniformBufferObjects[i]->GetMemoryPointer(), actor->GetColor().data(), sizeof(actor->GetColor())
+            );
+        }
+    }
+
     BuildPipeline(maximumOfFrames, pipelineInfo, actor);
 
     if (!m_drawable)

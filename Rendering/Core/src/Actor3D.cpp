@@ -8,5 +8,11 @@ void Actor3D::Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* ren
 {
     Logger::GetInstance()->Debug();
 
+    if (IsChanged())
+    {
+        m_mapper->Changed();
+        ResetChanged();
+    }
+
     m_mapper->Render(commandBuffer, renderer, this);
 }
