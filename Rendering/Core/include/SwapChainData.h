@@ -12,13 +12,12 @@
 #pragma once
 
 #include "Device.h"
+#include "Object.h"
 
 namespace Jelly {
-class SwapChainData
+class SwapChainData : public Object
 {
 public:
-    SwapChainData(std::nullptr_t);
-
     SwapChainData(
         std::shared_ptr<Device> device,
         const vk::raii::SurfaceKHR& surface,
@@ -26,16 +25,6 @@ public:
         const vk::raii::SwapchainKHR* pOldSwapchain,
         vk::ImageUsageFlags usage
     );
-
-    SwapChainData(SwapChainData&&) noexcept = default;
-
-    SwapChainData& operator=(SwapChainData&&) noexcept = default;
-
-    SwapChainData(const SwapChainData&) = delete;
-
-    SwapChainData& operator=(const SwapChainData&) = delete;
-
-    ~SwapChainData() noexcept = default;
 
     uint32_t GetNumberOfImages() const noexcept;
     vk::Format GetColorFormat() const noexcept;

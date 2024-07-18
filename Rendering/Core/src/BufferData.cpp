@@ -2,10 +2,6 @@
 
 using namespace Jelly;
 
-BufferData::BufferData(std::nullptr_t) noexcept
-{
-}
-
 BufferData::BufferData(
     std::shared_ptr<Device> device,
     vk::DeviceSize size,

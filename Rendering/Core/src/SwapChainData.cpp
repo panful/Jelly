@@ -6,10 +6,6 @@
 
 using namespace Jelly;
 
-SwapChainData::SwapChainData(std::nullptr_t)
-{
-}
-
 SwapChainData::SwapChainData(
     std::shared_ptr<Device> device,
     const vk::raii::SurfaceKHR& surface,

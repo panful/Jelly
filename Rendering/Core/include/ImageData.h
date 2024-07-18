@@ -11,18 +11,16 @@
 
 #pragma once
 
-#include "GlobalExport.h"
+#include "Object.h"
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
 class Device;
 
-class JELLY_EXPORT ImageData
+class JELLY_EXPORT ImageData : public Object
 {
 public:
-    ImageData(std::nullptr_t);
-
     ImageData(
         std::shared_ptr<Device> device,
         vk::Format format,
@@ -34,16 +32,6 @@ public:
         vk::ImageAspectFlags aspectMask,
         bool createImageView = true
     );
-
-    ImageData(ImageData&&) noexcept = default;
-
-    ImageData& operator=(ImageData&&) noexcept = default;
-
-    ImageData(const ImageData&) = delete;
-
-    ImageData& operator=(const ImageData&) = delete;
-
-    ~ImageData() noexcept = default;
 
     const vk::raii::Image& GetImage() const noexcept;
     const vk::raii::ImageView& GetImageView() const noexcept;

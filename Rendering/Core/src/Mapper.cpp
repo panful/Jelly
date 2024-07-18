@@ -135,11 +135,10 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
-                m_uniformBufferObjects.clear();
-                m_uniformBufferObjects.reserve(viewer->GetMaximumOfFrames());
+                m_uniformBufferObjects.resize(viewer->GetMaximumOfFrames());
                 for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
                 {
-                    m_uniformBufferObjects.emplace_back(
+                    m_uniformBufferObjects[i] = std::make_unique<BufferData>(
                         m_device,
                         sizeof(m_color),
                         vk::BufferUsageFlagBits::eUniformBuffer,
@@ -147,12 +146,12 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                         true
                     );
 
-                    std::memcpy(m_uniformBufferObjects[i].GetMemoryPointer(), m_color.data(), sizeof(m_color));
+                    std::memcpy(m_uniformBufferObjects[i]->GetMemoryPointer(), m_color.data(), sizeof(m_color));
                 }
 
                 for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
                 {
-                    vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i].GetBuffer(), 0, sizeof(m_color));
+                    vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i]->GetBuffer(), 0, sizeof(m_color));
 
                     // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
                     std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {

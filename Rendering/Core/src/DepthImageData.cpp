@@ -15,8 +15,3 @@ DepthImageData::DepthImageData(std::shared_ptr<Device> device, vk::Format format
       )
 {
 }
-
-DepthImageData::DepthImageData(std::nullptr_t nullptrValue)
-    : ImageData(nullptrValue)
-{
-}

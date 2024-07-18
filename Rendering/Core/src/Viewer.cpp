@@ -12,10 +12,10 @@ void Viewer::SetDevice(std::shared_ptr<Device> device)
 void Viewer::Init(const vk::Extent2D& extent)
 {
     m_extent = extent;
-    m_colorImageDatas.reserve(m_maximumOfFrames);
+    m_colorImageDatas.resize(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        m_colorImageDatas.emplace_back(ImageData(
+        m_colorImageDatas[i] = std::make_unique<ImageData>(
             m_device,
             m_colorFormat,
             m_extent,
@@ -24,7 +24,7 @@ void Viewer::Init(const vk::Extent2D& extent)
             vk::ImageLayout::eUndefined,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
             vk::ImageAspectFlagBits::eColor
-        ));
+        );
     }
 
     m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
@@ -66,7 +66,9 @@ void Viewer::Init(const vk::Extent2D& extent)
     m_framebuffers.reserve(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData->GetImageView()};
+        std::array<vk::ImageView, 2> imageViews {
+            m_colorImageDatas[i]->GetImageView(), m_depthImageData->GetImageView()
+        };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
@@ -81,10 +83,10 @@ void Viewer::Resize(const vk::Extent2D& extent)
     m_currentFrameIndex = 0;
     m_device->GetDevice().waitIdle();
 
-    m_colorImageDatas.clear();
+    m_colorImageDatas.resize(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        m_colorImageDatas.emplace_back(ImageData(
+        m_colorImageDatas[i] = std::make_unique<ImageData>(
             m_device,
             m_colorFormat,
             m_extent,
@@ -93,7 +95,7 @@ void Viewer::Resize(const vk::Extent2D& extent)
             vk::ImageLayout::eUndefined,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
             vk::ImageAspectFlagBits::eColor
-        ));
+        );
     }
 
     m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
@@ -101,7 +103,9 @@ void Viewer::Resize(const vk::Extent2D& extent)
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData->GetImageView()};
+        std::array<vk::ImageView, 2> imageViews {
+            m_colorImageDatas[i]->GetImageView(), m_depthImageData->GetImageView()
+        };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
@@ -140,7 +144,7 @@ std::vector<vk::ImageView> Viewer::GetColorImageViews() const noexcept
     std::vector<vk::ImageView> imageViews {};
     for (const auto& colorImageData : m_colorImageDatas)
     {
-        imageViews.emplace_back(colorImageData.GetImageView());
+        imageViews.emplace_back(colorImageData->GetImageView());
     }
     return imageViews;
 }

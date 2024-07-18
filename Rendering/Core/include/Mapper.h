@@ -82,7 +82,7 @@ protected:
     ColorMode m_colorMode {ColorMode::Uniform};
     std::unique_ptr<PrivateDescriptorSets> m_uniformColorDescriptorSets {};
     std::unique_ptr<PrivateDescriptorSets> m_textureColorDescriptorSets {};
-    std::vector<BufferData> m_uniformBufferObjects {};
+    std::vector<std::unique_ptr<BufferData>> m_uniformBufferObjects {};
     std::shared_ptr<Texture> m_texture {};
 };
 } // namespace Jelly

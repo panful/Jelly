@@ -53,7 +53,7 @@ private:
     std::shared_ptr<Device> m_device {};
     vk::raii::RenderPass m_renderPass {nullptr};
 
-    std::vector<ImageData> m_colorImageDatas {};
+    std::vector<std::unique_ptr<ImageData>> m_colorImageDatas {};
     std::unique_ptr<DepthImageData> m_depthImageData {nullptr};
 
     std::vector<vk::raii::Framebuffer> m_framebuffers {};

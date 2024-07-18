@@ -41,10 +41,6 @@ ImageData::ImageData(
         : nullptr;
 }
 
-ImageData::ImageData(std::nullptr_t)
-{
-}
-
 const vk::raii::Image& ImageData::GetImage() const noexcept
 {
     return m_image;

@@ -18,7 +18,5 @@ class JELLY_EXPORT DepthImageData : public ImageData
 {
 public:
     DepthImageData(std::shared_ptr<Device> device, vk::Format format, const vk::Extent2D& extent);
-
-    DepthImageData(std::nullptr_t nullptrValue);
 };
 } // namespace Jelly

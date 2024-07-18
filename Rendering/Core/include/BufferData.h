@@ -12,19 +12,17 @@
 #pragma once
 
 #include "Device.h"
-#include "GlobalExport.h"
 #include "Logger.h"
 #include "MemoryHelper.h"
+#include "Object.h"
 #include <format>
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class JELLY_EXPORT BufferData
+class JELLY_EXPORT BufferData : public Object
 {
 public:
-    BufferData(std::nullptr_t) noexcept;
-
     BufferData(
         std::shared_ptr<Device> device,
         vk::DeviceSize size,
@@ -37,11 +35,7 @@ public:
 
     BufferData& operator=(BufferData&&) noexcept = default;
 
-    BufferData(const BufferData&) = delete;
-
-    BufferData& operator=(const BufferData&) = delete;
-
-    ~BufferData() noexcept;
+    ~BufferData() noexcept override;
 
     const vk::raii::Buffer& GetBuffer() const noexcept;
     const vk::raii::DeviceMemory& GetDeviceMemory() const noexcept;
