@@ -34,14 +34,14 @@ public:
 
     const vk::raii::Sampler& GetSampler() const noexcept;
 
-    const ImageData& GetImageData() const noexcept;
+    const std::unique_ptr<ImageData>& GetImageData() const noexcept;
 
 private:
-    std::shared_ptr<Device> m_device {};
     vk::Format m_format {vk::Format::eR8G8B8A8Unorm};
     vk::Extent2D m_extent {256, 256};
+    std::shared_ptr<Device> m_device {};
+    std::unique_ptr<ImageData> m_imageData {};
     vk::raii::Sampler m_sampler {nullptr};
-    ImageData m_imageData {nullptr};
     std::vector<uint8_t> m_pixelData {};
 };
 } // namespace Jelly

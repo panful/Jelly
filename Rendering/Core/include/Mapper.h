@@ -35,7 +35,7 @@ enum class ColorMode : uint8_t
 
 class JELLY_EXPORT Mapper : public Object
 {
-    struct DescriptorSets
+    struct PrivateDescriptorSets
     {
         bool initialized {false};
         vk::raii::DescriptorSets descriptorSets {nullptr};
@@ -80,8 +80,8 @@ protected:
 
     std::array<float, 3> m_color {1., 1., 1.};
     ColorMode m_colorMode {ColorMode::Uniform};
-    DescriptorSets m_uniformColorDescriptorSets {};
-    DescriptorSets m_textureColorDescriptorSets {};
+    std::unique_ptr<PrivateDescriptorSets> m_uniformColorDescriptorSets {};
+    std::unique_ptr<PrivateDescriptorSets> m_textureColorDescriptorSets {};
     std::vector<BufferData> m_uniformBufferObjects {};
     std::shared_ptr<Texture> m_texture {};
 };

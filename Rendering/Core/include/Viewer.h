@@ -54,7 +54,7 @@ private:
     vk::raii::RenderPass m_renderPass {nullptr};
 
     std::vector<ImageData> m_colorImageDatas {};
-    DepthImageData m_depthImageData {nullptr};
+    std::unique_ptr<DepthImageData> m_depthImageData {nullptr};
 
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
     std::vector<std::shared_ptr<Renderer>> m_renderers {};

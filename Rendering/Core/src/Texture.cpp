@@ -34,7 +34,7 @@ void Texture::Update()
 
     stagingBufferData.Upload(m_pixelData);
 
-    m_imageData = ImageData(
+    m_imageData = std::make_unique<ImageData>(
         m_device,
         m_format,
         m_extent,
@@ -48,7 +48,7 @@ void Texture::Update()
     MemoryHelper::OneTimeSubmit(m_device, [this, &stagingBufferData](const vk::raii::CommandBuffer& commandBuffer) {
         ImageData::SetImageLayout(
             commandBuffer,
-            this->m_imageData.GetImage(),
+            this->m_imageData->GetImage(),
             this->m_format,
             vk::ImageLayout::eUndefined,
             vk::ImageLayout::eTransferDstOptimal
@@ -64,14 +64,14 @@ void Texture::Update()
         );
         commandBuffer.copyBufferToImage(
             stagingBufferData.GetBuffer(),
-            this->m_imageData.GetImage(),
+            this->m_imageData->GetImage(),
             vk::ImageLayout::eTransferDstOptimal,
             copyRegion
         );
 
         ImageData::SetImageLayout(
             commandBuffer,
-            this->m_imageData.GetImage(),
+            this->m_imageData->GetImage(),
             this->m_format,
             vk::ImageLayout::eTransferDstOptimal,
             vk::ImageLayout::eShaderReadOnlyOptimal
@@ -106,7 +106,7 @@ const vk::raii::Sampler& Texture::GetSampler() const noexcept
     return m_sampler;
 }
 
-const ImageData& Texture::GetImageData() const noexcept
+const std::unique_ptr<ImageData>& Texture::GetImageData() const noexcept
 {
     return m_imageData;
 }

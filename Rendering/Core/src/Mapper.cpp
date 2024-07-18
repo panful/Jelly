@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "Viewer.h"
 #include <functional>
+
 using namespace Jelly;
 
 void Mapper::Render(
@@ -34,7 +35,7 @@ void Mapper::DeviceRender(
                 vk::PipelineBindPoint::eGraphics,
                 pipeline->GetPipelineLayout(),
                 0,
-                {m_textureColorDescriptorSets.descriptorSets[viewer->GetCurrentFrameIndex()]},
+                {m_textureColorDescriptorSets->descriptorSets[viewer->GetCurrentFrameIndex()]},
                 nullptr
             );
             break;
@@ -43,7 +44,7 @@ void Mapper::DeviceRender(
                 vk::PipelineBindPoint::eGraphics,
                 pipeline->GetPipelineLayout(),
                 0,
-                {m_uniformColorDescriptorSets.descriptorSets[viewer->GetCurrentFrameIndex()]},
+                {m_uniformColorDescriptorSets->descriptorSets[viewer->GetCurrentFrameIndex()]},
                 nullptr
             );
             break;
@@ -80,20 +81,24 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
     switch (m_colorMode)
     {
         case ColorMode::Texture:
-            if (!m_textureColorDescriptorSets.initialized)
+            if (!m_textureColorDescriptorSets)
+            {
+                m_textureColorDescriptorSets = std::make_unique<PrivateDescriptorSets>();
+            }
+            if (!m_textureColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
                     viewer->GetMaximumOfFrames(),
                     m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
-                m_textureColorDescriptorSets.descriptorSets = vk::raii::DescriptorSets(
+                m_textureColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
                     m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
                 vk::DescriptorImageInfo descriptorImageInfo(
                     m_texture->GetSampler(),
-                    m_texture->GetImageData().GetImageView(),
+                    m_texture->GetImageData()->GetImageView(),
                     vk::ImageLayout::eShaderReadOnlyOptimal
                 );
 
@@ -102,7 +107,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
                     std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
                         vk::WriteDescriptorSet {
-                                                m_textureColorDescriptorSets.descriptorSets[i],
+                                                m_textureColorDescriptorSets->descriptorSets[i],
                                                 pipelineInfo.descriptorSetLayoutBindings[0].binding,
                                                 0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
                                                 descriptorImageInfo, nullptr
@@ -111,18 +116,22 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
                 }
 
-                m_textureColorDescriptorSets.initialized = true;
+                m_textureColorDescriptorSets->initialized = true;
             }
             break;
         case ColorMode::Uniform:
-            if (!m_uniformColorDescriptorSets.initialized)
+            if (!m_uniformColorDescriptorSets)
+            {
+                m_uniformColorDescriptorSets = std::make_unique<PrivateDescriptorSets>();
+            }
+            if (!m_uniformColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
                     viewer->GetMaximumOfFrames(),
                     m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
-                m_uniformColorDescriptorSets.descriptorSets = vk::raii::DescriptorSets(
+                m_uniformColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
                     m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
@@ -148,7 +157,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
                     std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
                         vk::WriteDescriptorSet {
-                                                m_uniformColorDescriptorSets.descriptorSets[i],
+                                                m_uniformColorDescriptorSets->descriptorSets[i],
                                                 pipelineInfo.descriptorSetLayoutBindings[0].binding,
                                                 0, pipelineInfo.descriptorSetLayoutBindings[0].descriptorType,
                                                 nullptr, dbInfo
@@ -157,7 +166,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
                 }
 
-                m_uniformColorDescriptorSets.initialized = true;
+                m_uniformColorDescriptorSets->initialized = true;
             }
             break;
         default:

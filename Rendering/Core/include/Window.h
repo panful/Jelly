@@ -94,7 +94,7 @@ private:
 
     std::shared_ptr<Viewer> m_viewer {};
 
-    SwapChainData m_swapChainData {nullptr};
+    std::unique_ptr<SwapChainData> m_swapChainData {};
     vk::raii::RenderPass m_renderPass {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
 

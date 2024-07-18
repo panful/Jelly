@@ -76,7 +76,7 @@ const std::any& Window::GetNativeWindow() const noexcept
 std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
 {
     std::vector<uint8_t> retVal {};
-    if (!m_enableGetRenderingResult || vk::Format::eB8G8R8A8Unorm != m_swapChainData.GetColorFormat())
+    if (!m_enableGetRenderingResult || vk::Format::eB8G8R8A8Unorm != m_swapChainData->GetColorFormat())
     {
         // 暂时只支持获取图像格式为 eB8G8R8A8Unorm 的交换链图像
         return retVal;
@@ -84,7 +84,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
 
     ImageData imageData(
         m_device,
-        m_swapChainData.GetColorFormat(),
+        m_swapChainData->GetColorFormat(),
         m_extent,
         vk::ImageTiling::eLinear,
         vk::ImageUsageFlagBits::eTransferDst,
@@ -95,8 +95,8 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     );
 
     MemoryHelper::OneTimeSubmit(m_device, [&imageData, this](const vk::raii::CommandBuffer& cmd) {
-        auto&& format   = this->m_swapChainData.GetColorFormat();
-        auto&& inImage  = this->m_swapChainData.GetImage(this->m_currentImageIndex);
+        auto&& format   = this->m_swapChainData->GetColorFormat();
+        auto&& inImage  = this->m_swapChainData->GetImage(this->m_currentImageIndex);
         auto&& outImage = imageData.GetImage();
 
         ImageData::SetImageLayout(
@@ -211,7 +211,7 @@ void Window::PreRender() noexcept
     }
 
     vk::Result imageResult {};
-    std::tie(imageResult, m_currentImageIndex) = m_swapChainData.GetSwapChain().acquireNextImage(
+    std::tie(imageResult, m_currentImageIndex) = m_swapChainData->GetSwapChain().acquireNextImage(
         std::numeric_limits<uint64_t>::max(), m_imageAcquiredSemaphores[m_currentFrameIndex]
     );
 
@@ -235,7 +235,7 @@ void Window::PostRender() noexcept
     m_device->GetGraphicsQueue().submit(drawSubmitInfo, m_inFlightFences[m_currentFrameIndex]);
 
     std::array<vk::Semaphore, 1> presentWait {m_renderFinishedSemaphores[m_currentFrameIndex]};
-    std::array<vk::SwapchainKHR, 1> swapchains {m_swapChainData.GetSwapChain()};
+    std::array<vk::SwapchainKHR, 1> swapchains {m_swapChainData->GetSwapChain()};
     vk::PresentInfoKHR presentInfoKHR(presentWait, swapchains, m_currentImageIndex);
 
     auto presentResult = m_device->GetPresentQueue().presentKHR(presentInfoKHR);
@@ -304,10 +304,10 @@ void Window::InitSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData = SwapChainData(m_device, m_surface, m_extent, nullptr, usage);
+    m_swapChainData = std::make_unique<SwapChainData>(m_device, m_surface, m_extent, nullptr, usage);
 
     // 创建的窗口大小可能不等于期望的大小
-    m_extent = vk::Extent2D {m_swapChainData.GetExtent().width, m_swapChainData.GetExtent().height};
+    m_extent = vk::Extent2D {m_swapChainData->GetExtent().width, m_swapChainData->GetExtent().height};
 }
 
 void Window::RecreateSwapChain() noexcept
@@ -316,13 +316,14 @@ void Window::RecreateSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData = SwapChainData(m_device, m_surface, m_extent, &m_swapChainData.GetSwapChain(), usage);
+    m_swapChainData =
+        std::make_unique<SwapChainData>(m_device, m_surface, m_extent, &m_swapChainData->GetSwapChain(), usage);
 
-    const auto numberOfImages = m_swapChainData.GetNumberOfImages();
+    const auto numberOfImages = m_swapChainData->GetNumberOfImages();
     m_framebuffers.clear();
     for (uint32_t i = 0; i < numberOfImages; ++i)
     {
-        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
+        std::array<vk::ImageView, 1> imageViews {m_swapChainData->GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
@@ -343,7 +344,7 @@ void Window::InitRenderPass() noexcept
     std::array attachmentDescriptions {
         vk::AttachmentDescription {
                                    {},
-                                   m_swapChainData.GetColorFormat(),
+                                   m_swapChainData->GetColorFormat(),
                                    vk::SampleCountFlagBits::e1,
                                    vk::AttachmentLoadOp::eClear,
                                    vk::AttachmentStoreOp::eStore,
@@ -363,11 +364,11 @@ void Window::InitRenderPass() noexcept
 
 void Window::InitFramebuffers() noexcept
 {
-    const auto numberOfImages = m_swapChainData.GetNumberOfImages();
+    const auto numberOfImages = m_swapChainData->GetNumberOfImages();
     m_framebuffers.reserve(numberOfImages);
     for (uint32_t i = 0; i < numberOfImages; ++i)
     {
-        std::array<vk::ImageView, 1> imageViews {m_swapChainData.GetImageView(i)};
+        std::array<vk::ImageView, 1> imageViews {m_swapChainData->GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)

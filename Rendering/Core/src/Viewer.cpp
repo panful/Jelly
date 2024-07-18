@@ -27,7 +27,7 @@ void Viewer::Init(const vk::Extent2D& extent)
         ));
     }
 
-    m_depthImageData = DepthImageData(m_device, m_depthFormat, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
 
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
     vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -66,7 +66,7 @@ void Viewer::Init(const vk::Extent2D& extent)
     m_framebuffers.reserve(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData.GetImageView()};
+        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData->GetImageView()};
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
@@ -96,12 +96,12 @@ void Viewer::Resize(const vk::Extent2D& extent)
         ));
     }
 
-    m_depthImageData = DepthImageData(m_device, m_depthFormat, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
 
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
-        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData.GetImageView()};
+        std::array<vk::ImageView, 2> imageViews {m_colorImageDatas[i].GetImageView(), m_depthImageData->GetImageView()};
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
