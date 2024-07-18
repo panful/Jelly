@@ -23,7 +23,7 @@
 - [x] Object类添加 Modified Changed needUpdate 类似变量
 - [ ] 窗口较小时，图元某些片段没有像素 commit de5ed317ecd33d57cc4e45c866a6a7aa108f821e 之后才出现这个问题，Viewer 尺寸固定为较大时，这种情况会很少出现
 - [x] uniform 使用 CopyToDevice 设置数据时，应该只 mapMemory 一次，保证释放 uniform 之前 unMapMemory 就行
-- [ ] 当相机到特殊位置后，actor 还是会被相机近平面裁剪，导致一部分看不到
+- [ ] 当相机到特殊位置后，actor 还是会被相机近平面裁剪，导致一部分看不到，example_Actors 示例会出现这种情况
 - [ ] 跟随相机的光照，在某些时候会有颜色值为(1,1,1,,1)的片段，白色的光点
 - [x] 参数为 std::nullptr_t 的构造函数标记为 = default
 - [ ] DataSet 暂时只支持 float
@@ -31,4 +31,4 @@
 - [x] 将所有类都继承自 Object 确实没必要继承的都改为私有类
 - [x] 所有栈上的成员变量改为 std::unique_ptr
 - [x] 所有 Get 函数，如果返回的是成员变量，返回类型都改为 常引用 const&
-- [ ] 将Mapper的部分属性移动到Actor，Mapper执行Render()时，将Actor当作参数传入
+- [x] 将Mapper的部分属性移动到Actor，Mapper执行Render()时，将Actor当作参数传入

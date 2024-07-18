@@ -1,4 +1,5 @@
 #include "DataSetMapper.h"
+#include "Actor.h"
 #include "DataArray.h"
 #include "DataSet.h"
 #include "Device.h"
@@ -23,7 +24,7 @@ std::array<double, 6> DataSetMapper::GetBounds() const noexcept
     return {-1., 1., -1., 1., -1., 1.};
 }
 
-void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass) noexcept
+void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass, Actor* actor) noexcept
 {
     Logger::GetInstance()->Debug();
 
@@ -51,10 +52,10 @@ void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass&
     switch (m_colorMode)
     {
         case ColorMode::Texture:
-            if (m_dataSet->HasTexCoordData() && m_texture)
+            if (m_dataSet->HasTexCoordData() && actor->GetTexture())
             {
-                m_texture->SetDevice(m_device);
-                m_texture->Update();
+                actor->GetTexture()->SetDevice(m_device);
+                actor->GetTexture()->Update();
                 strides.emplace_back(static_cast<uint32_t>(texCoordComponents * sizeof(float)));
 
                 m_shaderCreater->AddTexture2DColor(location++, binding);
@@ -89,7 +90,7 @@ void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass&
             break;
     }
 
-    if (m_enableLighting)
+    if (actor->GetEnableLighting())
     {
         m_shaderCreater->AddFollowCameraLight(location++);
     }
@@ -120,7 +121,7 @@ void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass&
         .renderPass                  = renderPass
     };
 
-    BuildPipeline(maximumOfFrames, pipelineInfo);
+    BuildPipeline(maximumOfFrames, pipelineInfo, actor);
 
     if (!m_drawable)
     {

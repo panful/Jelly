@@ -43,3 +43,59 @@ std::array<double, 6> Actor::GetBounds() const noexcept
 
     return {-1., 1., -1., 1., -1., 1.};
 }
+
+void Actor::SetColor(const std::array<float, 3>& color)
+{
+    if (m_color != color)
+    {
+        m_color = color;
+        Changed();
+    }
+}
+
+const std::array<float, 3>& Actor::GetColor() const noexcept
+{
+    return m_color;
+}
+
+void Actor::SetTexture(std::shared_ptr<Texture> texture)
+{
+    if (m_texture != texture)
+    {
+        m_texture = std::move(texture);
+        Changed();
+    }
+}
+
+const std::shared_ptr<Texture>& Actor::GetTexture() const noexcept
+{
+    return m_texture;
+}
+
+void Actor::SetEnableLighting(bool enableLighting) noexcept
+{
+    if (m_enableLighting != enableLighting)
+    {
+        m_enableLighting = enableLighting;
+        Changed();
+    }
+}
+
+bool Actor::GetEnableLighting() const noexcept
+{
+    return m_enableLighting;
+}
+
+void Actor::SetModelMatrix(const std::array<float, 16>& modelMatrix)
+{
+    if (m_modelMatrix != modelMatrix)
+    {
+        m_modelMatrix = modelMatrix;
+        Changed();
+    }
+}
+
+const std::array<float, 16> Actor::GetModelMatrix() const noexcept
+{
+    return m_modelMatrix;
+}

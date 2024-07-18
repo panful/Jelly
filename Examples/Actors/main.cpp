@@ -72,19 +72,19 @@ int main()
 
     auto mapper1 = std::make_shared<Jelly::DataSetMapper>();
     mapper1->SetDataSet(dataSet1);
-    mapper1->SetColor({1.f, 0.f, 1.f});
     mapper1->SetColorMode(Jelly::ColorMode::Vertex);
 
     auto mapper2 = std::make_shared<Jelly::DataSetMapper>();
     mapper2->SetDataSet(dataSet2);
-    mapper2->SetColor({1.f, 1.f, 0.f});
     mapper2->SetColorMode(Jelly::ColorMode::Uniform);
 
     auto actor1 = std::make_shared<Jelly::Actor3D>();
     actor1->SetMapper(mapper1);
+    actor1->SetColor({1.f, 0.f, 1.f});
 
     auto actor2 = std::make_shared<Jelly::Actor3D>();
     actor2->SetMapper(mapper2);
+    actor2->SetColor({1.f, 1.f, 0.f});
 
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);

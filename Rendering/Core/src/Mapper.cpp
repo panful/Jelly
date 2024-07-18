@@ -1,4 +1,5 @@
 #include "Mapper.h"
+#include "Actor.h"
 #include "Device.h"
 #include "Drawable.h"
 #include "Renderer.h"
@@ -14,7 +15,7 @@ void Mapper::Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* rend
     {
         if (IsChanged())
         {
-            Update(viewer->GetMaximumOfFrames(), viewer->GetRenderPass());
+            Update(viewer->GetMaximumOfFrames(), viewer->GetRenderPass(), actor);
             ResetChanged();
         }
 
@@ -53,9 +54,10 @@ void Mapper::DeviceRender(
             break;
     }
 
-    std::array<float, 16> model {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
     auto camera = renderer->GetCamera();
-    std::vector<std::array<float, 16>> transform {model, camera->GetViewMatrix(), camera->GetProjectMatrix()};
+    std::vector<std::array<float, 16>> transform {
+        actor->GetModelMatrix(), camera->GetViewMatrix(), camera->GetProjectMatrix()
+    };
 
     commandBuffer.pushConstants<std::array<float, 16>>(
         pipeline->GetPipelineLayout(), vk::ShaderStageFlagBits::eVertex, 0, std::move(transform)
@@ -70,7 +72,7 @@ void Mapper::SetDevice(std::shared_ptr<Device> device) noexcept
     m_device = std::move(device);
 }
 
-void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo) noexcept
+void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo, Actor* actor) noexcept
 {
     m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 
@@ -97,8 +99,8 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
                 );
 
                 vk::DescriptorImageInfo descriptorImageInfo(
-                    m_texture->GetSampler(),
-                    m_texture->GetImageData()->GetImageView(),
+                    actor->GetTexture()->GetSampler(),
+                    actor->GetTexture()->GetImageData()->GetImageView(),
                     vk::ImageLayout::eShaderReadOnlyOptimal
                 );
 
@@ -134,23 +136,24 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
                     m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
+                auto colorSize = sizeof(actor->GetColor());
                 m_uniformBufferObjects.resize(maximumOfFrames);
                 for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
                     m_uniformBufferObjects[i] = std::make_unique<BufferData>(
                         m_device,
-                        sizeof(m_color),
+                        colorSize,
                         vk::BufferUsageFlagBits::eUniformBuffer,
                         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
                         true
                     );
 
-                    std::memcpy(m_uniformBufferObjects[i]->GetMemoryPointer(), m_color.data(), sizeof(m_color));
+                    std::memcpy(m_uniformBufferObjects[i]->GetMemoryPointer(), actor->GetColor().data(), colorSize);
                 }
 
                 for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
-                    vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i]->GetBuffer(), 0, sizeof(m_color));
+                    vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i]->GetBuffer(), 0, colorSize);
 
                     // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
                     std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
@@ -184,41 +187,4 @@ void Mapper::SetColorMode(ColorMode colorMode) noexcept
 ColorMode Mapper::GetColorMode() const noexcept
 {
     return m_colorMode;
-}
-
-void Mapper::SetColor(const std::array<float, 3>& color)
-{
-    if (m_color != color)
-    {
-        m_color = color;
-        Changed();
-    }
-}
-
-const std::array<float, 3>& Mapper::GetColor() const noexcept
-{
-    return m_color;
-}
-
-void Mapper::SetTexture(std::shared_ptr<Texture> texture)
-{
-    if (m_texture != texture)
-    {
-        m_texture = std::move(texture);
-        Changed();
-    }
-}
-
-void Mapper::SetEnableLighting(bool enableLighting) noexcept
-{
-    if (m_enableLighting != enableLighting)
-    {
-        m_enableLighting = enableLighting;
-        Changed();
-    }
-}
-
-bool Mapper::GetEnableLighting() const noexcept
-{
-    return m_enableLighting;
 }

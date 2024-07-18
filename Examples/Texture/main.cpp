@@ -77,12 +77,12 @@ int main()
 
     auto mapper = std::make_shared<Jelly::DataSetMapper>();
     mapper->SetDataSet(dataSet);
-    mapper->SetTexture(texture);
-    mapper->SetColor({1.f, 0.f, 1.f});
     mapper->SetColorMode(Jelly::ColorMode::Texture);
 
     auto actor = std::make_shared<Jelly::Actor3D>();
     actor->SetMapper(mapper);
+    actor->SetTexture(texture);
+    actor->SetColor({1.f, 1.f, 0.f});
 
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor);

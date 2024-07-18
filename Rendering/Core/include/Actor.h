@@ -21,6 +21,7 @@ class Device;
 class Mapper;
 class Viewer;
 class Renderer;
+class Texture;
 
 class JELLY_EXPORT Actor : public Object
 {
@@ -35,6 +36,18 @@ public:
     void SetVisibility(bool visible) noexcept;
     bool GetVisibility() const noexcept;
 
+    void SetColor(const std::array<float, 3>& color);
+    const std::array<float, 3>& GetColor() const noexcept;
+
+    void SetTexture(std::shared_ptr<Texture> texture);
+    const std::shared_ptr<Texture>& GetTexture() const noexcept;
+
+    void SetEnableLighting(bool enableLighting) noexcept;
+    bool GetEnableLighting() const noexcept;
+
+    void SetModelMatrix(const std::array<float, 16>& modelMatrix);
+    const std::array<float, 16> GetModelMatrix() const noexcept;
+
     std::array<double, 6> GetBounds() const noexcept;
 
 protected:
@@ -43,5 +56,12 @@ protected:
 
 private:
     bool m_visibility {true};
+    bool m_enableLighting {true};
+
+    std::array<float, 16> m_modelMatrix {
+        1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f
+    };
+    std::array<float, 3> m_color {1., 1., 1.};
+    std::shared_ptr<Texture> m_texture {};
 };
 } // namespace Jelly
