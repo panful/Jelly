@@ -33,9 +33,14 @@ public:
     const std::vector<std::shared_ptr<Actor>>& GetAllActors() const noexcept;
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
-    void SetViewer(std::weak_ptr<Viewer> viewer) noexcept;
+
     void SetViewport(const std::array<double, 4>& viewport);
+
     void SetBackground(const std::array<float, 4>& background);
+
+    void SetViewer(std::weak_ptr<Viewer> viewer) noexcept;
+
+    std::shared_ptr<Viewer> GetViewer() noexcept;
 
     /// @brief 重置相机，使所有Actor居中显示
     void ResetCamera() const noexcept;

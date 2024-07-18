@@ -48,7 +48,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
     {
         if (actor->GetVisibility())
         {
-            actor->Render(commandBuffer, viewer, this);
+            actor->Render(commandBuffer, this);
         }
     }
 }
@@ -80,6 +80,11 @@ void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
 void Renderer::SetViewer(std::weak_ptr<Viewer> viewer) noexcept
 {
     m_viewer = std::move(viewer);
+}
+
+std::shared_ptr<Viewer> Renderer::GetViewer() noexcept
+{
+    return m_viewer.lock();
 }
 
 void Renderer::SetViewport(const std::array<double, 4>& viewport)

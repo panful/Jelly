@@ -23,7 +23,7 @@ std::array<double, 6> DataSetMapper::GetBounds() const noexcept
     return {-1., 1., -1., 1., -1., 1.};
 }
 
-void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
+void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass) noexcept
 {
     Logger::GetInstance()->Debug();
 
@@ -117,10 +117,10 @@ void DataSetMapper::Configure(const std::shared_ptr<Viewer>& viewer) noexcept
         .strides                     = std::move(strides),
         .pushConstantRanges          = std::move(pushConstantRange),
         .descriptorSetLayoutBindings = std::move(descriptorSetLayoutBindings),
-        .renderPass                  = viewer->GetRenderPass()
+        .renderPass                  = renderPass
     };
 
-    BuildPipeline(viewer, pipelineInfo);
+    BuildPipeline(maximumOfFrames, pipelineInfo);
 
     if (!m_drawable)
     {

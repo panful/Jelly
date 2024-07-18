@@ -8,21 +8,22 @@
 
 using namespace Jelly;
 
-void Mapper::Render(
-    const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
-) noexcept
+void Mapper::Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor) noexcept
 {
-    if (IsChanged())
+    if (auto viewer = renderer->GetViewer())
     {
-        Configure(viewer);
-        ResetChanged();
-    }
+        if (IsChanged())
+        {
+            Update(viewer->GetMaximumOfFrames(), viewer->GetRenderPass());
+            ResetChanged();
+        }
 
-    DeviceRender(commandBuffer, viewer, renderer);
+        DeviceRender(commandBuffer, renderer, actor, viewer->GetCurrentFrameIndex());
+    }
 }
 
 void Mapper::DeviceRender(
-    const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+    const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor, uint32_t currentFrameIndex
 )
 {
     auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
@@ -35,7 +36,7 @@ void Mapper::DeviceRender(
                 vk::PipelineBindPoint::eGraphics,
                 pipeline->GetPipelineLayout(),
                 0,
-                {m_textureColorDescriptorSets->descriptorSets[viewer->GetCurrentFrameIndex()]},
+                {m_textureColorDescriptorSets->descriptorSets[currentFrameIndex]},
                 nullptr
             );
             break;
@@ -44,7 +45,7 @@ void Mapper::DeviceRender(
                 vk::PipelineBindPoint::eGraphics,
                 pipeline->GetPipelineLayout(),
                 0,
-                {m_uniformColorDescriptorSets->descriptorSets[viewer->GetCurrentFrameIndex()]},
+                {m_uniformColorDescriptorSets->descriptorSets[currentFrameIndex]},
                 nullptr
             );
             break;
@@ -69,7 +70,7 @@ void Mapper::SetDevice(std::shared_ptr<Device> device) noexcept
     m_device = std::move(device);
 }
 
-void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const PipelineInfo& pipelineInfo) noexcept
+void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo) noexcept
 {
     m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 
@@ -88,8 +89,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
             if (!m_textureColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-                    viewer->GetMaximumOfFrames(),
-                    m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                    maximumOfFrames, m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
                 m_textureColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
@@ -102,7 +102,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     vk::ImageLayout::eShaderReadOnlyOptimal
                 );
 
-                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
                     // XXX descriptorSetLayoutBindings的索引后面需要更改，暂时只有一个(Uniform Texture)
                     std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
@@ -127,16 +127,15 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
             if (!m_uniformColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-                    viewer->GetMaximumOfFrames(),
-                    m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                    maximumOfFrames, m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
                 m_uniformColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
                     m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
-                m_uniformBufferObjects.resize(viewer->GetMaximumOfFrames());
-                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                m_uniformBufferObjects.resize(maximumOfFrames);
+                for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
                     m_uniformBufferObjects[i] = std::make_unique<BufferData>(
                         m_device,
@@ -149,7 +148,7 @@ void Mapper::BuildPipeline(const std::shared_ptr<Viewer>& viewer, const Pipeline
                     std::memcpy(m_uniformBufferObjects[i]->GetMemoryPointer(), m_color.data(), sizeof(m_color));
                 }
 
-                for (uint32_t i = 0; i < viewer->GetMaximumOfFrames(); ++i)
+                for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
                     vk::DescriptorBufferInfo dbInfo(m_uniformBufferObjects[i]->GetBuffer(), 0, sizeof(m_color));
 

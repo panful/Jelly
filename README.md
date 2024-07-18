@@ -31,3 +31,4 @@
 - [x] 将所有类都继承自 Object 确实没必要继承的都改为私有类
 - [x] 所有栈上的成员变量改为 std::unique_ptr
 - [x] 所有 Get 函数，如果返回的是成员变量，返回类型都改为 常引用 const&
+- [ ] 将Mapper的部分属性移动到Actor，Mapper执行Render()时，将Actor当作参数传入

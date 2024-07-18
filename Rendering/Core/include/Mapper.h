@@ -22,7 +22,7 @@
 
 namespace Jelly {
 class Device;
-class Viewer;
+class Actor;
 class Renderer;
 class Texture;
 
@@ -42,11 +42,9 @@ class JELLY_EXPORT Mapper : public Object
     };
 
 public:
-    void Render(
-        const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
-    ) noexcept;
+    void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor) noexcept;
 
-    virtual void Configure(const std::shared_ptr<Viewer>& viewer) noexcept = 0;
+    virtual void Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass) noexcept = 0;
 
     virtual std::array<double, 6> GetBounds() const noexcept = 0;
 
@@ -64,11 +62,11 @@ public:
     bool GetEnableLighting() const noexcept;
 
 protected:
-    void BuildPipeline(const std::shared_ptr<Viewer>& viewer, const PipelineInfo& pipelineInfo) noexcept;
+    void BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo) noexcept;
 
 private:
     void DeviceRender(
-        const vk::raii::CommandBuffer& commandBuffer, const std::shared_ptr<Viewer>& viewer, Renderer* renderer
+        const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor, uint32_t currentFrameIndex
     );
 
 protected:
