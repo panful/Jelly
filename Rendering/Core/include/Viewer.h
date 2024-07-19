@@ -14,6 +14,7 @@
 #include "DepthImageData.h"
 #include "ImageData.h"
 #include "Object.h"
+#include "RenderPass.h"
 #include <memory>
 #include <vulkan/vulkan_raii.hpp>
 
@@ -51,7 +52,7 @@ private:
     vk::Format m_depthFormat {vk::Format::eD16Unorm};
 
     std::shared_ptr<Device> m_device {};
-    vk::raii::RenderPass m_renderPass {nullptr};
+    std::unique_ptr<RenderPass> m_renderPass {};
 
     std::vector<std::unique_ptr<ImageData>> m_colorImageDatas {};
     std::unique_ptr<DepthImageData> m_depthImageData {nullptr};
