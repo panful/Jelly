@@ -42,7 +42,8 @@ void Texture::Update()
         vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eSampled,
         vk::ImageLayout::eUndefined,
         vk::MemoryPropertyFlagBits::eDeviceLocal,
-        vk::ImageAspectFlagBits::eColor
+        vk::ImageAspectFlagBits::eColor,
+        vk::SampleCountFlagBits::e1
     );
 
     MemoryHelper::OneTimeSubmit(m_device, [this, &stagingBufferData](const vk::raii::CommandBuffer& commandBuffer) {

@@ -17,6 +17,11 @@ namespace Jelly {
 class JELLY_EXPORT DepthImageData : public ImageData
 {
 public:
-    DepthImageData(std::shared_ptr<Device> device, vk::Format format, const vk::Extent2D& extent);
+    DepthImageData(
+        std::shared_ptr<Device> device,
+        vk::Format format,
+        vk::SampleCountFlagBits sampleCount,
+        const vk::Extent2D& extent
+    );
 };
 } // namespace Jelly

@@ -13,6 +13,7 @@ ImageData::ImageData(
     vk::ImageLayout initialLayout,
     vk::MemoryPropertyFlags memoryProperties,
     vk::ImageAspectFlags aspectMask,
+    vk::SampleCountFlagBits sampleCount,
     bool createImageView
 )
     : m_image(
@@ -23,7 +24,7 @@ ImageData::ImageData(
            vk::Extent3D(extent, 1),
            1,
            1,
-           vk::SampleCountFlagBits::e1,
+           sampleCount,
            tiling,
            usage,
            vk::SharingMode::eExclusive,

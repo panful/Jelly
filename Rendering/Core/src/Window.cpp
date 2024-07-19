@@ -91,6 +91,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
         vk::ImageLayout::eUndefined,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
         vk::ImageAspectFlagBits::eColor,
+        vk::SampleCountFlagBits::e1,
         false
     );
 

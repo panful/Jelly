@@ -30,6 +30,7 @@ public:
         vk::ImageLayout initialLayout,
         vk::MemoryPropertyFlags memoryProperties,
         vk::ImageAspectFlags aspectMask,
+        vk::SampleCountFlagBits sampleCount,
         bool createImageView = true
     );
 

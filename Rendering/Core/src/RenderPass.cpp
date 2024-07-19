@@ -18,11 +18,12 @@ RenderPass::RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& exten
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
             vk::ImageLayout::eUndefined,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
-            vk::ImageAspectFlagBits::eColor
+            vk::ImageAspectFlagBits::eColor,
+            vk::SampleCountFlagBits::e1
         );
     }
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, vk::SampleCountFlagBits::e1, extent);
 
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
     vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -89,11 +90,12 @@ void RenderPass::Resize(const vk::Extent2D& extent) noexcept
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
             vk::ImageLayout::eUndefined,
             vk::MemoryPropertyFlagBits::eDeviceLocal,
-            vk::ImageAspectFlagBits::eColor
+            vk::ImageAspectFlagBits::eColor,
+            vk::SampleCountFlagBits::e1
         );
     }
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, vk::SampleCountFlagBits::e1, extent);
 
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
