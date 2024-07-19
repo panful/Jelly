@@ -1,4 +1,5 @@
 #include "Viewer.h"
+#include "DefaultRenderPass.h"
 #include "Device.h"
 #include "Renderer.h"
 
@@ -12,7 +13,7 @@ void Viewer::SetDevice(std::shared_ptr<Device> device)
 void Viewer::Init(const vk::Extent2D& extent)
 {
     m_extent     = extent;
-    m_renderPass = std::make_unique<RenderPass>(m_device, m_extent);
+    m_renderPass = std::make_unique<DefaultRenderPass>(m_device, m_extent);
 }
 
 void Viewer::Resize(const vk::Extent2D& extent)

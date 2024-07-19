@@ -7,6 +7,7 @@
 #include "Logger.h"
 #include "Pipeline.h"
 #include "PipelineCache.h"
+#include "RenderPass.h"
 #include "SpvCreater.h"
 #include "Texture.h"
 #include "Viewer.h"
@@ -118,6 +119,7 @@ void DataSetMapper::Update(
         .vertexShaderCode            = std::move(vertSpv.value()),
         .fragmentShaderCode          = std::move(fragSpv.value()),
         .strides                     = std::move(strides),
+        .sampleCount                 = renderPass->GetSampleCountFlagBits(),
         .pushConstantRanges          = std::move(pushConstantRange),
         .descriptorSetLayoutBindings = std::move(descriptorSetLayoutBindings),
         .renderPass                  = renderPass->GetRenderPass()

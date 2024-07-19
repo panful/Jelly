@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "Device.h"
+#include "ImageData.h"
 #include "Logger.h"
 #include "MemoryHelper.h"
 #include "Renderer.h"

@@ -11,10 +11,10 @@
 
 #pragma once
 
-#include "DepthImageData.h"
 #include "ImageData.h"
 #include "Object.h"
 #include <memory>
+#include <vector>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
@@ -23,9 +23,9 @@ class Device;
 class JELLY_EXPORT RenderPass : public Object
 {
 public:
-    RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent);
+    RenderPass(std::shared_ptr<Device> device);
 
-    void Resize(const vk::Extent2D& extent) noexcept;
+    virtual void Resize(const vk::Extent2D& extent) noexcept = 0;
 
     const vk::raii::RenderPass& GetRenderPass() const noexcept;
 
@@ -33,15 +33,16 @@ public:
 
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;
 
-private:
-    vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
-    vk::Format m_depthFormat {vk::Format::eD16Unorm};
+    vk::SampleCountFlagBits GetSampleCountFlagBits() const noexcept;
+
+protected:
     uint32_t m_maximumOfFrames {JELLY_MAX_FRAMES};
+    vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
+    vk::SampleCountFlagBits m_sampleCountFlagBits {vk::SampleCountFlagBits::e1};
 
     std::shared_ptr<Device> m_device {};
     vk::raii::RenderPass m_renderPass {nullptr};
     std::vector<std::unique_ptr<ImageData>> m_colorImageDatas {};
-    std::unique_ptr<DepthImageData> m_depthImageData {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
 };
 } // namespace Jelly
