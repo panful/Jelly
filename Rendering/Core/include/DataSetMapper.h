@@ -21,7 +21,8 @@ class DataSet;
 class JELLY_EXPORT DataSetMapper : public Mapper
 {
 public:
-    void Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass, Actor* actor) noexcept override;
+    void
+    Update(uint32_t maximumOfFrames, const std::unique_ptr<RenderPass>& renderPass, Actor* actor) noexcept override;
 
     std::array<double, 6> GetBounds() const noexcept override;
 

@@ -25,6 +25,7 @@ class Device;
 class Actor;
 class Renderer;
 class Texture;
+class RenderPass;
 
 enum class ColorMode : uint8_t
 {
@@ -44,7 +45,8 @@ class JELLY_EXPORT Mapper : public Object
 public:
     void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor) noexcept;
 
-    virtual void Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass, Actor* actor) noexcept = 0;
+    virtual void
+    Update(uint32_t maximumOfFrames, const std::unique_ptr<RenderPass>& renderPass, Actor* actor) noexcept = 0;
 
     virtual std::array<double, 6> GetBounds() const noexcept = 0;
 

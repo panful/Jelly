@@ -71,9 +71,9 @@ const vk::Extent2D& Viewer::GetExtent() const noexcept
     return m_extent;
 }
 
-const vk::raii::RenderPass& Viewer::GetRenderPass() const noexcept
+const std::unique_ptr<RenderPass>& Viewer::GetRenderPass() const noexcept
 {
-    return m_renderPass->GetRenderPass();
+    return m_renderPass;
 }
 
 void Viewer::AddRenderer(std::shared_ptr<Renderer> renderer)

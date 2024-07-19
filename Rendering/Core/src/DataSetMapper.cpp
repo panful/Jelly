@@ -24,7 +24,9 @@ std::array<double, 6> DataSetMapper::GetBounds() const noexcept
     return {-1., 1., -1., 1., -1., 1.};
 }
 
-void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass& renderPass, Actor* actor) noexcept
+void DataSetMapper::Update(
+    uint32_t maximumOfFrames, const std::unique_ptr<RenderPass>& renderPass, Actor* actor
+) noexcept
 {
     Logger::GetInstance()->Debug();
 
@@ -118,7 +120,7 @@ void DataSetMapper::Update(uint32_t maximumOfFrames, const vk::raii::RenderPass&
         .strides                     = std::move(strides),
         .pushConstantRanges          = std::move(pushConstantRange),
         .descriptorSetLayoutBindings = std::move(descriptorSetLayoutBindings),
-        .renderPass                  = renderPass
+        .renderPass                  = renderPass->GetRenderPass()
     };
 
     // FIXME 修改所有的uniform可能会有一些问题，也许上一帧还没绘制完，uniform 还需使用就被修改了

@@ -37,7 +37,7 @@ public:
 
     const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
     const vk::Extent2D& GetExtent() const noexcept;
-    const vk::raii::RenderPass& GetRenderPass() const noexcept;
+    const std::unique_ptr<RenderPass>& GetRenderPass() const noexcept;
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;
     uint32_t GetCurrentFrameIndex() const noexcept;
     uint32_t GetMaximumOfFrames() const noexcept;
