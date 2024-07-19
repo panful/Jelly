@@ -1,5 +1,5 @@
 /**
- * @file DefaultRenderPass.h
+ * @file MSAARenderPass.h
  * @author yangpan (yangpan0822@qq.com)
  * @brief
  * @version 0.1
@@ -15,10 +15,12 @@
 #include "RenderPass.h"
 
 namespace Jelly {
-class JELLY_EXPORT DefaultRenderPass : public RenderPass
+class JELLY_EXPORT MsaaRenderPass : public RenderPass
 {
 public:
-    DefaultRenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent);
+    MsaaRenderPass(
+        std::shared_ptr<Device> device, const vk::Extent2D& extent, vk::SampleCountFlagBits sampleCountFlagBits
+    );
 
     void Resize(const vk::Extent2D& extent) noexcept override;
 
@@ -27,5 +29,6 @@ public:
 private:
     vk::Format m_depthFormat {vk::Format::eD16Unorm};
     std::unique_ptr<DepthImageData> m_depthImageData {};
+    std::unique_ptr<ImageData> m_msaaColorImage {};
 };
 } // namespace Jelly

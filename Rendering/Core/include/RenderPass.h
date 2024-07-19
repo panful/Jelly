@@ -27,6 +27,8 @@ public:
 
     virtual void Resize(const vk::Extent2D& extent) noexcept = 0;
 
+    virtual std::vector<vk::ClearValue> GetClearValues() const noexcept = 0;
+
     const vk::raii::RenderPass& GetRenderPass() const noexcept;
 
     const std::vector<vk::raii::Framebuffer>& GetFramebuffers() const noexcept;

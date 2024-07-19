@@ -1,6 +1,7 @@
 #include "Viewer.h"
 #include "DefaultRenderPass.h"
 #include "Device.h"
+#include "MsaaRenderPass.h"
 #include "Renderer.h"
 
 using namespace Jelly;
@@ -10,10 +11,39 @@ void Viewer::SetDevice(std::shared_ptr<Device> device)
     m_device = std::move(device);
 }
 
+void Viewer::SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept
+{
+    m_sampleCountFlagBits = sampleCount;
+}
+
 void Viewer::Init(const vk::Extent2D& extent)
 {
-    m_extent     = extent;
-    m_renderPass = std::make_unique<DefaultRenderPass>(m_device, m_extent);
+    m_extent = extent;
+
+    if (m_sampleCountFlagBits != vk::SampleCountFlagBits::e1)
+    {
+        auto properties = m_device->GetPhysicalDevice().getProperties();
+
+        vk::SampleCountFlags counts =
+            properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+
+        m_sampleCountFlagBits = counts & vk::SampleCountFlagBits::e64 ? vk::SampleCountFlagBits::e64
+            : counts & vk::SampleCountFlagBits::e32                   ? vk::SampleCountFlagBits::e32
+            : counts & vk::SampleCountFlagBits::e16                   ? vk::SampleCountFlagBits::e16
+            : counts & vk::SampleCountFlagBits::e8                    ? vk::SampleCountFlagBits::e8
+            : counts & vk::SampleCountFlagBits::e4                    ? vk::SampleCountFlagBits::e4
+            : counts & vk::SampleCountFlagBits::e2                    ? vk::SampleCountFlagBits::e2
+                                                                      : vk::SampleCountFlagBits::e1;
+    }
+
+    if (m_sampleCountFlagBits != vk::SampleCountFlagBits::e1)
+    {
+        m_renderPass = std::make_unique<MsaaRenderPass>(m_device, m_extent, m_sampleCountFlagBits);
+    }
+    else
+    {
+        m_renderPass = std::make_unique<DefaultRenderPass>(m_device, m_extent);
+    }
 }
 
 void Viewer::Resize(const vk::Extent2D& extent)
@@ -26,9 +56,8 @@ void Viewer::Resize(const vk::Extent2D& extent)
 
 void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
 {
-    std::array<vk::ClearValue, 2> clearValues;
-    clearValues[0].color        = vk::ClearColorValue(0.f, 0.f, 0.f, 0.f);
-    clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
+    auto clearValues = m_renderPass->GetClearValues();
+
     vk::RenderPassBeginInfo renderPassBeginInfo(
         m_renderPass->GetRenderPass(),
         m_renderPass->GetFramebuffers()[m_currentFrameIndex],

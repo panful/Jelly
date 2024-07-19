@@ -27,6 +27,8 @@ class JELLY_EXPORT Viewer
 public:
     void SetDevice(std::shared_ptr<Device> device);
 
+    void SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept;
+
     void Init(const vk::Extent2D& extent);
 
     void Render(const vk::raii::CommandBuffer& commandBuffer);
@@ -36,16 +38,22 @@ public:
     void Resize(const vk::Extent2D& extent);
 
     const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
+
     const vk::Extent2D& GetExtent() const noexcept;
+
     const std::unique_ptr<RenderPass>& GetRenderPass() const noexcept;
+
     std::vector<vk::ImageView> GetColorImageViews() const noexcept;
+
     uint32_t GetCurrentFrameIndex() const noexcept;
+
     uint32_t GetMaximumOfFrames() const noexcept;
 
 private:
-    vk::Extent2D m_extent {};
     uint32_t m_currentFrameIndex {0};
     uint32_t m_maximumOfFrames {JELLY_MAX_FRAMES};
+    vk::Extent2D m_extent {};
+    vk::SampleCountFlagBits m_sampleCountFlagBits {vk::SampleCountFlagBits::e8};
 
     std::shared_ptr<Device> m_device {};
     std::unique_ptr<RenderPass> m_renderPass {};

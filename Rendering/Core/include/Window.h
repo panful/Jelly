@@ -38,8 +38,12 @@ public:
     void AddRenderer(std::shared_ptr<Renderer> renderer);
 
     void SetSize(const uint32_t width, const uint32_t height) noexcept;
+
     void SetTitle(const std::string_view title) noexcept;
+
     void SetEnableGetRenderingResult(bool enable) noexcept;
+
+    void SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept;
 
     const std::vector<std::shared_ptr<Renderer>>& GetAllRenderers() const noexcept;
 

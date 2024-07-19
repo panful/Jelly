@@ -59,6 +59,11 @@ void Window::SetEnableGetRenderingResult(bool enable) noexcept
     m_enableGetRenderingResult = enable;
 }
 
+void Window::SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept
+{
+    m_viewer->SetSampleCount(sampleCount);
+}
+
 const std::vector<std::shared_ptr<Renderer>>& Window::GetAllRenderers() const noexcept
 {
     return m_viewer->GetAllRenderers();

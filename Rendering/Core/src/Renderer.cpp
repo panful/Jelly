@@ -33,8 +33,10 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 
     m_camera->SetAspectRatio(static_cast<double>(extent.width) / static_cast<double>(extent.height));
 
-    vk::ClearValue clearValue {m_background};
-    vk::ClearAttachment attachment {vk::ImageAspectFlagBits::eColor, 0, clearValue};
+    std::array<vk::ClearAttachment, 1> attachments {
+        vk::ClearAttachment {vk::ImageAspectFlagBits::eColor, 0, vk::ClearValue {m_background}}
+    };
+
     vk::ClearRect rect {
         vk::Rect2D {offset, extent},
          0, 1
@@ -42,7 +44,7 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 
     commandBuffer.setViewport(0, viewport);
     commandBuffer.setScissor(0, vk::Rect2D(offset, extent));
-    commandBuffer.clearAttachments(attachment, rect);
+    commandBuffer.clearAttachments(attachments, rect);
 
     for (auto& actor : m_actors)
     {
