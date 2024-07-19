@@ -11,38 +11,8 @@ void Viewer::SetDevice(std::shared_ptr<Device> device)
 
 void Viewer::Init(const vk::Extent2D& extent)
 {
-    m_extent = extent;
-    m_colorImageDatas.resize(m_maximumOfFrames);
-    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
-    {
-        m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
-            m_colorFormat,
-            m_extent,
-            vk::ImageTiling::eOptimal,
-            vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
-            vk::ImageLayout::eUndefined,
-            vk::MemoryPropertyFlagBits::eDeviceLocal,
-            vk::ImageAspectFlagBits::eColor
-        );
-    }
-
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
-
-    m_renderPass = std::make_unique<RenderPass>(m_device, m_colorFormat, m_depthFormat);
-
-    m_framebuffers.reserve(m_maximumOfFrames);
-    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
-    {
-        std::array<vk::ImageView, 2> imageViews {
-            m_colorImageDatas[i]->GetImageView(), m_depthImageData->GetImageView()
-        };
-
-        m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
-            vk::FramebufferCreateInfo({}, m_renderPass->GetRenderPass(), imageViews, m_extent.width, m_extent.height, 1)
-        ));
-    }
+    m_extent     = extent;
+    m_renderPass = std::make_unique<RenderPass>(m_device, m_extent);
 }
 
 void Viewer::Resize(const vk::Extent2D& extent)
@@ -50,36 +20,7 @@ void Viewer::Resize(const vk::Extent2D& extent)
     m_extent            = extent;
     m_currentFrameIndex = 0;
     m_device->GetDevice().waitIdle();
-
-    m_colorImageDatas.resize(m_maximumOfFrames);
-    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
-    {
-        m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
-            m_colorFormat,
-            m_extent,
-            vk::ImageTiling::eOptimal,
-            vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
-            vk::ImageLayout::eUndefined,
-            vk::MemoryPropertyFlagBits::eDeviceLocal,
-            vk::ImageAspectFlagBits::eColor
-        );
-    }
-
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_extent);
-
-    m_framebuffers.clear();
-    for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
-    {
-        std::array<vk::ImageView, 2> imageViews {
-            m_colorImageDatas[i]->GetImageView(), m_depthImageData->GetImageView()
-        };
-
-        m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
-            vk::FramebufferCreateInfo({}, m_renderPass->GetRenderPass(), imageViews, m_extent.width, m_extent.height, 1)
-        ));
-    }
+    m_renderPass->Resize(m_extent);
 }
 
 void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
@@ -88,7 +29,10 @@ void Viewer::Render(const vk::raii::CommandBuffer& commandBuffer)
     clearValues[0].color        = vk::ClearColorValue(0.f, 0.f, 0.f, 0.f);
     clearValues[1].depthStencil = vk::ClearDepthStencilValue(1.f, 0);
     vk::RenderPassBeginInfo renderPassBeginInfo(
-        m_renderPass->GetRenderPass(), m_framebuffers[m_currentFrameIndex], vk::Rect2D({0, 0}, m_extent), clearValues
+        m_renderPass->GetRenderPass(),
+        m_renderPass->GetFramebuffers()[m_currentFrameIndex],
+        vk::Rect2D({0, 0}, m_extent),
+        clearValues
     );
     commandBuffer.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
@@ -109,12 +53,7 @@ const std::vector<std::shared_ptr<Renderer>>& Viewer::GetAllRenderers() const no
 
 std::vector<vk::ImageView> Viewer::GetColorImageViews() const noexcept
 {
-    std::vector<vk::ImageView> imageViews {};
-    for (const auto& colorImageData : m_colorImageDatas)
-    {
-        imageViews.emplace_back(colorImageData->GetImageView());
-    }
-    return imageViews;
+    return m_renderPass->GetColorImageViews();
 }
 
 uint32_t Viewer::GetCurrentFrameIndex() const noexcept

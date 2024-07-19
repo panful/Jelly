@@ -11,8 +11,6 @@
 
 #pragma once
 
-#include "DepthImageData.h"
-#include "ImageData.h"
 #include "Object.h"
 #include "RenderPass.h"
 #include <memory>
@@ -45,19 +43,12 @@ public:
     uint32_t GetMaximumOfFrames() const noexcept;
 
 private:
+    vk::Extent2D m_extent {};
     uint32_t m_currentFrameIndex {0};
     uint32_t m_maximumOfFrames {JELLY_MAX_FRAMES};
-    vk::Extent2D m_extent {};
-    vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
-    vk::Format m_depthFormat {vk::Format::eD16Unorm};
 
     std::shared_ptr<Device> m_device {};
     std::unique_ptr<RenderPass> m_renderPass {};
-
-    std::vector<std::unique_ptr<ImageData>> m_colorImageDatas {};
-    std::unique_ptr<DepthImageData> m_depthImageData {nullptr};
-
-    std::vector<vk::raii::Framebuffer> m_framebuffers {};
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };
 } // namespace Jelly
