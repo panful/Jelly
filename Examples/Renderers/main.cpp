@@ -13,6 +13,7 @@ int main()
     auto renderer2 = std::make_shared<Jelly::Renderer>();
     renderer2->SetBackground({.3f, .3f, .3f, 1.f});
     renderer2->SetViewport({.55, .55, .4, .4});
+    renderer2->SetEnableGradientBackground(true);
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer1);

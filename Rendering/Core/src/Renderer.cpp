@@ -1,6 +1,8 @@
 #include "Renderer.h"
 #include "Actor.h"
 #include "Logger.h"
+#include "Pipeline.h"
+#include "SpvCreater.h"
 #include "Viewer.h"
 #include "Window.h"
 #include <cmath>
@@ -13,6 +15,11 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
     Logger::GetInstance()->Trace();
 
     auto viewer = m_viewer.lock(); // 如果 Renderer 存在，Viewer 一定存在，此处无需判空
+
+    if (m_enableGradientBackground)
+    {
+        std::call_once(m_createBackgroundPipeline, [this, &viewer]() { this->CreateBackgroundPipeline(viewer); });
+    }
 
     auto offset = vk::Offset2D {
         static_cast<int32_t>(viewer->GetExtent().width * m_viewport[0]),
@@ -52,6 +59,12 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
         {
             actor->Render(commandBuffer, this);
         }
+    }
+
+    if (m_enableGradientBackground)
+    {
+        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_backgroundPipeline->GetPipeline());
+        commandBuffer.draw(3, 1, 0, 0);
     }
 }
 
@@ -97,6 +110,16 @@ void Renderer::SetViewport(const std::array<double, 4>& viewport)
 void Renderer::SetBackground(const std::array<float, 4>& background)
 {
     m_background = background;
+}
+
+void Renderer::SetBackground2(const std::array<float, 4>& background)
+{
+    m_background2 = background;
+}
+
+void Renderer::SetEnableGradientBackground(bool enable) noexcept
+{
+    m_enableGradientBackground = enable;
 }
 
 void Renderer::ResetCamera() const noexcept
@@ -276,4 +299,39 @@ std::array<double, 3> Renderer::DisplayToWorld(const std::array<int, 2>& display
 
     Logger::GetInstance()->Error("invalid viewer");
     return {};
+}
+
+void Renderer::CreateBackgroundPipeline(std::shared_ptr<Viewer>& viewer)
+{
+    // TODO: 暂时先以纹理坐标作为背景色，后续再补充
+    static std::string_view vertCode = R"(
+        #version 450
+        layout (location = 0) out vec2 outUV;
+        void main() {
+            outUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
+            gl_Position = vec4(outUV * 2.0f - 1.0f, 1.0f, 1.0f);
+        }
+    )";
+    static std::string_view fragCode = R"(
+        #version 450
+        layout (location = 0) in vec2 inUV;
+        layout (location = 0) out vec4 outFragColor;
+        void main() {
+            outFragColor = vec4(inUV, 0.f, 1.f);
+        }
+    )";
+
+    auto vertSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eVertex, vertCode);
+    auto fragSpv = SpvCreater::GetInstance()->GLSL2SPV(vk::ShaderStageFlagBits::eFragment, fragCode);
+
+    PipelineInfo pipelineInfo {
+        .vertexShaderCode   = std::move(vertSpv.value()),
+        .fragmentShaderCode = std::move(fragSpv.value()),
+        .strides            = {},
+        .sampleCount        = viewer->GetRenderPass()->GetSampleCountFlagBits(),
+        .depthCompareOp     = vk::CompareOp::eLessOrEqual,
+        .renderPass         = viewer->GetRenderPass()->GetRenderPass()
+    };
+
+    m_backgroundPipeline = std::make_unique<Pipeline>(m_device, pipelineInfo);
 }

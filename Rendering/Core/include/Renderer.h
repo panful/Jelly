@@ -15,6 +15,7 @@
 #include "Object.h"
 #include <array>
 #include <memory>
+#include <mutex>
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
@@ -22,6 +23,7 @@ class Actor;
 class Device;
 class Window;
 class Viewer;
+class Pipeline;
 
 class JELLY_EXPORT Renderer : public Object
 {
@@ -37,6 +39,10 @@ public:
     void SetViewport(const std::array<double, 4>& viewport);
 
     void SetBackground(const std::array<float, 4>& background);
+
+    void SetBackground2(const std::array<float, 4>& background);
+
+    void SetEnableGradientBackground(bool enable) noexcept;
 
     void SetViewer(std::weak_ptr<Viewer> viewer) noexcept;
 
@@ -65,12 +71,20 @@ public:
     std::array<double, 3> DisplayToWorld(const std::array<int, 2>& displayPoint) const noexcept;
 
 private:
+    void CreateBackgroundPipeline(std::shared_ptr<Viewer>& viewer);
+
+private:
+    std::once_flag m_createBackgroundPipeline {};
     std::shared_ptr<Device> m_device {};
     std::weak_ptr<Viewer> m_viewer {};
     std::shared_ptr<Camera> m_camera {std::make_shared<Camera>()};
     std::vector<std::shared_ptr<Actor>> m_actors {};
 
     std::array<double, 4> m_viewport {0., 0., 1., 1.}; // 起始位置以及宽高
+
+    bool m_enableGradientBackground {false};
+    std::unique_ptr<Pipeline> m_backgroundPipeline {};
     std::array<float, 4> m_background {.3f, .2f, .1f, 1.f};
+    std::array<float, 4> m_background2 {.3f, .2f, .1f, 1.f};
 };
 } // namespace Jelly
