@@ -21,6 +21,7 @@ option(BUILD_UNIT_TESTING "build the unit test" ON)
 option(BUILD_EXAMPLES "build the examples" ON)
 option(BUILD_SHARED_LIBRARIES "build shared libraries(dlls)" ON)
 option(USE_GLFW_WINDOW "display using glfw dindow" ON)
+option(USE_QT_WINDOW "display using Qt window" ON)
 
 add_definitions(-DJELLY_MAX_FRAMES=3)
 add_definitions(-DGLM_FORCE_RADIANS)            # glm 的参数使用弧度制

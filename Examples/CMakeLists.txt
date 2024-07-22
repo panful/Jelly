@@ -4,3 +4,7 @@ add_subdirectory(Actor)
 add_subdirectory(Actors)
 add_subdirectory(InteractorStyle)
 add_subdirectory(Texture)
+
+if(USE_QT_WINDOW)
+    add_subdirectory(WindowQT)
+endif(USE_QT_WINDOW)

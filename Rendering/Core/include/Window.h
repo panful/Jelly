@@ -91,6 +91,7 @@ protected:
     vk::Extent2D m_extent {800, 600};
     std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
+    std::unique_ptr<SwapChainData> m_swapChainData {};
 
 private:
     uint32_t m_numberOfFrames {JELLY_MAX_FRAMES};
@@ -101,7 +102,6 @@ private:
 
     std::shared_ptr<Viewer> m_viewer {};
 
-    std::unique_ptr<SwapChainData> m_swapChainData {};
     vk::raii::RenderPass m_renderPass {nullptr};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};
 
