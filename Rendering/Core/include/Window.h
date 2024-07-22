@@ -31,6 +31,9 @@ class JELLY_EXPORT Window : public Object
 {
 public:
     Window() noexcept;
+
+    explicit Window(std::shared_ptr<Device> device) noexcept;
+
     ~Window() noexcept override;
 
     void Render() noexcept;

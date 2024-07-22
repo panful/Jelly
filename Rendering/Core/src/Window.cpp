@@ -19,6 +19,13 @@ Window::Window() noexcept
     m_viewer->SetDevice(m_device);
 }
 
+Window::Window(std::shared_ptr<Device> device) noexcept
+    : m_device(std::move(device))
+    , m_viewer(std::make_shared<Viewer>())
+{
+    m_viewer->SetDevice(m_device);
+}
+
 Window::~Window() noexcept
 {
     m_device->GetDevice().waitIdle();
