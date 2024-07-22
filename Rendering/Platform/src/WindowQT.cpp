@@ -1,6 +1,7 @@
 #include "WindowQT.h"
 #include "Device.h"
 #include "Logger.h"
+#include <QResizeEvent>
 
 using namespace Jelly;
 
@@ -15,13 +16,9 @@ WindowQT::WindowQT(std::shared_ptr<Device> device, QWindow* parent)
 {
 }
 
-void WindowQT::closeEvent(QCloseEvent*)
+void WindowQT::SetEventAdapter(std::function<void(QEvent*)>&& eventAdapter) noexcept
 {
-    // Qt会将 QVulkanInstance::surfaceForWindow 返回的 VkSurfaceKHR 销毁
-    // SwapChain 必须保证在 Surface 销毁之前就销毁
-    m_device->GetDevice().waitIdle();
-    m_swapChainData.reset();
-    m_surface.release();
+    m_eventAdapter = std::move(eventAdapter);
 }
 
 void WindowQT::InitSurface() noexcept
@@ -35,8 +32,48 @@ void WindowQT::InitSurface() noexcept
 
     this->setVulkanInstance(m_qVulkanInstance.get());
     this->setSurfaceType(QSurface::VulkanSurface);
-    this->show();
+    this->create();
 
     m_surface = vk::raii::SurfaceKHR(m_device->GetInstance(), QVulkanInstance::surfaceForWindow(this));
     m_window  = this;
+}
+
+void WindowQT::closeEvent(QCloseEvent* event)
+{
+    // Qt会将 QVulkanInstance::surfaceForWindow 返回的 VkSurfaceKHR 销毁
+    // SwapChain 必须保证在 Surface 销毁之前就销毁
+    m_device->GetDevice().waitIdle();
+    m_swapChainData.reset();
+    m_surface.release();
+
+    return QWindow::closeEvent(event);
+}
+
+void WindowQT::resizeEvent(QResizeEvent* event)
+{
+    if (event->size().width() <= 0 || event->size().height() <= 0 || !m_swapChainData)
+    {
+        return QWindow::resizeEvent(event);
+    }
+
+    this->SetSize(static_cast<uint32_t>(event->size().width()), static_cast<uint32_t>(event->size().height()));
+    this->Render();
+
+    return QWindow::resizeEvent(event);
+}
+
+void WindowQT::paintEvent(QPaintEvent* event)
+{
+    this->Render();
+    return QWindow::paintEvent(event);
+}
+
+bool WindowQT::event(QEvent* event)
+{
+    if (m_eventAdapter)
+    {
+        m_eventAdapter(event);
+    }
+
+    return QWindow::event(event);
 }

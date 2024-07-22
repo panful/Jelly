@@ -2,9 +2,8 @@
 #include "DataSet.h"
 #include "DataSetMapper.h"
 #include "FloatData.h"
-#include "InteractorGLFW.h"
+#include "InteractorQT.h"
 #include "Renderer.h"
-#include "WindowGLFW.h"
 #include "WindowQT.h"
 #include <QGuiApplication>
 #include <iostream>
@@ -77,10 +76,14 @@ int main(int argc, char** argv)
     renderer->AddActor(actor);
     renderer->ResetCamera();
 
-    Jelly::WindowQT window {};
-    window.resize(800, 600);
-    window.AddRenderer(renderer);
-    window.Render();
+    auto window = std::make_shared<Jelly::WindowQT>();
+    window->AddRenderer(renderer);
+    window->resize(800, 600);
+    window->show();
+
+    auto interactor = std::make_shared<Jelly::InteractorQT>();
+    interactor->SetWindow(window);
+    interactor->Start();
 
     return app.exec();
 }

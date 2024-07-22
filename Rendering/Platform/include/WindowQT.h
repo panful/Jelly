@@ -14,6 +14,7 @@
 #include "Window.h"
 #include <QVulkanInstance>
 #include <QWindow>
+#include <functional>
 #include <memory>
 
 class QVulkanInstance;
@@ -28,10 +29,19 @@ public:
 
     explicit WindowQT(std::shared_ptr<Device> device, QWindow* parent = nullptr);
 
+    void SetEventAdapter(std::function<void(QEvent*)>&& eventAdapter) noexcept;
+
 protected:
     void InitSurface() noexcept override;
 
-    void closeEvent(QCloseEvent*) override;
+    void closeEvent(QCloseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
+
+    bool event(QEvent* event) override;
+
+protected:
+    std::function<void(QEvent*)> m_eventAdapter {};
 
 private:
     std::unique_ptr<QVulkanInstance> m_qVulkanInstance {};

@@ -27,10 +27,12 @@ if(USE_QT_WINDOW)
 
     set(SRCS ${SRCS}
         ${CMAKE_CURRENT_SOURCE_DIR}/src/WindowQT.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/InteractorQT.cpp
     )
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_SOURCE_DIR}/include/WindowQT.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/InteractorQT.h
     )
 
     set(LIBRARIES ${LIBRARIES} Qt6::Widgets)
