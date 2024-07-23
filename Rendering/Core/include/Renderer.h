@@ -38,6 +38,8 @@ public:
 
     void SetViewport(const std::array<double, 4>& viewport);
 
+    const std::array<double, 4>& GetViewport() const noexcept;
+
     void SetBackground(const std::array<float, 4>& background);
 
     void SetBackground2(const std::array<float, 4>& background);

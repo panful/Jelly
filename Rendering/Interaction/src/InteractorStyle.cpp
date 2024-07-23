@@ -30,47 +30,59 @@ void InteractorStyle::FindPokedRenderer()
     m_currentRenderer.reset();
 }
 
-void InteractorStyle::Dolly(double factor) const noexcept
+void InteractorStyle::Dolly(const std::shared_ptr<Renderer>& renderer, double factor) const noexcept
 {
-    if (factor <= 0)
+    if (factor <= 0.0)
     {
         return;
     }
 
-    if (auto renderer = m_currentRenderer.lock())
+    auto camera = renderer->GetCamera();
+    switch (camera->GetCameraType())
     {
-        auto camera = renderer->GetCamera();
-        switch (camera->GetCameraType())
+        case CameraType::Orthographic:
         {
-            case CameraType::Orthographic:
-            {
-                camera->SetOrthographicScale(camera->GetOrthographicScale() / factor);
-            }
-            break;
-            case CameraType::Perspective:
-            {
-                const auto& eyePos   = camera->GetEyePos();
-                const auto& focalPos = camera->GetFocalPos();
-
-                auto x = focalPos[0] - eyePos[0];
-                auto y = focalPos[1] - eyePos[1];
-                auto z = focalPos[2] - eyePos[2];
-
-                std::array<double, 3> newEyePos = {
-                    focalPos[0] - x / factor, focalPos[1] - y / factor, focalPos[2] - z / factor
-                };
-
-                camera->SetEyePos(newEyePos);
-                renderer->ResetCameraClipRange();
-            }
-            break;
-            default:
-            {
-                Logger::GetInstance()->Warn("wrong camera type");
-            }
-            break;
+            camera->SetOrthographicScale(camera->GetOrthographicScale() / factor);
         }
+        break;
+        case CameraType::Perspective:
+        {
+            const auto& eyePos   = camera->GetEyePos();
+            const auto& focalPos = camera->GetFocalPos();
+
+            auto x = focalPos[0] - eyePos[0];
+            auto y = focalPos[1] - eyePos[1];
+            auto z = focalPos[2] - eyePos[2];
+
+            std::array<double, 3> newEyePos = {
+                focalPos[0] - x / factor, focalPos[1] - y / factor, focalPos[2] - z / factor
+            };
+
+            camera->SetEyePos(newEyePos);
+            renderer->ResetCameraClipRange();
+        }
+        break;
+        default:
+        {
+            Logger::GetInstance()->Warn("wrong camera type");
+        }
+        break;
     }
+}
+
+void InteractorStyle::TranslateCamera(
+    const std::shared_ptr<Renderer>& renderer, const std::array<double, 3>& from, const std::array<double, 3>& to
+) const noexcept
+{
+    auto camera = renderer->GetCamera();
+
+    auto& eyePos   = camera->GetEyePos();
+    auto& focalPos = camera->GetFocalPos();
+
+    std::array<double, 3> motionVector {to[0] - from[0], to[1] - from[1], to[2] - from[2]};
+
+    camera->SetEyePos({eyePos[0] + motionVector[0], eyePos[1] + motionVector[1], eyePos[2] + motionVector[2]});
+    camera->SetFocalPos({focalPos[0] + motionVector[0], focalPos[1] + motionVector[1], focalPos[2] + motionVector[2]});
 }
 
 void InteractorStyle::MouseMoveEvent()

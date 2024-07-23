@@ -59,8 +59,17 @@ protected:
     void FindPokedRenderer();
 
     /// @brief 推拉相机实现场景缩放
+    /// @param renderer 相机所在的 Renderer
     /// @param factor 小于1缩小，大于1放大，小于等于0无效
-    void Dolly(double factor) const noexcept;
+    void Dolly(const std::shared_ptr<Renderer>& renderer, double factor) const noexcept;
+
+    /// @brief 将相机从指定位置移动到另一个位置
+    /// @param renderer
+    /// @param from
+    /// @param to
+    void TranslateCamera(
+        const std::shared_ptr<Renderer>& renderer, const std::array<double, 3>& from, const std::array<double, 3>& to
+    ) const noexcept;
 
 protected:
     InteractorState m_state {InteractorState::None};

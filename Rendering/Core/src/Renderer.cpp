@@ -107,6 +107,11 @@ void Renderer::SetViewport(const std::array<double, 4>& viewport)
     m_viewport = viewport;
 }
 
+const std::array<double, 4>& Renderer::GetViewport() const noexcept
+{
+    return m_viewport;
+}
+
 void Renderer::SetBackground(const std::array<float, 4>& background)
 {
     m_background = background;

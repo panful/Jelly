@@ -1,6 +1,7 @@
 #include "InteractorStyleTrackballCamera.h"
 #include "Interactor.h"
 #include "Renderer.h"
+#include "Viewer.h"
 #include "Window.h"
 
 using namespace Jelly;
@@ -49,6 +50,16 @@ void InteractorStyleTrackballCamera::MouseMoveEvent()
             break;
             case InteractorState::Zoom:
             {
+                // 鼠标在Y轴的变化
+                if (interactor->GetMousePosition()[1] - m_lastMousePosition[1] > 0)
+                {
+                    Dolly(renderer, 1. + m_zoomFactor);
+                }
+                else if (interactor->GetMousePosition()[1] - m_lastMousePosition[1] < 0)
+                {
+                    Dolly(renderer, 1. - m_zoomFactor);
+                }
+                interactor->GetWindow()->Render();
             }
             break;
             default:
@@ -93,32 +104,56 @@ void InteractorStyleTrackballCamera::LeftButtonReleaseEvent()
 
 void InteractorStyleTrackballCamera::MiddleButtonPressEvent()
 {
+    FindPokedRenderer();
+
+    if (auto interactor = m_interactor.lock())
+    {
+        m_lastMousePosition = interactor->GetMousePosition();
+        m_state             = InteractorState::Zoom;
+    }
 }
 
 void InteractorStyleTrackballCamera::MiddleButtonReleaseEvent()
 {
+    m_state = InteractorState::None;
 }
 
 void InteractorStyleTrackballCamera::MouseWheelForwardEvent()
 {
     FindPokedRenderer();
-
-    if (auto renderer = m_currentRenderer.lock())
-    {
-        auto interactor = m_interactor.lock();
-        Dolly(1. + m_zoomFactor);
-        interactor->GetWindow()->Render();
-    }
+    ZoomByMousePoint(1. + m_zoomFactor);
 }
 
 void InteractorStyleTrackballCamera::MouseWheelBackwardEvent()
 {
     FindPokedRenderer();
+    ZoomByMousePoint(1. - m_zoomFactor);
+}
 
+void InteractorStyleTrackballCamera::ZoomByMousePoint(double factor)
+{
     if (auto renderer = m_currentRenderer.lock())
     {
         auto interactor = m_interactor.lock();
-        Dolly(1. - m_zoomFactor);
+
+        auto& extent   = renderer->GetViewer()->GetExtent();
+        auto& viewport = renderer->GetViewport();
+
+        std::array<int, 2> center = {
+            static_cast<int>(extent.width * viewport[0] + extent.width * viewport[2] / 2.),
+            static_cast<int>(extent.height * viewport[1] + extent.height * viewport[3] / 2.)
+        };
+
+        auto centerWorld = renderer->DisplayToWorld(center);
+        auto mouseWorld  = renderer->DisplayToWorld(interactor->GetMousePosition());
+        TranslateCamera(renderer, centerWorld, mouseWorld);
+
+        Dolly(renderer, factor);
+
+        auto centerWorld2 = renderer->DisplayToWorld(center);
+        auto mouseWorld2  = renderer->DisplayToWorld(interactor->GetMousePosition());
+        TranslateCamera(renderer, mouseWorld2, centerWorld2);
+
         interactor->GetWindow()->Render();
     }
 }
