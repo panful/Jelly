@@ -247,8 +247,14 @@ CameraType Camera::GetCameraType() const noexcept
     return m_cameraType;
 }
 
-std::array<double, 3> Camera::NDCToWorld(const std::array<double, 3>& ndcPoint) const noexcept
+std::array<double, 3> Camera::NDCToWorld(const std::array<double, 3>& ndcPoint) noexcept
 {
+    if (IsChanged())
+    {
+        Update();
+        ResetChanged();
+    }
+
     glm::dvec4 ndc {ndcPoint[0], ndcPoint[1], ndcPoint[2], 1.};
 
     glm::dmat4 viewMat = glm::make_mat4(m_viewMatrix.data());
@@ -259,8 +265,14 @@ std::array<double, 3> Camera::NDCToWorld(const std::array<double, 3>& ndcPoint) 
     return {worldPos.x / worldPos.w, worldPos.y / worldPos.w, worldPos.z / worldPos.w};
 }
 
-std::array<double, 3> Camera::WorldToView(const std::array<double, 3>& worldPoint) const noexcept
+std::array<double, 3> Camera::WorldToView(const std::array<double, 3>& worldPoint) noexcept
 {
+    if (IsChanged())
+    {
+        Update();
+        ResetChanged();
+    }
+
     glm::dvec4 world {worldPoint[0], worldPoint[1], worldPoint[2], 1.};
 
     glm::dmat4 viewMat = glm::make_mat4(m_viewMatrix.data());
@@ -273,7 +285,7 @@ std::array<double, 3> Camera::WorldToView(const std::array<double, 3>& worldPoin
 
 void Camera::Update()
 {
-    auto dMat4TofArr16 = [](const glm::dmat4& from, std::array<float, 16>& to) {
+    static auto dMat4TofArr16 = [](const glm::dmat4& from, std::array<float, 16>& to) {
         for (auto i = 0u; i < 4u; ++i)
         {
             for (auto j = 0u; j < 4u; ++j)
