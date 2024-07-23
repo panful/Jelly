@@ -7,4 +7,5 @@ add_subdirectory(Texture)
 
 if(USE_QT_WINDOW)
     add_subdirectory(WindowQT)
+    add_subdirectory(QTProject)
 endif(USE_QT_WINDOW)
