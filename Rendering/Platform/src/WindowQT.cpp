@@ -38,17 +38,6 @@ void WindowQT::InitSurface() noexcept
     m_window  = this;
 }
 
-void WindowQT::closeEvent(QCloseEvent* event)
-{
-    // Qt会将 QVulkanInstance::surfaceForWindow 返回的 VkSurfaceKHR 销毁
-    // SwapChain 必须保证在 Surface 销毁之前就销毁
-    m_device->GetDevice().waitIdle();
-    m_swapChainData.reset();
-    m_surface.release();
-
-    return QWindow::closeEvent(event);
-}
-
 void WindowQT::resizeEvent(QResizeEvent* event)
 {
     if (event->size().width() <= 0 || event->size().height() <= 0 || !m_swapChainData)
@@ -70,6 +59,23 @@ void WindowQT::paintEvent(QPaintEvent* event)
 
 bool WindowQT::event(QEvent* event)
 {
+    static bool destroySurface {false};
+    if (event->type() == QEvent::PlatformSurface && !destroySurface)
+    {
+        destroySurface = true;
+        return QWindow::event(event);
+    }
+
+    if (event->type() == QEvent::PlatformSurface && destroySurface)
+    {
+        // Qt 会将 QVulkanInstance::surfaceForWindow 返回的 VkSurfaceKHR 销毁
+        // SwapChain 必须保证在 Surface 销毁之前就销毁
+        m_device->GetDevice().waitIdle();
+        m_swapChainData.reset();
+        m_surface.release();
+        return true;
+    }
+
     if (m_eventAdapter)
     {
         m_eventAdapter(event);

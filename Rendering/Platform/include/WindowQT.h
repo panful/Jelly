@@ -34,7 +34,6 @@ public:
 protected:
     void InitSurface() noexcept override;
 
-    void closeEvent(QCloseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
