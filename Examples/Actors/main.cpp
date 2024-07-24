@@ -89,6 +89,7 @@ int main()
     auto renderer = std::make_shared<Jelly::Renderer>();
     renderer->AddActor(actor1);
     renderer->AddActor(actor2);
+    renderer->ResetCamera();
 
     auto window = std::make_shared<Jelly::WindowGLFW>();
     window->AddRenderer(renderer);
