@@ -9,14 +9,95 @@
 #include "Texture.h"
 #include "WindowQT.h"
 #include <QBoxLayout>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDialog>
 #include <QDockWidget>
 #include <QGridLayout>
+#include <QGroupBox>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QRadioButton>
 #include <QString>
 #include <QWidget>
-#include <mutex>
 #include <vector>
+
+class ActorDialog : public QDialog
+{
+public:
+    explicit ActorDialog(
+        std::shared_ptr<Jelly::WindowQT>& window, std::unique_ptr<Actor>& actor, QPlainTextEdit* log, const char* name
+    )
+        : QDialog(nullptr)
+    {
+        this->setWindowTitle(name);
+        this->setMinimumSize(400, 300);
+
+        auto mainLayout = new QVBoxLayout(this);
+        this->setLayout(mainLayout);
+
+        //--------------------------------------
+        auto colorTypeBox = new QGroupBox("color type", this);
+
+        auto color_vertex  = new QRadioButton("Vertex", colorTypeBox);
+        auto color_uniform = new QRadioButton("Uniform", colorTypeBox);
+        auto color_texture = new QRadioButton("Texture", colorTypeBox);
+
+        auto colorTypeBoxLayout = new QHBoxLayout(colorTypeBox);
+        colorTypeBoxLayout->addWidget(color_vertex);
+        colorTypeBoxLayout->addWidget(color_uniform);
+        colorTypeBoxLayout->addWidget(color_texture);
+
+        colorTypeBox->setLayout(colorTypeBoxLayout);
+
+        auto colorTypeGroup = new QButtonGroup(colorTypeBox);
+        colorTypeGroup->addButton(color_vertex, static_cast<int>(Jelly::ColorMode::Vertex));
+        colorTypeGroup->addButton(color_uniform, static_cast<int>(Jelly::ColorMode::Uniform));
+        colorTypeGroup->addButton(color_texture, static_cast<int>(Jelly::ColorMode::Texture));
+
+        qobject_cast<QRadioButton*>(colorTypeGroup->button(static_cast<int>(actor->mapper->GetColorMode())))
+            ->setChecked(true);
+
+        connect(colorTypeGroup, &QButtonGroup::idClicked, [&actor, &window, &name, log](int id) {
+            actor->mapper->SetColorMode(static_cast<Jelly::ColorMode>(id));
+            log->appendPlainText(name + QString(" color mode: %1").arg(id));
+            window->Render();
+        });
+
+        //----------------------------------------------
+        auto visibilityBox       = new QGroupBox("visibility", this);
+        auto visibilityBoxLayout = new QHBoxLayout(visibilityBox);
+        visibilityBox->setLayout(visibilityBoxLayout);
+        auto visible = new QCheckBox("visible", visibilityBox);
+        visible->setChecked(actor->actor->GetVisibility());
+        visibilityBoxLayout->addWidget(visible);
+
+        connect(visible, &QCheckBox::stateChanged, [&window, &actor, &name, log]() {
+            actor->actor->SetVisibility(!actor->actor->GetVisibility());
+            log->appendPlainText(name + QString(" visible: %1").arg(actor->actor->GetVisibility() ? "on" : "off"));
+            window->Render();
+        });
+
+        //----------------------------------------------
+        auto lightingBox       = new QGroupBox("lighting", this);
+        auto lightingBoxLayout = new QHBoxLayout(lightingBox);
+        lightingBox->setLayout(lightingBoxLayout);
+        auto lighting = new QCheckBox("lighting", lightingBox);
+        lighting->setChecked(actor->actor->GetEnableLighting());
+        lightingBoxLayout->addWidget(lighting);
+
+        connect(lighting, &QCheckBox::stateChanged, [&window, &actor, &name, log]() {
+            actor->actor->SetEnableLighting(!actor->actor->GetEnableLighting());
+            log->appendPlainText(name + QString(" lighting: %1").arg(actor->actor->GetEnableLighting() ? "on" : "off"));
+            window->Render();
+        });
+
+        //-------------------------------------------------
+        mainLayout->addWidget(colorTypeBox);
+        mainLayout->addWidget(visibilityBox);
+        mainLayout->addWidget(lightingBox);
+    }
+};
 
 MyWindow::MyWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -32,24 +113,47 @@ MyWindow::MyWindow(QWidget* parent)
 
     auto btnRestCamera = new QPushButton("reset camera", widget);
     auto btnBackground = new QPushButton("set background", widget);
-    auto btnCube       = new QPushButton("display cube switch", widget);
     auto btnProject    = new QPushButton("camera project", widget);
-    auto btnColor      = new QPushButton("coloring type", widget);
-    auto btnLighting   = new QPushButton("light switch", widget);
 
-    connect(btnRestCamera, &QPushButton::clicked, [this]() { this->ResetCamera(); });
-    connect(btnBackground, &QPushButton::clicked, [this]() { this->Background(); });
-    connect(btnCube, &QPushButton::clicked, [this]() { this->DisplayCube(); });
-    connect(btnProject, &QPushButton::clicked, [this]() { this->ProjectType(); });
-    connect(btnColor, &QPushButton::clicked, [this]() { this->ColorType(); });
-    connect(btnLighting, &QPushButton::clicked, [this]() { this->Lighting(); });
+    connect(btnRestCamera, &QPushButton::clicked, [this]() {
+        this->m_defaultRenderer->ResetCamera();
+        this->m_renderWindow->Render();
+    });
+    connect(btnBackground, &QPushButton::clicked, [this]() {
+        static bool enable {false};
+        enable = !enable;
+        this->m_defaultRenderer->SetEnableGradientBackground(enable);
+        this->m_renderWindow->Render();
+    });
+    connect(btnProject, &QPushButton::clicked, [this]() {
+        static int index {1};
+        this->m_defaultRenderer->GetCamera()->SetCameraType(static_cast<Jelly::CameraType>(index++ % 2));
+        m_renderWindow->Render();
+    });
+
+    auto btnActor1 = new QPushButton("Actor 1", widget);
+    auto btnActor2 = new QPushButton("Actor 2", widget);
+    auto btnActor3 = new QPushButton("Actor 3", widget);
+
+    connect(btnActor1, &QPushButton::clicked, [this]() {
+        ActorDialog dialog(this->m_renderWindow, this->m_plane1, this->m_logTextWidget, "Actor 1");
+        dialog.exec();
+    });
+    connect(btnActor2, &QPushButton::clicked, [this]() {
+        ActorDialog dialog(this->m_renderWindow, this->m_plane2, this->m_logTextWidget, "Actor 2");
+        dialog.exec();
+    });
+    connect(btnActor3, &QPushButton::clicked, [this]() {
+        ActorDialog dialog(this->m_renderWindow, this->m_plane3, this->m_logTextWidget, "Actor 3");
+        dialog.exec();
+    });
 
     layout->addWidget(btnRestCamera);
     layout->addWidget(btnBackground);
-    layout->addWidget(btnCube);
     layout->addWidget(btnProject);
-    layout->addWidget(btnColor);
-    layout->addWidget(btnLighting);
+    layout->addWidget(btnActor1);
+    layout->addWidget(btnActor2);
+    layout->addWidget(btnActor3);
     widget->setLayout(layout);
     leftDockWidget->setWidget(widget);
 
@@ -68,59 +172,24 @@ MyWindow::MyWindow(QWidget* parent)
     m_renderWindow->setFlags(Qt::FramelessWindowHint); // 必须设置为无边框，否则窗口会出现一个黑边
     QWidget* wrapper = QWidget::createWindowContainer(m_renderWindow.get());
     this->setCentralWidget(wrapper);
+
+    InitActor();
 }
 
-void MyWindow::Background()
+void MyWindow::InitActor()
 {
-    static bool enable {false};
-    enable = !enable;
-    m_defaultRenderer->SetEnableGradientBackground(enable);
-    m_renderWindow->Render();
-}
-
-void MyWindow::ResetCamera()
-{
-    m_defaultRenderer->ResetCamera();
-    m_renderWindow->Render();
-}
-
-void MyWindow::DisplayCube()
-{
-    static std::once_flag flag {};
-
-    std::call_once(flag, [this]() {
+    auto makeCube = [](float x, float y, float z, float r, float g, float b) {
+        // clang-format off
         std::vector<float> points {
-            -10.f, -10.f, -20.f, -10.f, 10.f, -20.f, 10.f, 10.f, -20.f, 10.f, -10.f, -20.f,
-            -10.f, -10.f, 20.f,  -10.f, 10.f, 20.f,  10.f, 10.f, 20.f,  10.f, -10.f, 20.f,
+            -1.f + x, -1.f + y, 0.f + z,
+            -1.f + x,  1.f + y, 0.f + z,
+             1.f + x,  1.f + y, 0.f + z,
+             1.f + x, -1.f + y, 0.f + z
         };
-
-        std::vector<float> colors {
-            1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-            0.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, 0.f, 0.f, 1.f, 0.f,
-        };
-
-        std::vector<float> texCoords {
-            0.f,
-            1.f,
-            0.f,
-            0.f,
-            0.33f,
-            1.f,
-            0.33f,
-            0.f,
-            0.66f,
-            1.f,
-            0.66f,
-            0.f,
-            1.f,
-            1.f,
-            1.f,
-            0.f,
-        };
-
-        std::vector<uint32_t> triangles {
-            0, 1, 2, 0, 2, 3, 3, 2, 6, 3, 6, 7, 7, 6, 5, 7, 5, 4, 4, 5, 1, 4, 1, 0, 4, 0, 3, 4, 3, 7, 1, 5, 6, 1, 6, 2,
-        };
+        // clang-format on
+        std::vector<float> colors {r, 0.f, 0.f, r, g, 0.f, 0.f, g, b, 0.f, 0.f, b};
+        std::vector<float> texCoords {0.f, 1.f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.f};
+        std::vector<uint32_t> cells {0, 1, 2, 0, 2, 3};
 
         auto pointData = std::make_shared<Jelly::FloatData>();
         pointData->SetData(std::move(points));
@@ -132,80 +201,67 @@ void MyWindow::DisplayCube()
         texCoordData->SetData(std::move(texCoords));
 
         auto indexData = std::make_shared<Jelly::DataArrayTemplate<uint32_t>>();
-        indexData->SetData(std::move(triangles));
+        indexData->SetData(std::move(cells));
 
         auto dataSet = std::make_shared<Jelly::DataSet>();
         dataSet->SetPoints(pointData);
         dataSet->SetColors(colorData);
         dataSet->SetTexCoords(texCoordData);
         dataSet->SetIndices(indexData);
+        return dataSet;
+    };
 
-        auto mapper = std::make_shared<Jelly::DataSetMapper>();
-        mapper->SetDataSet(dataSet);
-        mapper->SetColorMode(Jelly::ColorMode::Vertex);
-
-        this->m_cubeMapper = mapper;
-
+    auto makeTexture = [](uint8_t color) {
         std::vector<uint8_t> texturePixels {};
         texturePixels.reserve(100 * 100 * 4);
         for (auto x = 0u; x < 100u; ++x)
         {
             for (auto y = 0u; y < 100u; ++y)
             {
-                texturePixels.emplace_back(x > 50 ? 0 : 255);
-                texturePixels.emplace_back(y > 50 ? 0 : 255);
-                texturePixels.emplace_back(0);
+                texturePixels.emplace_back(x > 50 ? 0 : color);
+                texturePixels.emplace_back(y > 50 ? 0 : color);
+                texturePixels.emplace_back(color);
                 texturePixels.emplace_back(255);
             }
         }
 
         auto texture = std::make_shared<Jelly::Texture>();
         texture->SetImage(vk::Extent2D {100, 100}, std::move(texturePixels));
+        return texture;
+    };
 
-        this->m_cubeActor = std::make_shared<Jelly::Actor3D>();
-        this->m_cubeActor->SetMapper(this->m_cubeMapper);
-        this->m_cubeActor->SetColor({1.f, 0.f, 1.f});
-        this->m_cubeActor->SetTexture(texture);
+    //-----------------------------------
+    m_plane1         = std::make_unique<Actor>();
+    m_plane1->mapper = std::make_shared<Jelly::DataSetMapper>();
+    m_plane1->mapper->SetDataSet(makeCube(0.f, 0.f, 0.f, 1.f, 1.f, 1.f));
+    m_plane1->actor = std::make_shared<Jelly::Actor3D>();
+    m_plane1->actor->SetMapper(m_plane1->mapper);
+    m_plane1->actor->SetColor({1.f, 0.f, 0.f});
+    m_plane1->actor->SetTexture(makeTexture(128));
 
-        this->m_defaultRenderer->AddActor(this->m_cubeActor);
-        this->m_defaultRenderer->ResetCamera();
-    });
+    m_defaultRenderer->AddActor(m_plane1->actor);
 
-    static bool visible {false};
-    visible = !visible;
-    m_cubeActor->SetVisibility(visible);
+    //-----------------------------------
+    m_plane2         = std::make_unique<Actor>();
+    m_plane2->mapper = std::make_shared<Jelly::DataSetMapper>();
+    m_plane2->mapper->SetDataSet(makeCube(0.f, 1.f, 1.f, 1.f, 0.f, 1.f));
+    m_plane2->actor = std::make_shared<Jelly::Actor3D>();
+    m_plane2->actor->SetMapper(m_plane2->mapper);
+    m_plane2->actor->SetColor({0.f, 1.f, 0.f});
+    m_plane2->actor->SetTexture(makeTexture(64));
 
-    m_renderWindow->Render();
-}
+    m_defaultRenderer->AddActor(m_plane2->actor);
 
-void MyWindow::ProjectType()
-{
-    static int index {1};
-    m_defaultRenderer->GetCamera()->SetCameraType(static_cast<Jelly::CameraType>(index++ % 2));
-    m_renderWindow->Render();
-}
+    //-----------------------------------
+    m_plane3         = std::make_unique<Actor>();
+    m_plane3->mapper = std::make_shared<Jelly::DataSetMapper>();
+    m_plane3->mapper->SetDataSet(makeCube(0.f, -1.f, -1.f, 1.f, 1.f, 0.f));
+    m_plane3->actor = std::make_shared<Jelly::Actor3D>();
+    m_plane3->actor->SetMapper(m_plane3->mapper);
+    m_plane3->actor->SetColor({0.f, 0.f, 1.f});
+    m_plane3->actor->SetTexture(makeTexture(255));
 
-void MyWindow::ColorType()
-{
-    if (!m_cubeMapper)
-    {
-        return;
-    }
+    m_defaultRenderer->AddActor(m_plane3->actor);
 
-    static int index {1};
-    m_cubeMapper->SetColorMode(static_cast<Jelly::ColorMode>(index++ % 3));
-    m_renderWindow->Render();
-}
-
-void MyWindow::Lighting()
-{
-    if (!m_cubeActor)
-    {
-        return;
-    }
-
-    m_cubeActor->SetEnableLighting(!m_cubeActor->GetEnableLighting());
-    m_renderWindow->Render();
-
-    m_logTextWidget->appendPlainText(QString("lighting: %1").arg(m_cubeActor->GetEnableLighting() ? "on" : "off"));
+    m_defaultRenderer->ResetCamera();
 }
