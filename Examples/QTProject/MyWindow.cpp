@@ -11,6 +11,7 @@
 #include <QBoxLayout>
 #include <QButtonGroup>
 #include <QCheckBox>
+#include <QColorDialog>
 #include <QDialog>
 #include <QDockWidget>
 #include <QGridLayout>
@@ -60,7 +61,7 @@ public:
 
         connect(colorTypeGroup, &QButtonGroup::idClicked, [&actor, &window, &name, log](int id) {
             actor->mapper->SetColorMode(static_cast<Jelly::ColorMode>(id));
-            log->appendPlainText(name + QString(" color mode: %1").arg(id));
+            log->appendPlainText(QString(" color mode: %1").arg(id));
             window->Render();
         });
 
@@ -74,7 +75,7 @@ public:
 
         connect(visible, &QCheckBox::stateChanged, [&window, &actor, &name, log]() {
             actor->actor->SetVisibility(!actor->actor->GetVisibility());
-            log->appendPlainText(name + QString(" visible: %1").arg(actor->actor->GetVisibility() ? "on" : "off"));
+            log->appendPlainText(QString(" visible: %1").arg(actor->actor->GetVisibility() ? "on" : "off"));
             window->Render();
         });
 
@@ -88,7 +89,25 @@ public:
 
         connect(lighting, &QCheckBox::stateChanged, [&window, &actor, &name, log]() {
             actor->actor->SetEnableLighting(!actor->actor->GetEnableLighting());
-            log->appendPlainText(name + QString(" lighting: %1").arg(actor->actor->GetEnableLighting() ? "on" : "off"));
+            log->appendPlainText(QString(" lighting: %1").arg(actor->actor->GetEnableLighting() ? "on" : "off"));
+            window->Render();
+        });
+
+        //----------------------------------------------
+        auto colorBox       = new QGroupBox("color", this);
+        auto colorBoxLayout = new QHBoxLayout(colorBox);
+        colorBox->setLayout(colorBoxLayout);
+        auto color = new QPushButton("select color", colorBox);
+        colorBoxLayout->addWidget(color);
+
+        connect(color, &QPushButton::clicked, [&window, &actor, &name, log, this]() {
+            QColorDialog dialog;
+            dialog.setGeometry(this->geometry());
+            dialog.exec();
+
+            QColor c = dialog.selectedColor();
+            log->appendPlainText(QString(" R: %1 G: %2 B: %3").arg(c.redF()).arg(c.greenF()).arg(c.blueF()));
+            actor->actor->SetColor({c.redF(), c.greenF(), c.blueF()});
             window->Render();
         });
 
@@ -96,6 +115,7 @@ public:
         mainLayout->addWidget(colorTypeBox);
         mainLayout->addWidget(visibilityBox);
         mainLayout->addWidget(lightingBox);
+        mainLayout->addWidget(colorBox);
     }
 };
 
@@ -137,14 +157,17 @@ MyWindow::MyWindow(QWidget* parent)
 
     connect(btnActor1, &QPushButton::clicked, [this]() {
         ActorDialog dialog(this->m_renderWindow, this->m_plane1, this->m_logTextWidget, "Actor 1");
+        dialog.setGeometry(this->geometry().x(), this->geometry().y(), 100, 100);
         dialog.exec();
     });
     connect(btnActor2, &QPushButton::clicked, [this]() {
         ActorDialog dialog(this->m_renderWindow, this->m_plane2, this->m_logTextWidget, "Actor 2");
+        dialog.setGeometry(this->geometry().x(), this->geometry().y(), 100, 100);
         dialog.exec();
     });
     connect(btnActor3, &QPushButton::clicked, [this]() {
         ActorDialog dialog(this->m_renderWindow, this->m_plane3, this->m_logTextWidget, "Actor 3");
+        dialog.setGeometry(this->geometry().x(), this->geometry().y(), 100, 100);
         dialog.exec();
     });
 
