@@ -5,6 +5,8 @@
 #include "DataSetMapper.h"
 #include "FloatData.h"
 #include "InteractorQT.h"
+#include "InteractorStyleTrackballCamera.h"
+#include "Picker.h"
 #include "Renderer.h"
 #include "Texture.h"
 #include "WindowQT.h"
@@ -21,7 +23,44 @@
 #include <QRadioButton>
 #include <QString>
 #include <QWidget>
+#include <functional>
+#include <memory>
 #include <vector>
+
+class MyStyle : public Jelly::InteractorStyleTrackballCamera
+{
+protected:
+    void MiddleButtonPressEvent() override
+    {
+        FindPokedRenderer();
+
+        if (auto interactor = m_interactor.lock())
+        {
+            if (auto renderer = m_currentRenderer.lock())
+            {
+                auto pickedActor = m_picker->Pick(interactor->GetMousePosition(), renderer);
+                if (m_pickCallback)
+                {
+                    m_pickCallback(pickedActor);
+                }
+            }
+        }
+    }
+
+    void MiddleButtonReleaseEvent() override
+    {
+    }
+
+public:
+    void SetPickCallback(std::function<void(const std::shared_ptr<Jelly::Actor>&)>&& callback)
+    {
+        m_pickCallback = std::move(callback);
+    }
+
+private:
+    std::unique_ptr<Jelly::Picker> m_picker {std::make_unique<Jelly::Picker>()};
+    std::function<void(const std::shared_ptr<Jelly::Actor>&)> m_pickCallback {};
+};
 
 class ActorDialog : public QDialog
 {
@@ -188,8 +227,25 @@ MyWindow::MyWindow(QWidget* parent)
     m_defaultRenderer->SetBackground({.1f, .2f, .3f, 1.f});
     m_renderWindow->AddRenderer(m_defaultRenderer);
 
+    auto style = std::make_shared<MyStyle>();
+    style->SetPickCallback([this](const std::shared_ptr<Jelly::Actor>& actor) {
+        if (actor == this->m_plane1->actor)
+        {
+            this->m_logTextWidget->appendPlainText("picked actor1");
+        }
+        else if (actor == this->m_plane2->actor)
+        {
+            this->m_logTextWidget->appendPlainText("picked actor2");
+        }
+        else if (actor == this->m_plane3->actor)
+        {
+            this->m_logTextWidget->appendPlainText("picked actor3");
+        }
+    });
+
     m_windowInteractor = std::make_shared<Jelly::InteractorQT>();
     m_windowInteractor->SetWindow(m_renderWindow);
+    m_windowInteractor->SetInteractorStyle(style);
     m_windowInteractor->Start();
 
     m_renderWindow->setFlags(Qt::FramelessWindowHint); // 必须设置为无边框，否则窗口会出现一个黑边
