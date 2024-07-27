@@ -36,7 +36,6 @@ vk::Instance Device::InitInstance() noexcept
 
     vk::DebugUtilsMessageSeverityFlagsEXT severityFlags {
         vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError
-        | vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose
     };
     vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags {
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance
