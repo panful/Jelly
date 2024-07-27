@@ -54,7 +54,7 @@ public:
     }
 
     template <typename Func>
-    static void OneTimeSubmit(const std::shared_ptr<Device> device, const Func& func)
+    static void OneTimeSubmit(const std::shared_ptr<Device>& device, const Func& func)
     {
         vk::raii::CommandPool commandPool(
             device->GetDevice(), {{vk::CommandPoolCreateFlagBits::eTransient}, device->GetGraphicsQueueIndex()}

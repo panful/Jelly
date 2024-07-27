@@ -162,6 +162,11 @@ std::vector<vk::DeviceSize> Drawable::GetVertexOffsets() const noexcept
     return offsets;
 }
 
+vk::Buffer Drawable::GetVertexPosBuffer() const noexcept
+{
+    return m_vertexBufferData->bufferData->GetBuffer();
+}
+
 vk::Buffer Drawable::GetIndexBuffer() const noexcept
 {
     return m_indexBufferData->bufferData->GetBuffer();

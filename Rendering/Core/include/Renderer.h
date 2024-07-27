@@ -36,6 +36,8 @@ public:
 
     void SetDevice(std::shared_ptr<Device> device) noexcept;
 
+    const std::shared_ptr<Device>& GetDevice() const noexcept;
+
     void SetViewport(const std::array<double, 4>& viewport);
 
     const std::array<double, 4>& GetViewport() const noexcept;

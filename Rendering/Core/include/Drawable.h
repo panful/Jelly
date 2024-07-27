@@ -34,6 +34,10 @@ public:
     std::vector<vk::Buffer> GetVertexBuffers() const noexcept;
     std::vector<vk::DeviceSize> GetVertexOffsets() const noexcept;
 
+    /// @brief 获取顶点位置 Buffer
+    /// @return
+    vk::Buffer GetVertexPosBuffer() const noexcept;
+
     vk::Buffer GetIndexBuffer() const noexcept;
     uint32_t GetIndexCount() const noexcept;
     vk::IndexType GetIndexType() const noexcept;

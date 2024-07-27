@@ -56,6 +56,8 @@ public:
 
     ColorMode GetColorMode() const noexcept;
 
+    const std::unique_ptr<Drawable>& GetDrawable() const noexcept;
+
 protected:
     void BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo, Actor* actor) noexcept;
 

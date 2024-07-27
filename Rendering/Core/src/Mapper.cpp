@@ -188,3 +188,8 @@ ColorMode Mapper::GetColorMode() const noexcept
 {
     return m_colorMode;
 }
+
+const std::unique_ptr<Drawable>& Mapper::GetDrawable() const noexcept
+{
+    return m_drawable;
+}

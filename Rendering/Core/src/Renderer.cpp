@@ -92,6 +92,11 @@ void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
     }
 }
 
+const std::shared_ptr<Device>& Renderer::GetDevice() const noexcept
+{
+    return m_device;
+}
+
 void Renderer::SetViewer(std::weak_ptr<Viewer> viewer) noexcept
 {
     m_viewer = std::move(viewer);
