@@ -12,7 +12,7 @@ WindowQT::WindowQT(QWindow* parent)
 
 WindowQT::WindowQT(std::shared_ptr<Device> device, QWindow* parent)
     : QWindow(parent)
-    , Window(std::move(device))
+    , Jelly::Window(std::move(device))
 {
 }
 
