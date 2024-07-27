@@ -23,7 +23,7 @@ class Device;
 class JELLY_EXPORT RenderPass : public Object
 {
 public:
-    RenderPass(std::shared_ptr<Device> device);
+    RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent);
 
     virtual void Resize(const vk::Extent2D& extent) noexcept = 0;
 
@@ -37,8 +37,11 @@ public:
 
     vk::SampleCountFlagBits GetSampleCountFlagBits() const noexcept;
 
+    const vk::Extent2D& GetExtent() const noexcept;
+
 protected:
     uint32_t m_maximumOfFrames {JELLY_MAX_FRAMES};
+    vk::Extent2D m_extent {};
     vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
     vk::SampleCountFlagBits m_sampleCountFlagBits {vk::SampleCountFlagBits::e1};
 

@@ -33,3 +33,4 @@
 - [x] 将Mapper的部分属性移动到Actor，Mapper执行Render()时，将Actor当作参数传入
 - [ ] 不支持动态修改 Actor 的纹理
 - [ ] 背景色支持纹理图片、渐变色等自定义复杂背景
+- [ ] ColorMode 是否有必要设置为 Actor 的属性，而不是 Mapper

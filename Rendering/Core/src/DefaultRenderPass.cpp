@@ -5,7 +5,7 @@
 using namespace Jelly;
 
 DefaultRenderPass::DefaultRenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent)
-    : RenderPass(std::move(device))
+    : RenderPass(std::move(device), extent)
 {
     m_colorImageDatas.resize(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -13,7 +13,7 @@ DefaultRenderPass::DefaultRenderPass(std::shared_ptr<Device> device, const vk::E
         m_colorImageDatas[i] = std::make_unique<ImageData>(
             m_device,
             m_colorFormat,
-            extent,
+            m_extent,
             vk::ImageTiling::eOptimal,
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
             vk::ImageLayout::eUndefined,
@@ -72,20 +72,26 @@ DefaultRenderPass::DefaultRenderPass(std::shared_ptr<Device> device, const vk::E
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
-            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, extent.width, extent.height, 1)
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
 }
 
 void DefaultRenderPass::Resize(const vk::Extent2D& extent) noexcept
 {
+    if (extent == m_extent)
+    {
+        return;
+    }
+
+    m_extent = extent;
     m_colorImageDatas.resize(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas[i] = std::make_unique<ImageData>(
             m_device,
             m_colorFormat,
-            extent,
+            m_extent,
             vk::ImageTiling::eOptimal,
             vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eSampled,
             vk::ImageLayout::eUndefined,
@@ -95,7 +101,7 @@ void DefaultRenderPass::Resize(const vk::Extent2D& extent) noexcept
         );
     }
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, m_extent);
 
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -106,7 +112,7 @@ void DefaultRenderPass::Resize(const vk::Extent2D& extent) noexcept
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
             m_device->GetDevice(),
-            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, extent.width, extent.height, 1)
+            vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
 }

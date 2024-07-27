@@ -2,8 +2,9 @@
 
 using namespace Jelly;
 
-RenderPass::RenderPass(std::shared_ptr<Device> device)
+RenderPass::RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent)
     : m_device(std::move(device))
+    , m_extent(extent)
 {
 }
 
@@ -30,4 +31,9 @@ std::vector<vk::ImageView> RenderPass::GetColorImageViews() const noexcept
 vk::SampleCountFlagBits RenderPass::GetSampleCountFlagBits() const noexcept
 {
     return m_sampleCountFlagBits;
+}
+
+const vk::Extent2D& RenderPass::GetExtent() const noexcept
+{
+    return m_extent;
 }
