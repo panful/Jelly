@@ -30,7 +30,7 @@ public:
 
     void SetDevice(std::shared_ptr<Device> device);
 
-    void Update();
+    void Update() override;
 
     const vk::raii::Sampler& GetSampler() const noexcept;
 

@@ -46,7 +46,7 @@ public:
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
     void SetColorMode(ColorMode colorMode) noexcept;
 
-    void Update();
+    void Update() override;
 
 private:
     std::shared_ptr<Device> m_device {};

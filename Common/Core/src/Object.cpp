@@ -16,3 +16,7 @@ void Object::ResetChanged() noexcept
 {
     m_isChanged = false;
 }
+
+void Object::Update()
+{
+}

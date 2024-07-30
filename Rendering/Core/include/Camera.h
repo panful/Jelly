@@ -123,7 +123,7 @@ public:
     std::array<double, 3> WorldToView(const std::array<double, 3>& worldPoint) noexcept;
 
 private:
-    void Update();
+    void Update() override;
 
 private:
     CameraType m_cameraType {CameraType::Orthographic};

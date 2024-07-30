@@ -40,6 +40,8 @@ public:
     /// @brief 将状态设置为未修改
     void ResetChanged() noexcept;
 
+    virtual void Update();
+
 private:
     std::atomic_bool m_isChanged {true};
 };
