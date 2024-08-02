@@ -27,7 +27,7 @@ void Mapper::DeviceRender(
     const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor, uint32_t currentFrameIndex
 )
 {
-    auto&& pipeline = m_device->GetPipelineCache()->GetPipeline(m_pipelineKey);
+    auto&& pipeline = Device::Get()->GetPipelineCache()->GetPipeline(m_pipelineKey);
     commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
 
     switch (m_colorMode)
@@ -67,18 +67,13 @@ void Mapper::DeviceRender(
     commandBuffer.drawIndexed(m_drawable->GetIndexCount(), 1, 0, 0, 0);
 }
 
-void Mapper::SetDevice(std::shared_ptr<Device> device) noexcept
-{
-    m_device = std::move(device);
-}
-
 void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelineInfo, Actor* actor) noexcept
 {
     m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 
-    if (!m_device->GetPipelineCache()->HasPipeline(m_pipelineKey))
+    if (!Device::Get()->GetPipelineCache()->HasPipeline(m_pipelineKey))
     {
-        m_device->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(m_device, pipelineInfo));
+        Device::Get()->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(pipelineInfo));
     }
 
     switch (m_colorMode)
@@ -91,11 +86,12 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
             if (!m_textureColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-                    maximumOfFrames, m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                    maximumOfFrames,
+                    Device::Get()->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
                 m_textureColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
-                    m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
+                    Device::Get()->GetDevice(), {Device::Get()->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
                 vk::DescriptorImageInfo descriptorImageInfo(
@@ -115,7 +111,7 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
                                                 descriptorImageInfo, nullptr
                         }
                     };
-                    m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+                    Device::Get()->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
                 }
 
                 m_textureColorDescriptorSets->initialized = true;
@@ -129,11 +125,12 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
             if (!m_uniformColorDescriptorSets->initialized)
             {
                 std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(
-                    maximumOfFrames, m_device->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
+                    maximumOfFrames,
+                    Device::Get()->GetPipelineCache()->GetPipeline(m_pipelineKey)->GetDescriptorSetLayout()
                 );
 
                 m_uniformColorDescriptorSets->descriptorSets = vk::raii::DescriptorSets(
-                    m_device->GetDevice(), {m_device->GetDescriptorPool(), descriptorSetLayouts}
+                    Device::Get()->GetDevice(), {Device::Get()->GetDescriptorPool(), descriptorSetLayouts}
                 );
 
                 auto colorSize = sizeof(actor->GetColor());
@@ -141,7 +138,6 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
                 for (uint32_t i = 0; i < maximumOfFrames; ++i)
                 {
                     m_uniformBufferObjects[i] = std::make_unique<BufferData>(
-                        m_device,
                         colorSize,
                         vk::BufferUsageFlagBits::eUniformBuffer,
                         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent,
@@ -164,7 +160,7 @@ void Mapper::BuildPipeline(uint32_t maximumOfFrames, const PipelineInfo& pipelin
                                                 nullptr, dbInfo
                         }
                     };
-                    m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+                    Device::Get()->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
                 }
 
                 m_uniformColorDescriptorSets->initialized = true;

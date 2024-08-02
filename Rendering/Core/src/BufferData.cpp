@@ -3,18 +3,14 @@
 using namespace Jelly;
 
 BufferData::BufferData(
-    std::shared_ptr<Device> device,
-    vk::DeviceSize size,
-    vk::BufferUsageFlags usage,
-    vk::MemoryPropertyFlags propertyFlags,
-    bool mapMemory
+    vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags propertyFlags, bool mapMemory
 )
-    : m_buffer(device->GetDevice(), vk::BufferCreateInfo({}, size, usage))
+    : m_buffer(Device::Get()->GetDevice(), vk::BufferCreateInfo({}, size, usage))
     , m_size(size)
     , m_usage(usage)
     , m_propertyFlags(propertyFlags)
 {
-    m_deviceMemory = MemoryHelper::AllocateDeviceMemory(device, m_buffer.getMemoryRequirements(), propertyFlags);
+    m_deviceMemory = MemoryHelper::AllocateDeviceMemory(m_buffer.getMemoryRequirements(), propertyFlags);
     m_buffer.bindMemory(m_deviceMemory, 0);
 
     if (mapMemory)

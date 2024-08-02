@@ -1,7 +1,6 @@
 #include "Renderer.h"
 #include "Actor.h"
 #include "Logger.h"
-#include "Pipeline.h"
 #include "SpvCreater.h"
 #include "Viewer.h"
 #include "Window.h"
@@ -70,31 +69,12 @@ void Renderer::Render(const vk::raii::CommandBuffer& commandBuffer) noexcept
 
 void Renderer::AddActor(std::shared_ptr<Actor> actor)
 {
-    if (m_device)
-    {
-        actor->SetDevice(m_device);
-    }
-
     m_actors.emplace_back(std::move(actor));
 }
 
 const std::vector<std::shared_ptr<Actor>>& Renderer::GetAllActors() const noexcept
 {
     return m_actors;
-}
-
-void Renderer::SetDevice(std::shared_ptr<Device> device) noexcept
-{
-    m_device = std::move(device);
-    for (auto& actor : m_actors)
-    {
-        actor->SetDevice(m_device);
-    }
-}
-
-const std::shared_ptr<Device>& Renderer::GetDevice() const noexcept
-{
-    return m_device;
 }
 
 void Renderer::SetViewer(std::weak_ptr<Viewer> viewer) noexcept
@@ -343,5 +323,5 @@ void Renderer::CreateBackgroundPipeline(std::shared_ptr<Viewer>& viewer)
         .renderPass         = viewer->GetRenderPass()->GetRenderPass()
     };
 
-    m_backgroundPipeline = std::make_unique<Pipeline>(m_device, pipelineInfo);
+    m_backgroundPipeline = std::make_unique<Pipeline>(pipelineInfo);
 }

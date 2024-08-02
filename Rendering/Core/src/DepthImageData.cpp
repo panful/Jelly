@@ -2,11 +2,8 @@
 
 using namespace Jelly;
 
-DepthImageData::DepthImageData(
-    std::shared_ptr<Device> device, vk::Format format, vk::SampleCountFlagBits sampleCount, const vk::Extent2D& extent
-)
+DepthImageData::DepthImageData(vk::Format format, vk::SampleCountFlagBits sampleCount, const vk::Extent2D& extent)
     : ImageData(
-          std::move(device),
           format,
           extent,
           vk::ImageTiling::eOptimal,

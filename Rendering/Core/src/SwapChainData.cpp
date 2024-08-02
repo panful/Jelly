@@ -1,4 +1,5 @@
 #include "SwapChainData.h"
+#include "Device.h"
 #include "Logger.h"
 #include <algorithm>
 #include <array>
@@ -7,19 +8,19 @@
 using namespace Jelly;
 
 SwapChainData::SwapChainData(
-    std::shared_ptr<Device> device,
     const vk::raii::SurfaceKHR& surface,
     const vk::Extent2D& extent,
     const vk::raii::SwapchainKHR* pOldSwapchain,
     vk::ImageUsageFlags usage
 )
-    : m_device(std::move(device))
 {
-    vk::SurfaceFormatKHR surfaceFormat = PickSurfaceFormat(m_device->GetPhysicalDevice().getSurfaceFormatsKHR(surface));
+    vk::SurfaceFormatKHR surfaceFormat =
+        PickSurfaceFormat(Device::Get()->GetPhysicalDevice().getSurfaceFormatsKHR(surface));
 
     m_colorFormat = surfaceFormat.format;
 
-    vk::SurfaceCapabilitiesKHR surfaceCapabilities = m_device->GetPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
+    vk::SurfaceCapabilitiesKHR surfaceCapabilities =
+        Device::Get()->GetPhysicalDevice().getSurfaceCapabilitiesKHR(surface);
     if (surfaceCapabilities.currentExtent.width == std::numeric_limits<uint32_t>::max())
     {
         // 如果表面大小未定义，则将大小设置为所请求图像的大小。
@@ -64,7 +65,8 @@ SwapChainData::SwapChainData(
 
     m_numberOfImages = std::clamp(3u, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
 
-    vk::PresentModeKHR presentMode = PickPresentMode(m_device->GetPhysicalDevice().getSurfacePresentModesKHR(surface));
+    vk::PresentModeKHR presentMode =
+        PickPresentMode(Device::Get()->GetPhysicalDevice().getSurfacePresentModesKHR(surface));
     vk::SwapchainCreateInfoKHR swapChainCreateInfo(
         {},
         surface,
@@ -83,8 +85,8 @@ SwapChainData::SwapChainData(
         pOldSwapchain ? **pOldSwapchain : nullptr
     );
 
-    const auto graphicsQueueFamilyIndex = m_device->GetGraphicsQueueIndex();
-    const auto presentQueueFamilyIndex  = m_device->GetPresentQueueIndex();
+    const auto graphicsQueueFamilyIndex = Device::Get()->GetGraphicsQueueIndex();
+    const auto presentQueueFamilyIndex  = Device::Get()->GetPresentQueueIndex();
 
     if (graphicsQueueFamilyIndex != presentQueueFamilyIndex)
     {
@@ -94,7 +96,7 @@ SwapChainData::SwapChainData(
         swapChainCreateInfo.pQueueFamilyIndices   = queueFamilyIndices;
     }
 
-    m_swapChain = vk::raii::SwapchainKHR(m_device->GetDevice(), swapChainCreateInfo);
+    m_swapChain = vk::raii::SwapchainKHR(Device::Get()->GetDevice(), swapChainCreateInfo);
     m_images    = m_swapChain.getImages();
 
     m_imageViews.reserve(m_images.size());
@@ -104,7 +106,7 @@ SwapChainData::SwapChainData(
     for (auto image : m_images)
     {
         imageViewCreateInfo.image = image;
-        m_imageViews.emplace_back(m_device->GetDevice(), imageViewCreateInfo);
+        m_imageViews.emplace_back(Device::Get()->GetDevice(), imageViewCreateInfo);
     }
 }
 

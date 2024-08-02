@@ -11,11 +11,6 @@ void Texture::SetImage(const vk::Extent2D& extent, std::vector<uint8_t>&& pixelD
     m_pixelData = std::move(pixelData);
 }
 
-void Texture::SetDevice(std::shared_ptr<Device> device)
-{
-    m_device = std::move(device);
-}
-
 void Texture::Update()
 {
     if (!IsChanged())
@@ -26,7 +21,6 @@ void Texture::Update()
     auto imageSize = m_extent.width * m_extent.height * 4;
 
     BufferData stagingBufferData(
-        m_device,
         imageSize,
         vk::BufferUsageFlagBits::eTransferSrc,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
@@ -35,7 +29,6 @@ void Texture::Update()
     stagingBufferData.Upload(m_pixelData);
 
     m_imageData = std::make_unique<ImageData>(
-        m_device,
         m_format,
         m_extent,
         vk::ImageTiling::eOptimal,
@@ -46,7 +39,7 @@ void Texture::Update()
         vk::SampleCountFlagBits::e1
     );
 
-    MemoryHelper::OneTimeSubmit(m_device, [this, &stagingBufferData](const vk::raii::CommandBuffer& commandBuffer) {
+    MemoryHelper::OneTimeSubmit([this, &stagingBufferData](const vk::raii::CommandBuffer& commandBuffer) {
         ImageData::SetImageLayout(
             commandBuffer,
             this->m_imageData->GetImage(),
@@ -80,7 +73,7 @@ void Texture::Update()
     });
 
     m_sampler = vk::raii::Sampler(
-        m_device->GetDevice(),
+        Device::Get()->GetDevice(),
         {{},
          vk::Filter::eLinear,
          vk::Filter::eLinear,

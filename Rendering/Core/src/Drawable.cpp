@@ -8,11 +8,6 @@
 
 using namespace Jelly;
 
-void Drawable::SetDevice(std::shared_ptr<Device> device) noexcept
-{
-    m_device = std::move(device);
-}
-
 void Drawable::SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept
 {
     if (m_dataSet != dataSet)
@@ -38,14 +33,12 @@ void Drawable::Update()
         if (!m_indexBufferData->initialized)
         {
             m_indexBufferData->bufferData = std::make_unique<BufferData>(
-                m_device,
                 m_dataSet->GetIndices()->GetDataTypeSize() * m_dataSet->GetIndices()->GetElementCount(),
                 vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst,
                 vk::MemoryPropertyFlagBits::eDeviceLocal
             );
 
             m_indexBufferData->bufferData->Upload(
-                m_device,
                 static_cast<const uint32_t*>(m_dataSet->GetIndices()->GetVoidPointer()),
                 m_dataSet->GetIndices()->GetElementCount()
             );
@@ -64,14 +57,12 @@ void Drawable::Update()
         if (!m_vertexBufferData->initialized)
         {
             m_vertexBufferData->bufferData = std::make_unique<BufferData>(
-                m_device,
                 m_dataSet->GetPoints()->GetElementCount() * sizeof(float),
                 vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
                 vk::MemoryPropertyFlagBits::eDeviceLocal
             );
 
             m_vertexBufferData->bufferData->Upload(
-                m_device,
                 static_cast<const float*>(m_dataSet->GetPoints()->GetVoidPointer()),
                 m_dataSet->GetPoints()->GetElementCount()
             );
@@ -82,13 +73,11 @@ void Drawable::Update()
         if (!m_colorBufferData->initialized && ColorMode::Vertex == m_colorMode && m_dataSet->HasColorData())
         {
             m_colorBufferData->bufferData = std::make_unique<BufferData>(
-                m_device,
                 m_dataSet->GetColors()->GetElementCount() * sizeof(float),
                 vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
                 vk::MemoryPropertyFlagBits::eDeviceLocal
             );
             m_colorBufferData->bufferData->Upload(
-                m_device,
                 static_cast<const float*>(m_dataSet->GetColors()->GetVoidPointer()),
                 m_dataSet->GetColors()->GetElementCount()
             );
@@ -103,13 +92,11 @@ void Drawable::Update()
         if (!m_texCoordBufferData->initialized && ColorMode::Texture == m_colorMode && m_dataSet->HasTexCoordData())
         {
             m_texCoordBufferData->bufferData = std::make_unique<BufferData>(
-                m_device,
                 m_dataSet->GetTexCoords()->GetElementCount() * sizeof(float),
                 vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst,
                 vk::MemoryPropertyFlagBits::eDeviceLocal
             );
             m_texCoordBufferData->bufferData->Upload(
-                m_device,
                 static_cast<const float*>(m_dataSet->GetTexCoords()->GetVoidPointer()),
                 m_dataSet->GetTexCoords()->GetElementCount()
             );

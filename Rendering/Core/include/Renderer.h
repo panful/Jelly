@@ -13,6 +13,7 @@
 
 #include "Camera.h"
 #include "Object.h"
+#include "Pipeline.h"
 #include <array>
 #include <memory>
 #include <mutex>
@@ -20,10 +21,8 @@
 
 namespace Jelly {
 class Actor;
-class Device;
 class Window;
 class Viewer;
-class Pipeline;
 
 class JELLY_EXPORT Renderer : public Object
 {
@@ -33,10 +32,6 @@ public:
     void AddActor(std::shared_ptr<Actor> actor);
 
     const std::vector<std::shared_ptr<Actor>>& GetAllActors() const noexcept;
-
-    void SetDevice(std::shared_ptr<Device> device) noexcept;
-
-    const std::shared_ptr<Device>& GetDevice() const noexcept;
 
     void SetViewport(const std::array<double, 4>& viewport);
 
@@ -79,7 +74,6 @@ private:
 
 private:
     std::once_flag m_createBackgroundPipeline {};
-    std::shared_ptr<Device> m_device {};
     std::weak_ptr<Viewer> m_viewer {};
     std::shared_ptr<Camera> m_camera {std::make_shared<Camera>()};
     std::vector<std::shared_ptr<Actor>> m_actors {};

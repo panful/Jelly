@@ -17,7 +17,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
 class Mapper;
 class Viewer;
 class Renderer;
@@ -27,8 +26,6 @@ class JELLY_EXPORT Actor : public Object
 {
 public:
     virtual void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer) noexcept = 0;
-
-    void SetDevice(std::shared_ptr<Device> device) noexcept;
 
     void SetMapper(std::shared_ptr<Mapper> mapper) noexcept;
     const std::shared_ptr<Mapper>& GetMapper() const noexcept;
@@ -51,7 +48,6 @@ public:
     std::array<double, 6> GetBounds() const noexcept;
 
 protected:
-    std::shared_ptr<Device> m_device {};
     std::shared_ptr<Mapper> m_mapper {};
 
 private:

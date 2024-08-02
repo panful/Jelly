@@ -17,7 +17,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
 class Renderer;
 
 class JELLY_EXPORT Viewer
@@ -25,8 +24,6 @@ class JELLY_EXPORT Viewer
     , public std::enable_shared_from_this<Viewer>
 {
 public:
-    void SetDevice(std::shared_ptr<Device> device);
-
     void SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept;
 
     void Init(const vk::Extent2D& extent);
@@ -55,7 +52,6 @@ private:
     vk::Extent2D m_extent {};
     vk::SampleCountFlagBits m_sampleCountFlagBits {vk::SampleCountFlagBits::e8};
 
-    std::shared_ptr<Device> m_device {};
     std::unique_ptr<RenderPass> m_renderPass {};
     std::vector<std::shared_ptr<Renderer>> m_renderers {};
 };

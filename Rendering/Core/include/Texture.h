@@ -18,8 +18,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
-
 class JELLY_EXPORT Texture : public Object
 {
 public:
@@ -27,8 +25,6 @@ public:
     /// @param extent
     /// @param pixelData 像素数据，格式为：RGBA
     void SetImage(const vk::Extent2D& extent, std::vector<uint8_t>&& pixelData);
-
-    void SetDevice(std::shared_ptr<Device> device);
 
     void Update() override;
 
@@ -39,7 +35,6 @@ public:
 private:
     vk::Format m_format {vk::Format::eR8G8B8A8Unorm};
     vk::Extent2D m_extent {256, 256};
-    std::shared_ptr<Device> m_device {};
     std::unique_ptr<ImageData> m_imageData {};
     vk::raii::Sampler m_sampler {nullptr};
     std::vector<uint8_t> m_pixelData {};

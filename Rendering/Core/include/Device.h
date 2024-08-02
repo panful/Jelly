@@ -19,7 +19,12 @@
 namespace Jelly {
 class JELLY_EXPORT Device : public Object
 {
+private:
+    Device() noexcept = default;
+
 public:
+    static Device* Get();
+
     void SetEnableValidationLayers(bool enable);
 
     bool CheckSurfaceSupport(const vk::raii::SurfaceKHR& surface);

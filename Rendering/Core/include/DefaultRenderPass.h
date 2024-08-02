@@ -18,7 +18,7 @@ namespace Jelly {
 class JELLY_EXPORT DefaultRenderPass : public RenderPass
 {
 public:
-    DefaultRenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent);
+    DefaultRenderPass(const vk::Extent2D& extent);
 
     void Resize(const vk::Extent2D& extent) noexcept override;
 

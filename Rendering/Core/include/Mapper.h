@@ -21,7 +21,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
 class Actor;
 class Renderer;
 class Texture;
@@ -50,8 +49,6 @@ public:
 
     virtual std::array<double, 6> GetBounds() const noexcept = 0;
 
-    void SetDevice(std::shared_ptr<Device> device) noexcept;
-
     void SetColorMode(ColorMode colorMode) noexcept;
 
     ColorMode GetColorMode() const noexcept;
@@ -67,7 +64,6 @@ private:
     );
 
 protected:
-    std::shared_ptr<Device> m_device {};
     std::unique_ptr<Drawable> m_drawable {};
 
     size_t m_pipelineKey {};

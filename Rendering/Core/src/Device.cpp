@@ -20,6 +20,12 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 }
 } // namespace
 
+Device* Device::Get()
+{
+    static Device device {};
+    return &device;
+}
+
 vk::Instance Device::InitInstance() noexcept
 {
     Logger::GetInstance()->Trace();

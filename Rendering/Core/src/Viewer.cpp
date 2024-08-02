@@ -6,11 +6,6 @@
 
 using namespace Jelly;
 
-void Viewer::SetDevice(std::shared_ptr<Device> device)
-{
-    m_device = std::move(device);
-}
-
 void Viewer::SetSampleCount(vk::SampleCountFlagBits sampleCount) noexcept
 {
     m_sampleCountFlagBits = sampleCount;
@@ -22,7 +17,7 @@ void Viewer::Init(const vk::Extent2D& extent)
 
     if (m_sampleCountFlagBits != vk::SampleCountFlagBits::e1)
     {
-        auto properties = m_device->GetPhysicalDevice().getProperties();
+        auto properties = Device::Get()->GetPhysicalDevice().getProperties();
 
         vk::SampleCountFlags counts =
             properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
@@ -38,11 +33,11 @@ void Viewer::Init(const vk::Extent2D& extent)
 
     if (m_sampleCountFlagBits != vk::SampleCountFlagBits::e1)
     {
-        m_renderPass = std::make_unique<MsaaRenderPass>(m_device, m_extent, m_sampleCountFlagBits);
+        m_renderPass = std::make_unique<MsaaRenderPass>(m_extent, m_sampleCountFlagBits);
     }
     else
     {
-        m_renderPass = std::make_unique<DefaultRenderPass>(m_device, m_extent);
+        m_renderPass = std::make_unique<DefaultRenderPass>(m_extent);
     }
 }
 
@@ -50,7 +45,7 @@ void Viewer::Resize(const vk::Extent2D& extent)
 {
     m_extent            = extent;
     m_currentFrameIndex = 0;
-    m_device->GetDevice().waitIdle();
+    Device::Get()->GetDevice().waitIdle();
     m_renderPass->Resize(m_extent);
 }
 
@@ -108,7 +103,6 @@ const std::unique_ptr<RenderPass>& Viewer::GetRenderPass() const noexcept
 
 void Viewer::AddRenderer(std::shared_ptr<Renderer> renderer)
 {
-    renderer->SetDevice(m_device);
     renderer->SetViewer(weak_from_this());
     m_renderers.emplace_back(std::move(renderer));
 }

@@ -22,7 +22,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
 class Renderer;
 class Viewer;
 class Pipeline;
@@ -31,8 +30,6 @@ class JELLY_EXPORT Window : public Object
 {
 public:
     Window() noexcept;
-
-    explicit Window(std::shared_ptr<Device> device) noexcept;
 
     ~Window() noexcept override;
 
@@ -58,8 +55,6 @@ public:
     /// @return 格式为 RGBA 原点在左上角
     /// @note 需要先将 EnableGetRenderingResult 开启
     std::vector<uint8_t> GetLastRenderingResult() const noexcept;
-
-    const std::shared_ptr<Device>& GetDevice() const noexcept;
 
     bool HasInitialized() const noexcept;
 
@@ -89,7 +84,6 @@ protected:
     std::any m_window {};
     std::string m_title {"Jelly"};
     vk::Extent2D m_extent {800, 600};
-    std::shared_ptr<Device> m_device {};
     vk::raii::SurfaceKHR m_surface {nullptr};
     std::unique_ptr<SwapChainData> m_swapChainData {};
 

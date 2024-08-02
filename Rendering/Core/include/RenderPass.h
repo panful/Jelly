@@ -18,12 +18,10 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
-
 class JELLY_EXPORT RenderPass : public Object
 {
 public:
-    RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent);
+    RenderPass(const vk::Extent2D& extent);
 
     virtual void Resize(const vk::Extent2D& extent) noexcept = 0;
 
@@ -45,7 +43,6 @@ protected:
     vk::Format m_colorFormat {vk::Format::eB8G8R8A8Unorm};
     vk::SampleCountFlagBits m_sampleCountFlagBits {vk::SampleCountFlagBits::e1};
 
-    std::shared_ptr<Device> m_device {};
     vk::raii::RenderPass m_renderPass {nullptr};
     std::vector<std::unique_ptr<ImageData>> m_colorImageDatas {};
     std::vector<vk::raii::Framebuffer> m_framebuffers {};

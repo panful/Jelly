@@ -28,15 +28,14 @@ uint32_t MemoryHelper::FindMemoryType(
 }
 
 vk::raii::DeviceMemory MemoryHelper::AllocateDeviceMemory(
-    const std::shared_ptr<Device> device,
     const vk::MemoryRequirements& memoryRequirements,
     vk::MemoryPropertyFlags memoryPropertyFlags
 ) noexcept
 {
     uint32_t memoryTypeIndex = FindMemoryType(
-        device->GetPhysicalDevice().getMemoryProperties(), memoryPropertyFlags, memoryRequirements.memoryTypeBits
+        Device::Get()->GetPhysicalDevice().getMemoryProperties(), memoryPropertyFlags, memoryRequirements.memoryTypeBits
     );
     vk::MemoryAllocateInfo memoryAllocateInfo(memoryRequirements.size, memoryTypeIndex);
 
-    return vk::raii::DeviceMemory(device->GetDevice(), memoryAllocateInfo);
+    return vk::raii::DeviceMemory(Device::Get()->GetDevice(), memoryAllocateInfo);
 }

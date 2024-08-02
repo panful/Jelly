@@ -18,8 +18,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
-
 struct DescriptorSetLayoutBinding
 {
     uint32_t binding {};
@@ -81,7 +79,7 @@ struct PipelineInfo
 class JELLY_EXPORT Pipeline : public Object
 {
 public:
-    Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineInfo) noexcept;
+    Pipeline(const PipelineInfo& pipelineInfo) noexcept;
 
     const vk::raii::DescriptorSetLayout& GetDescriptorSetLayout() const noexcept;
     const vk::raii::PipelineLayout& GetPipelineLayout() const noexcept;

@@ -24,16 +24,8 @@ class JELLY_EXPORT BufferData : public Object
 {
 public:
     BufferData(
-        std::shared_ptr<Device> device,
-        vk::DeviceSize size,
-        vk::BufferUsageFlags usage,
-        vk::MemoryPropertyFlags propertyFlags,
-        bool mapMemory = false
+        vk::DeviceSize size, vk::BufferUsageFlags usage, vk::MemoryPropertyFlags propertyFlags, bool mapMemory = false
     );
-
-    BufferData(BufferData&&) noexcept = default;
-
-    BufferData& operator=(BufferData&&) noexcept = default;
 
     ~BufferData() noexcept override;
 
@@ -58,14 +50,13 @@ public:
 
     /// @brief 使用暂存缓冲将CPU端的数据拷贝到GPU
     /// @tparam DataType
-    /// @param device
     /// @param data
     /// @param stride 数据的步长
     template <typename DataType>
-    void Upload(const std::shared_ptr<Device> device, const std::vector<DataType>& data, size_t stride = 0) const;
+    void UploadWithStage(const std::vector<DataType>& data, size_t stride = 0) const;
 
     template <typename DataType>
-    void Upload(const std::shared_ptr<Device> device, const DataType* pData, size_t elementCount) const;
+    void Upload(const DataType* pData, size_t elementCount) const;
 
 private:
     vk::raii::DeviceMemory m_deviceMemory {nullptr};
@@ -119,7 +110,7 @@ void BufferData::Upload(const std::vector<DataType>& data, size_t stride) const
 }
 
 template <typename DataType>
-void BufferData::Upload(const std::shared_ptr<Device> device, const std::vector<DataType>& data, size_t stride) const
+void BufferData::UploadWithStage(const std::vector<DataType>& data, size_t stride) const
 {
     if (!(m_usage & vk::BufferUsageFlagBits::eTransferDst))
     {
@@ -153,7 +144,6 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const std::vector<
     }
 
     BufferData stagingBuffer(
-        device,
         dataSize,
         vk::BufferUsageFlagBits::eTransferSrc,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
@@ -161,13 +151,13 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const std::vector<
 
     MemoryHelper::CopyToDevice(stagingBuffer.m_deviceMemory, data.data(), data.size(), elementSize);
 
-    MemoryHelper::OneTimeSubmit(device, [&](const vk::raii::CommandBuffer& commandBuffer) {
+    MemoryHelper::OneTimeSubmit([&](const vk::raii::CommandBuffer& commandBuffer) {
         commandBuffer.copyBuffer(*stagingBuffer.m_buffer, *this->m_buffer, vk::BufferCopy(0, 0, dataSize));
     });
 }
 
 template <typename DataType>
-void BufferData::Upload(const std::shared_ptr<Device> device, const DataType* pData, size_t elementCount) const
+void BufferData::Upload(const DataType* pData, size_t elementCount) const
 {
     if (!(m_usage & vk::BufferUsageFlagBits::eTransferDst))
     {
@@ -193,7 +183,6 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const DataType* pD
     }
 
     BufferData stagingBuffer(
-        device,
         dataSize,
         vk::BufferUsageFlagBits::eTransferSrc,
         vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent
@@ -201,7 +190,7 @@ void BufferData::Upload(const std::shared_ptr<Device> device, const DataType* pD
 
     MemoryHelper::CopyToDevice(stagingBuffer.m_deviceMemory, pData, elementCount, elementSize);
 
-    MemoryHelper::OneTimeSubmit(device, [&](const vk::raii::CommandBuffer& commandBuffer) {
+    MemoryHelper::OneTimeSubmit([&](const vk::raii::CommandBuffer& commandBuffer) {
         commandBuffer.copyBuffer(*stagingBuffer.m_buffer, *this->m_buffer, vk::BufferCopy(0, 0, dataSize));
     });
 }

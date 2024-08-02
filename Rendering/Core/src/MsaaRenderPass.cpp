@@ -4,10 +4,8 @@
 
 using namespace Jelly;
 
-MsaaRenderPass::MsaaRenderPass(
-    std::shared_ptr<Device> device, const vk::Extent2D& extent, vk::SampleCountFlagBits sampleCountFlagBits
-)
-    : RenderPass(std::move(device), extent)
+MsaaRenderPass::MsaaRenderPass(const vk::Extent2D& extent, vk::SampleCountFlagBits sampleCountFlagBits)
+    : RenderPass(extent)
 {
     m_sampleCountFlagBits = sampleCountFlagBits;
 
@@ -15,7 +13,6 @@ MsaaRenderPass::MsaaRenderPass(
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
             m_colorFormat,
             m_extent,
             vk::ImageTiling::eOptimal,
@@ -28,7 +25,6 @@ MsaaRenderPass::MsaaRenderPass(
     }
 
     m_msaaColorImage = std::make_unique<ImageData>(
-        m_device,
         m_colorFormat,
         extent,
         vk::ImageTiling::eOptimal,
@@ -39,7 +35,7 @@ MsaaRenderPass::MsaaRenderPass(
         m_sampleCountFlagBits
     );
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_depthFormat, m_sampleCountFlagBits, m_extent);
 
     vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
@@ -100,7 +96,7 @@ MsaaRenderPass::MsaaRenderPass(
         vk::RenderPassCreateFlags(), attachmentDescriptions, subpassDescription
     );
 
-    m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
+    m_renderPass = vk::raii::RenderPass(Device::Get()->GetDevice(), renderPassCreateInfo);
 
     m_framebuffers.reserve(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -110,7 +106,7 @@ MsaaRenderPass::MsaaRenderPass(
         };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
@@ -128,7 +124,6 @@ void MsaaRenderPass::Resize(const vk::Extent2D& extent) noexcept
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
             m_colorFormat,
             m_extent,
             vk::ImageTiling::eOptimal,
@@ -141,7 +136,6 @@ void MsaaRenderPass::Resize(const vk::Extent2D& extent) noexcept
     }
 
     m_msaaColorImage = std::make_unique<ImageData>(
-        m_device,
         m_colorFormat,
         m_extent,
         vk::ImageTiling::eOptimal,
@@ -152,7 +146,7 @@ void MsaaRenderPass::Resize(const vk::Extent2D& extent) noexcept
         m_sampleCountFlagBits
     );
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_depthFormat, m_sampleCountFlagBits, m_extent);
 
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -162,7 +156,7 @@ void MsaaRenderPass::Resize(const vk::Extent2D& extent) noexcept
         };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }

@@ -57,7 +57,6 @@ void DataSetMapper::Update(
         case ColorMode::Texture:
             if (m_dataSet->HasTexCoordData() && actor->GetTexture())
             {
-                actor->GetTexture()->SetDevice(m_device);
                 actor->GetTexture()->Update();
                 strides.emplace_back(static_cast<uint32_t>(texCoordComponents * sizeof(float)));
 
@@ -143,7 +142,6 @@ void DataSetMapper::Update(
         m_drawable = std::make_unique<Drawable>();
     }
 
-    m_drawable->SetDevice(m_device);
     m_drawable->SetDataSet(m_dataSet);
     m_drawable->SetColorMode(m_colorMode);
     m_drawable->Update();

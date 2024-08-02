@@ -13,22 +13,13 @@
 using namespace Jelly;
 
 Window::Window() noexcept
-    : m_device(std::make_shared<Device>())
-    , m_viewer(std::make_shared<Viewer>())
+    : m_viewer(std::make_shared<Viewer>())
 {
-    m_viewer->SetDevice(m_device);
-}
-
-Window::Window(std::shared_ptr<Device> device) noexcept
-    : m_device(std::move(device))
-    , m_viewer(std::make_shared<Viewer>())
-{
-    m_viewer->SetDevice(m_device);
 }
 
 Window::~Window() noexcept
 {
-    m_device->GetDevice().waitIdle();
+    Device::Get()->GetDevice().waitIdle();
 }
 
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)
@@ -47,7 +38,7 @@ void Window::SetSize(const uint32_t width, const uint32_t height) noexcept
 
     if (m_initialized)
     {
-        m_device->GetDevice().waitIdle();
+        Device::Get()->GetDevice().waitIdle();
         m_viewer->Resize(vk::Extent2D {width, height});
 
         m_currentFrameIndex = 0;
@@ -96,7 +87,6 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     }
 
     ImageData imageData(
-        m_device,
         m_swapChainData->GetColorFormat(),
         m_extent,
         vk::ImageTiling::eLinear,
@@ -108,7 +98,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
         false
     );
 
-    MemoryHelper::OneTimeSubmit(m_device, [&imageData, this](const vk::raii::CommandBuffer& cmd) {
+    MemoryHelper::OneTimeSubmit([&imageData, this](const vk::raii::CommandBuffer& cmd) {
         auto&& format   = this->m_swapChainData->GetColorFormat();
         auto&& inImage  = this->m_swapChainData->GetImage(this->m_currentImageIndex);
         auto&& outImage = imageData.GetImage();
@@ -121,7 +111,7 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
             cmd, inImage, format, vk::ImageLayout::ePresentSrcKHR, vk::ImageLayout::eTransferSrcOptimal
         );
 
-        auto formatProperties = this->m_device->GetPhysicalDevice().getFormatProperties(format);
+        auto formatProperties = Device::Get()->GetPhysicalDevice().getFormatProperties(format);
 
         if ((formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
             && (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst))
@@ -189,11 +179,6 @@ std::vector<uint8_t> Window::GetLastRenderingResult() const noexcept
     return retVal;
 }
 
-const std::shared_ptr<Device>& Window::GetDevice() const noexcept
-{
-    return m_device;
-}
-
 bool Window::HasInitialized() const noexcept
 {
     return m_initialized;
@@ -215,7 +200,7 @@ void Window::Render() noexcept
 
 void Window::PreRender() noexcept
 {
-    auto fenceResult = m_device->GetDevice().waitForFences(
+    auto fenceResult = Device::Get()->GetDevice().waitForFences(
         {m_inFlightFences[m_currentFrameIndex]}, vk::True, std::numeric_limits<uint64_t>::max()
     );
 
@@ -229,7 +214,7 @@ void Window::PreRender() noexcept
         std::numeric_limits<uint64_t>::max(), m_imageAcquiredSemaphores[m_currentFrameIndex]
     );
 
-    m_device->GetDevice().resetFences({m_inFlightFences[m_currentFrameIndex]});
+    Device::Get()->GetDevice().resetFences({m_inFlightFences[m_currentFrameIndex]});
 
     auto&& cmd = m_commandBuffers[m_currentFrameIndex];
     cmd.reset();
@@ -246,13 +231,13 @@ void Window::PostRender() noexcept
     std::array<vk::Semaphore, 1> waitSemaphores {m_imageAcquiredSemaphores[m_currentFrameIndex]};
     std::array<vk::PipelineStageFlags, 1> waitStages = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
     vk::SubmitInfo drawSubmitInfo(waitSemaphores, waitStages, drawCommandBuffers, signalSemaphores);
-    m_device->GetGraphicsQueue().submit(drawSubmitInfo, m_inFlightFences[m_currentFrameIndex]);
+    Device::Get()->GetGraphicsQueue().submit(drawSubmitInfo, m_inFlightFences[m_currentFrameIndex]);
 
     std::array<vk::Semaphore, 1> presentWait {m_renderFinishedSemaphores[m_currentFrameIndex]};
     std::array<vk::SwapchainKHR, 1> swapchains {m_swapChainData->GetSwapChain()};
     vk::PresentInfoKHR presentInfoKHR(presentWait, swapchains, m_currentImageIndex);
 
-    auto presentResult = m_device->GetPresentQueue().presentKHR(presentInfoKHR);
+    auto presentResult = Device::Get()->GetPresentQueue().presentKHR(presentInfoKHR);
 
     if (vk::Result::eSuccess != presentResult)
     {
@@ -293,12 +278,12 @@ void Window::InitWindow() noexcept
 {
     InitSurface();
 
-    m_device->PickPhysicalDevice(m_surface);
-    m_device->InitDevice();
-    m_device->InitQueues();
-    m_device->InitCommandPool();
-    m_device->InitDescriptorPool();
-    m_device->InitPipelineCache();
+    Device::Get()->PickPhysicalDevice(m_surface);
+    Device::Get()->InitDevice();
+    Device::Get()->InitQueues();
+    Device::Get()->InitCommandPool();
+    Device::Get()->InitDescriptorPool();
+    Device::Get()->InitPipelineCache();
 
     InitSwapChain();
     InitViewer();
@@ -318,7 +303,7 @@ void Window::InitSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData = std::make_unique<SwapChainData>(m_device, m_surface, m_extent, nullptr, usage);
+    m_swapChainData = std::make_unique<SwapChainData>(m_surface, m_extent, nullptr, usage);
 
     // 创建的窗口大小可能不等于期望的大小
     m_extent = vk::Extent2D {m_swapChainData->GetExtent().width, m_swapChainData->GetExtent().height};
@@ -330,8 +315,7 @@ void Window::RecreateSwapChain() noexcept
         ? vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferSrc
         : vk::ImageUsageFlagBits::eColorAttachment;
 
-    m_swapChainData =
-        std::make_unique<SwapChainData>(m_device, m_surface, m_extent, &m_swapChainData->GetSwapChain(), usage);
+    m_swapChainData = std::make_unique<SwapChainData>(m_surface, m_extent, &m_swapChainData->GetSwapChain(), usage);
 
     const auto numberOfImages = m_swapChainData->GetNumberOfImages();
     m_framebuffers.clear();
@@ -339,7 +323,7 @@ void Window::RecreateSwapChain() noexcept
     {
         std::array<vk::ImageView, 1> imageViews {m_swapChainData->GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
@@ -373,7 +357,7 @@ void Window::InitRenderPass() noexcept
         vk::RenderPassCreateFlags(), attachmentDescriptions, subpassDescription
     );
 
-    m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
+    m_renderPass = vk::raii::RenderPass(Device::Get()->GetDevice(), renderPassCreateInfo);
 }
 
 void Window::InitFramebuffers() noexcept
@@ -384,7 +368,7 @@ void Window::InitFramebuffers() noexcept
     {
         std::array<vk::ImageView, 1> imageViews {m_swapChainData->GetImageView(i)};
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
@@ -397,24 +381,31 @@ void Window::InitSyncObjects() noexcept
     m_imageAcquiredSemaphores.reserve(m_numberOfFrames);
     for (uint32_t i = 0; i < m_numberOfFrames; ++i)
     {
-        m_inFlightFences.emplace_back(vk::raii::Fence(m_device->GetDevice(), {vk::FenceCreateFlagBits::eSignaled}));
-        m_renderFinishedSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
-        m_imageAcquiredSemaphores.emplace_back(vk::raii::Semaphore(m_device->GetDevice(), vk::SemaphoreCreateInfo()));
+        m_inFlightFences.emplace_back(vk::raii::Fence(Device::Get()->GetDevice(), {vk::FenceCreateFlagBits::eSignaled})
+        );
+        m_renderFinishedSemaphores.emplace_back(
+            vk::raii::Semaphore(Device::Get()->GetDevice(), vk::SemaphoreCreateInfo())
+        );
+        m_imageAcquiredSemaphores.emplace_back(
+            vk::raii::Semaphore(Device::Get()->GetDevice(), vk::SemaphoreCreateInfo())
+        );
     }
 }
 
 void Window::InitCommandBuffers() noexcept
 {
     m_commandBuffers = vk::raii::CommandBuffers(
-        m_device->GetDevice(),
-        vk::CommandBufferAllocateInfo {m_device->GetCommandPool(), vk::CommandBufferLevel::ePrimary, m_numberOfFrames}
+        Device::Get()->GetDevice(),
+        vk::CommandBufferAllocateInfo {
+            Device::Get()->GetCommandPool(), vk::CommandBufferLevel::ePrimary, m_numberOfFrames
+        }
     );
 }
 
 void Window::InitSampler() noexcept
 {
     m_sampler = vk::raii::Sampler(
-        m_device->GetDevice(),
+        Device::Get()->GetDevice(),
         vk::SamplerCreateInfo {
             {},
             vk::Filter::eLinear,
@@ -466,7 +457,7 @@ void Window::InitPipeline() noexcept
             {{0, vk::DescriptorType::eCombinedImageSampler, vk::ShaderStageFlagBits::eFragment}},
         .renderPass = m_renderPass
     };
-    m_pipeline = std::make_unique<Pipeline>(m_device, pipelineInfo);
+    m_pipeline = std::make_unique<Pipeline>(pipelineInfo);
 }
 
 void Window::InitViewer() noexcept
@@ -479,7 +470,8 @@ void Window::InitDescriptorSets() noexcept
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts(m_numberOfFrames, m_pipeline->GetDescriptorSetLayout());
 
     m_descriptorSets = vk::raii::DescriptorSets(
-        m_device->GetDevice(), vk::DescriptorSetAllocateInfo {m_device->GetDescriptorPool(), descriptorSetLayouts}
+        Device::Get()->GetDevice(),
+        vk::DescriptorSetAllocateInfo {Device::Get()->GetDescriptorPool(), descriptorSetLayouts}
     );
 }
 
@@ -493,6 +485,6 @@ void Window::UpdateDescriptorSets() noexcept
         std::array<vk::WriteDescriptorSet, 1> writeDescriptorSets {
             {{m_descriptorSets[i], 0, 0, vk::DescriptorType::eCombinedImageSampler, descriptorImageInfo, nullptr}}
         };
-        m_device->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
+        Device::Get()->GetDevice().updateDescriptorSets(writeDescriptorSets, nullptr);
     }
 }

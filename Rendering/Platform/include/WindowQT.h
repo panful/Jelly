@@ -27,8 +27,6 @@ class JELLY_EXPORT WindowQT
 public:
     explicit WindowQT(QWindow* parent = nullptr);
 
-    explicit WindowQT(std::shared_ptr<Device> device, QWindow* parent = nullptr);
-
     void SetEventAdapter(std::function<void(QEvent*)>&& eventAdapter) noexcept;
 
 protected:

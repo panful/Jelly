@@ -3,16 +3,9 @@
 
 using namespace Jelly;
 
-void Actor::SetDevice(std::shared_ptr<Device> device) noexcept
-{
-    m_device = std::move(device);
-    m_mapper->SetDevice(m_device);
-}
-
 void Actor::SetMapper(std::shared_ptr<Mapper> mapper) noexcept
 {
     m_mapper = std::move(mapper);
-    m_mapper->SetDevice(m_device);
 }
 
 const std::shared_ptr<Mapper>& Actor::GetMapper() const noexcept

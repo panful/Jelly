@@ -11,15 +11,14 @@
 
 #pragma once
 
-#include "Device.h"
 #include "Object.h"
+#include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
 class SwapChainData : public Object
 {
 public:
     SwapChainData(
-        std::shared_ptr<Device> device,
         const vk::raii::SurfaceKHR& surface,
         const vk::Extent2D& extent,
         const vk::raii::SwapchainKHR* pOldSwapchain,
@@ -38,7 +37,6 @@ private:
     static vk::SurfaceFormatKHR PickSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& formats);
 
 private:
-    std::shared_ptr<Device> m_device {};
     vk::Format m_colorFormat {};
     vk::raii::SwapchainKHR m_swapChain {nullptr};
     std::vector<vk::Image> m_images {};

@@ -94,7 +94,7 @@ std::shared_ptr<Actor> Picker::Pick(const std::array<int, 2>& displayPos, std::s
         }
         else
         {
-            m_renderPass = std::make_unique<PickRenderPass>(m_renderer->GetDevice(), extent);
+            m_renderPass = std::make_unique<PickRenderPass>(extent);
         }
 
         // 所有的拾取都使用同一个着色器
@@ -118,16 +118,14 @@ std::shared_ptr<Actor> Picker::Pick(const std::array<int, 2>& displayPos, std::s
 
             this->m_pipelineKey = std::hash<PipelineInfo>()(pipelineInfo);
 
-            this->m_renderer->GetDevice()->GetPipelineCache()->AddPipeline(
-                m_pipelineKey, std::make_unique<Pipeline>(m_renderer->GetDevice(), pipelineInfo)
-            );
+            Device::Get()->GetPipelineCache()->AddPipeline(m_pipelineKey, std::make_unique<Pipeline>(pipelineInfo));
         });
 
         ResetChanged();
     }
 
     std::unordered_map<uint32_t, std::shared_ptr<Actor>> id_actors {};
-    MemoryHelper::OneTimeSubmit(m_renderer->GetDevice(), [&id_actors, this](const vk::raii::CommandBuffer& cmd) {
+    MemoryHelper::OneTimeSubmit([&id_actors, this](const vk::raii::CommandBuffer& cmd) {
         auto clearValues = this->m_renderPass->GetClearValues();
         vk::RenderPassBeginInfo renderPassBeginInfo(
             this->m_renderPass->GetRenderPass(),
@@ -137,7 +135,7 @@ std::shared_ptr<Actor> Picker::Pick(const std::array<int, 2>& displayPos, std::s
         );
         cmd.beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
-        auto& pipeline = this->m_renderer->GetDevice()->GetPipelineCache()->GetPipeline(this->m_pipelineKey);
+        auto& pipeline = Device::Get()->GetPipelineCache()->GetPipeline(this->m_pipelineKey);
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->GetPipeline());
 
         vk::Viewport viewport {
@@ -215,7 +213,6 @@ uint32_t Picker::GetActorID(const std::array<int, 2>& displayPos) const noexcept
     auto& extent = m_renderPass->GetExtent();
 
     ImageData imageData(
-        m_renderer->GetDevice(),
         vk::Format::eB8G8R8A8Unorm,
         m_renderPass->GetExtent(),
         vk::ImageTiling::eLinear,
@@ -227,61 +224,50 @@ uint32_t Picker::GetActorID(const std::array<int, 2>& displayPos) const noexcept
         false
     );
 
-    MemoryHelper::OneTimeSubmit(
-        m_renderer->GetDevice(),
-        [&imageData, &extent, this](const vk::raii::CommandBuffer& cmd) {
-            auto format     = vk::Format::eB8G8R8A8Unorm;
-            auto&& inImage  = this->m_renderPass->GetColorImageData()->GetImage();
-            auto&& outImage = imageData.GetImage();
+    MemoryHelper::OneTimeSubmit([&imageData, &extent, this](const vk::raii::CommandBuffer& cmd) {
+        auto format     = vk::Format::eB8G8R8A8Unorm;
+        auto&& inImage  = this->m_renderPass->GetColorImageData()->GetImage();
+        auto&& outImage = imageData.GetImage();
 
-            ImageData::SetImageLayout(
-                cmd, outImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal
-            );
+        ImageData::SetImageLayout(
+            cmd, outImage, format, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal
+        );
 
-            auto formatProperties = this->m_renderer->GetDevice()->GetPhysicalDevice().getFormatProperties(format);
+        auto formatProperties = Device::Get()->GetPhysicalDevice().getFormatProperties(format);
 
-            if ((formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
-                && (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst))
-            {
-                vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
-                std::array<vk::Offset3D, 2> offsets {
-                    vk::Offset3D(0, 0, 0),
-                    vk::Offset3D(static_cast<int32_t>(extent.width), static_cast<int32_t>(extent.height), 1)
-                };
-                vk::ImageBlit imageBlit(imageSubresourceLayers, offsets, imageSubresourceLayers, offsets);
-                cmd.blitImage(
-                    inImage,
-                    vk::ImageLayout::eTransferSrcOptimal,
-                    outImage,
-                    vk::ImageLayout::eTransferDstOptimal,
-                    imageBlit,
-                    vk::Filter::eLinear
-                );
-            }
-            else
-            {
-                vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
-                vk::ImageCopy imageCopy(
-                    imageSubresourceLayers,
-                    vk::Offset3D(),
-                    imageSubresourceLayers,
-                    vk::Offset3D(),
-                    vk::Extent3D(extent, 1)
-                );
-                cmd.copyImage(
-                    inImage,
-                    vk::ImageLayout::eTransferSrcOptimal,
-                    outImage,
-                    vk::ImageLayout::eTransferDstOptimal,
-                    imageCopy
-                );
-            }
-
-            ImageData::SetImageLayout(
-                cmd, outImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral
+        if ((formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eBlitSrc)
+            && (formatProperties.linearTilingFeatures & vk::FormatFeatureFlagBits::eBlitDst))
+        {
+            vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+            std::array<vk::Offset3D, 2> offsets {
+                vk::Offset3D(0, 0, 0),
+                vk::Offset3D(static_cast<int32_t>(extent.width), static_cast<int32_t>(extent.height), 1)
+            };
+            vk::ImageBlit imageBlit(imageSubresourceLayers, offsets, imageSubresourceLayers, offsets);
+            cmd.blitImage(
+                inImage,
+                vk::ImageLayout::eTransferSrcOptimal,
+                outImage,
+                vk::ImageLayout::eTransferDstOptimal,
+                imageBlit,
+                vk::Filter::eLinear
             );
         }
-    );
+        else
+        {
+            vk::ImageSubresourceLayers imageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1);
+            vk::ImageCopy imageCopy(
+                imageSubresourceLayers, vk::Offset3D(), imageSubresourceLayers, vk::Offset3D(), vk::Extent3D(extent, 1)
+            );
+            cmd.copyImage(
+                inImage, vk::ImageLayout::eTransferSrcOptimal, outImage, vk::ImageLayout::eTransferDstOptimal, imageCopy
+            );
+        }
+
+        ImageData::SetImageLayout(
+            cmd, outImage, format, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eGeneral
+        );
+    });
 
     auto layout = imageData.GetImage().getSubresourceLayout({vk::ImageAspectFlagBits::eColor, 0, 0});
     auto pixels = reinterpret_cast<uint8_t*>(imageData.GetDeviceMemory().mapMemory(0, vk::WholeSize, {}));

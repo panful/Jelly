@@ -2,9 +2,8 @@
 
 using namespace Jelly;
 
-RenderPass::RenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent)
-    : m_device(std::move(device))
-    , m_extent(extent)
+RenderPass::RenderPass(const vk::Extent2D& extent)
+    : m_extent(extent)
 {
 }
 

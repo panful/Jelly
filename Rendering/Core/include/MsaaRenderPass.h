@@ -18,9 +18,7 @@ namespace Jelly {
 class JELLY_EXPORT MsaaRenderPass : public RenderPass
 {
 public:
-    MsaaRenderPass(
-        std::shared_ptr<Device> device, const vk::Extent2D& extent, vk::SampleCountFlagBits sampleCountFlagBits
-    );
+    MsaaRenderPass(const vk::Extent2D& extent, vk::SampleCountFlagBits sampleCountFlagBits);
 
     void Resize(const vk::Extent2D& extent) noexcept override;
 

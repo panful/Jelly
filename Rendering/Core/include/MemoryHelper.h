@@ -54,14 +54,16 @@ public:
     }
 
     template <typename Func>
-    static void OneTimeSubmit(const std::shared_ptr<Device>& device, const Func& func)
+    static void OneTimeSubmit(const Func& func)
     {
         vk::raii::CommandPool commandPool(
-            device->GetDevice(), {{vk::CommandPoolCreateFlagBits::eTransient}, device->GetGraphicsQueueIndex()}
+            Device::Get()->GetDevice(),
+            {{vk::CommandPoolCreateFlagBits::eTransient}, Device::Get()->GetGraphicsQueueIndex()}
         );
 
         vk::raii::CommandBuffer commandBuffer = std::move(
-            vk::raii::CommandBuffers(device->GetDevice(), {commandPool, vk::CommandBufferLevel::ePrimary, 1}).front()
+            vk::raii::CommandBuffers(Device::Get()->GetDevice(), {commandPool, vk::CommandBufferLevel::ePrimary, 1})
+                .front()
         );
 
         commandBuffer.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
@@ -69,8 +71,8 @@ public:
         commandBuffer.end();
 
         vk::SubmitInfo submitInfo(nullptr, nullptr, *commandBuffer);
-        device->GetGraphicsQueue().submit(submitInfo, nullptr);
-        device->GetGraphicsQueue().waitIdle();
+        Device::Get()->GetGraphicsQueue().submit(submitInfo, nullptr);
+        Device::Get()->GetGraphicsQueue().waitIdle();
     }
 
     static uint32_t FindMemoryType(
@@ -80,9 +82,7 @@ public:
     ) noexcept;
 
     static vk::raii::DeviceMemory AllocateDeviceMemory(
-        const std::shared_ptr<Device> device,
-        const vk::MemoryRequirements& memoryRequirements,
-        vk::MemoryPropertyFlags memoryPropertyFlags
+        const vk::MemoryRequirements& memoryRequirements, vk::MemoryPropertyFlags memoryPropertyFlags
     ) noexcept;
 };
 } // namespace Jelly

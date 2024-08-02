@@ -16,13 +16,10 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
-
 class JELLY_EXPORT ImageData : public Object
 {
 public:
     ImageData(
-        std::shared_ptr<Device> device,
         vk::Format format,
         const vk::Extent2D& extent,
         vk::ImageTiling tiling,

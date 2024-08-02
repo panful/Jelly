@@ -5,7 +5,6 @@
 using namespace Jelly;
 
 ImageData::ImageData(
-    std::shared_ptr<Device> device,
     vk::Format format,
     const vk::Extent2D& extent,
     vk::ImageTiling tiling,
@@ -17,7 +16,7 @@ ImageData::ImageData(
     bool createImageView
 )
     : m_image(
-          device->GetDevice(),
+          Device::Get()->GetDevice(),
           {vk::ImageCreateFlags(),
            vk::ImageType::e2D,
            format,
@@ -32,11 +31,11 @@ ImageData::ImageData(
            initialLayout}
       )
 {
-    m_deviceMemory = MemoryHelper::AllocateDeviceMemory(device, m_image.getMemoryRequirements(), memoryProperties);
+    m_deviceMemory = MemoryHelper::AllocateDeviceMemory(m_image.getMemoryRequirements(), memoryProperties);
     m_image.bindMemory(m_deviceMemory, 0);
     m_imageView = createImageView
         ? vk::raii::ImageView(
-              device->GetDevice(),
+              Device::Get()->GetDevice(),
               vk::ImageViewCreateInfo({}, m_image, vk::ImageViewType::e2D, format, {}, {aspectMask, 0, 1, 0, 1})
           )
         : nullptr;

@@ -6,14 +6,16 @@
 
 using namespace Jelly;
 
-Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineInfo) noexcept
+Pipeline::Pipeline(const PipelineInfo& pipelineInfo) noexcept
 {
     vk::raii::ShaderModule vertexShaderModule(
-        device->GetDevice(), vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), pipelineInfo.vertexShaderCode)
+        Device::Get()->GetDevice(),
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), pipelineInfo.vertexShaderCode)
     );
 
     vk::raii::ShaderModule fragmentShaderModule(
-        device->GetDevice(), vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), pipelineInfo.fragmentShaderCode)
+        Device::Get()->GetDevice(),
+        vk::ShaderModuleCreateInfo(vk::ShaderModuleCreateFlags(), pipelineInfo.fragmentShaderCode)
     );
 
     std::array pipelineShaderStageCreateInfos = {
@@ -123,11 +125,11 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
     }
 
     vk::DescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo({}, descriptorSetLayoutBindings);
-    m_descriptorSetLayout = vk::raii::DescriptorSetLayout(device->GetDevice(), descriptorSetLayoutCreateInfo);
+    m_descriptorSetLayout = vk::raii::DescriptorSetLayout(Device::Get()->GetDevice(), descriptorSetLayoutCreateInfo);
 
     std::array<vk::DescriptorSetLayout, 1> descriptorSetLayouts {m_descriptorSetLayout};
     m_pipelineLayout = vk::raii::PipelineLayout(
-        device->GetDevice(), vk::PipelineLayoutCreateInfo({}, descriptorSetLayouts, pushConstantRanges)
+        Device::Get()->GetDevice(), vk::PipelineLayoutCreateInfo({}, descriptorSetLayouts, pushConstantRanges)
     );
 
     vk::GraphicsPipelineCreateInfo graphicsPipelineCreateInfo(
@@ -146,8 +148,8 @@ Pipeline::Pipeline(std::shared_ptr<Device> device, const PipelineInfo& pipelineI
         pipelineInfo.renderPass
     );
 
-    vk::raii::PipelineCache pipelineCache(device->GetDevice(), vk::PipelineCacheCreateInfo());
-    m_pipeline = vk::raii::Pipeline(device->GetDevice(), pipelineCache, graphicsPipelineCreateInfo);
+    vk::raii::PipelineCache pipelineCache(Device::Get()->GetDevice(), vk::PipelineCacheCreateInfo());
+    m_pipeline = vk::raii::Pipeline(Device::Get()->GetDevice(), pipelineCache, graphicsPipelineCreateInfo);
 }
 
 const vk::raii::DescriptorSetLayout& Pipeline::GetDescriptorSetLayout() const noexcept

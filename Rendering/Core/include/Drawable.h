@@ -18,7 +18,6 @@
 #include <vulkan/vulkan_raii.hpp>
 
 namespace Jelly {
-class Device;
 class DataSet;
 enum class ColorMode : uint8_t;
 
@@ -42,14 +41,12 @@ public:
     uint32_t GetIndexCount() const noexcept;
     vk::IndexType GetIndexType() const noexcept;
 
-    void SetDevice(std::shared_ptr<Device> device) noexcept;
     void SetDataSet(std::shared_ptr<DataSet> dataSet) noexcept;
     void SetColorMode(ColorMode colorMode) noexcept;
 
     void Update() override;
 
 private:
-    std::shared_ptr<Device> m_device {};
     std::shared_ptr<DataSet> m_dataSet {};
     ColorMode m_colorMode {};
 

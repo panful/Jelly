@@ -4,9 +4,8 @@
 
 using namespace Jelly;
 
-PickRenderPass::PickRenderPass(std::shared_ptr<Device> device, const vk::Extent2D& extent)
-    : RenderPass(std::move(device), extent)
-
+PickRenderPass::PickRenderPass(const vk::Extent2D& extent)
+    : RenderPass(extent)
 {
     m_maximumOfFrames = 1; // 拾取时只需要绘制一帧
 
@@ -14,7 +13,6 @@ PickRenderPass::PickRenderPass(std::shared_ptr<Device> device, const vk::Extent2
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
             m_colorFormat,
             m_extent,
             vk::ImageTiling::eOptimal,
@@ -26,7 +24,7 @@ PickRenderPass::PickRenderPass(std::shared_ptr<Device> device, const vk::Extent2
         );
     }
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_depthFormat, m_sampleCountFlagBits, m_extent);
 
     vk::AttachmentReference colorAttachment(0, vk::ImageLayout::eColorAttachmentOptimal);
     vk::AttachmentReference depthAttachment(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -64,7 +62,7 @@ PickRenderPass::PickRenderPass(std::shared_ptr<Device> device, const vk::Extent2
         vk::RenderPassCreateFlags(), attachmentDescriptions, subpassDescription
     );
 
-    m_renderPass = vk::raii::RenderPass(m_device->GetDevice(), renderPassCreateInfo);
+    m_renderPass = vk::raii::RenderPass(Device::Get()->GetDevice(), renderPassCreateInfo);
 
     m_framebuffers.reserve(m_maximumOfFrames);
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -74,7 +72,7 @@ PickRenderPass::PickRenderPass(std::shared_ptr<Device> device, const vk::Extent2
         };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }
@@ -92,7 +90,6 @@ void PickRenderPass::Resize(const vk::Extent2D& extent) noexcept
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
     {
         m_colorImageDatas[i] = std::make_unique<ImageData>(
-            m_device,
             m_colorFormat,
             m_extent,
             vk::ImageTiling::eOptimal,
@@ -104,7 +101,7 @@ void PickRenderPass::Resize(const vk::Extent2D& extent) noexcept
         );
     }
 
-    m_depthImageData = std::make_unique<DepthImageData>(m_device, m_depthFormat, m_sampleCountFlagBits, m_extent);
+    m_depthImageData = std::make_unique<DepthImageData>(m_depthFormat, m_sampleCountFlagBits, m_extent);
 
     m_framebuffers.clear();
     for (uint32_t i = 0; i < m_maximumOfFrames; ++i)
@@ -114,7 +111,7 @@ void PickRenderPass::Resize(const vk::Extent2D& extent) noexcept
         };
 
         m_framebuffers.emplace_back(vk::raii::Framebuffer(
-            m_device->GetDevice(),
+            Device::Get()->GetDevice(),
             vk::FramebufferCreateInfo({}, m_renderPass, imageViews, m_extent.width, m_extent.height, 1)
         ));
     }

@@ -10,12 +10,6 @@ WindowQT::WindowQT(QWindow* parent)
 {
 }
 
-WindowQT::WindowQT(std::shared_ptr<Device> device, QWindow* parent)
-    : QWindow(parent)
-    , Jelly::Window(std::move(device))
-{
-}
-
 void WindowQT::SetEventAdapter(std::function<void(QEvent*)>&& eventAdapter) noexcept
 {
     m_eventAdapter = std::move(eventAdapter);
@@ -24,7 +18,7 @@ void WindowQT::SetEventAdapter(std::function<void(QEvent*)>&& eventAdapter) noex
 void WindowQT::InitSurface() noexcept
 {
     m_qVulkanInstance = std::make_unique<QVulkanInstance>();
-    m_qVulkanInstance->setVkInstance(m_device->InitInstance());
+    m_qVulkanInstance->setVkInstance(Device::Get()->InitInstance());
     if (!m_qVulkanInstance->create())
     {
         Logger::GetInstance()->Error("failed to create QVulkanInstance");
@@ -34,7 +28,7 @@ void WindowQT::InitSurface() noexcept
     this->setSurfaceType(QSurface::VulkanSurface);
     this->create();
 
-    m_surface = vk::raii::SurfaceKHR(m_device->GetInstance(), QVulkanInstance::surfaceForWindow(this));
+    m_surface = vk::raii::SurfaceKHR(Device::Get()->GetInstance(), QVulkanInstance::surfaceForWindow(this));
     m_window  = this;
 }
 
@@ -70,7 +64,7 @@ bool WindowQT::event(QEvent* event)
     {
         // Qt 会将 QVulkanInstance::surfaceForWindow 返回的 VkSurfaceKHR 销毁
         // SwapChain 必须保证在 Surface 销毁之前就销毁
-        m_device->GetDevice().waitIdle();
+        Device::Get()->GetDevice().waitIdle();
         m_swapChainData.reset();
         m_surface.release();
         return true;
