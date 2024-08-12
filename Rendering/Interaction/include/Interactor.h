@@ -24,6 +24,11 @@ class JELLY_EXPORT Interactor
     , public std::enable_shared_from_this<Interactor>
 {
 public:
+    ~Interactor() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
     virtual void Start() noexcept = 0;
 
     void SetWindow(std::shared_ptr<Window> window) noexcept;

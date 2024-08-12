@@ -17,6 +17,11 @@ namespace Jelly {
 class JELLY_EXPORT Actor3D : public Actor
 {
 public:
+    ~Actor3D() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+    
     void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer) noexcept override;
 };
 } // namespace Jelly

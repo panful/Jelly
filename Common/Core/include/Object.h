@@ -13,6 +13,7 @@
 
 #include "GlobalExport.h"
 #include <atomic>
+#include <iostream>
 
 namespace Jelly {
 class JELLY_EXPORT Object

@@ -30,6 +30,11 @@ enum class InteractorState : uint8_t
 class JELLY_EXPORT InteractorStyle : public Object
 {
 public:
+    ~InteractorStyle() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
     void SetInteractor(std::weak_ptr<Interactor> interactor) noexcept;
 
 public:

@@ -2,9 +2,9 @@
 #include "Logger.h"
 #include "PipelineCache.h"
 #include <format>
+#include <iostream>
 #include <optional>
 #include <set>
-#include <iostream>
 
 using namespace Jelly;
 
@@ -21,19 +21,36 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 }
 } // namespace
 
-static Device* device {};
+static Device* rawptr_device {};
 
+static std::shared_ptr<Device> shared_device {};
+
+Device::~Device() noexcept
+{
+    std::cout << __func__ << std::endl;
+}
+
+// std::shared_ptr<Device> Device::Get()
 Device* Device::Get()
 {
     static std::once_flag flag {};
-    std::call_once(flag, []() { device = new Device(); });
-    return device;
+    std::call_once(flag, []() { rawptr_device = new Device(); });
+    return rawptr_device;
+
+    // static std::once_flag flag {};
+    // std::call_once(flag, []() { shared_device = std::make_shared<Device>(); });
+    // return shared_device;
+
+    // static Device device {};
+    // return &device;
 }
 
 void Device::Destroy()
 {
-    delete device;
-    device = nullptr;
+    std::cout << __func__ << std::endl;
+
+    delete rawptr_device;
+    rawptr_device = nullptr;
 }
 
 vk::Instance Device::InitInstance() noexcept

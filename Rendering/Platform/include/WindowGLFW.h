@@ -18,6 +18,12 @@ struct GLFWwindow;
 namespace Jelly {
 class JELLY_EXPORT WindowGLFW : public Window
 {
+public:
+    ~WindowGLFW() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
 protected:
     void InitSurface() noexcept override;
 };

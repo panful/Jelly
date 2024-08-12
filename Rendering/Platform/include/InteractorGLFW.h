@@ -19,6 +19,11 @@ namespace Jelly {
 class JELLY_EXPORT InteractorGLFW : public Interactor
 {
 public:
+    ~InteractorGLFW() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+    
     void Start() noexcept override;
 
 private:

@@ -18,6 +18,12 @@ namespace Jelly {
 /// @brief 右键旋转、左键移动、滚轮缩放（以鼠标所在位置为缩放中心）、中键缩放（以窗口中心为缩放中心）
 class JELLY_EXPORT InteractorStyleTrackballCamera : public InteractorStyle
 {
+public:
+    ~InteractorStyleTrackballCamera() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
 protected:
     void MouseMoveEvent() override;
 
@@ -34,7 +40,6 @@ protected:
     void MouseWheelBackwardEvent() override;
 
 protected:
-
     /// @brief 以鼠标所在位置为中心进行缩放
     /// @param factor 小于1缩小，大于1放大，小于等于0无效
     void ZoomByMousePoint(double factor);

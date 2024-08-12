@@ -19,10 +19,13 @@
 namespace Jelly {
 class JELLY_EXPORT Device : public Object
 {
-private:
+public:
     Device() noexcept = default;
 
+    ~Device() noexcept override;
+
 public:
+    // static std::shared_ptr<Device> Get();
     static Device* Get();
     static void Destroy();
 

@@ -20,6 +20,7 @@ Window::Window() noexcept
 Window::~Window() noexcept
 {
     Device::Get()->GetDevice().waitIdle();
+    std::cout << __func__ << std::endl;
 }
 
 void Window::AddRenderer(std::shared_ptr<Renderer> renderer)

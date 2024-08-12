@@ -42,6 +42,12 @@ class JELLY_EXPORT Mapper : public Object
     };
 
 public:
+
+    ~Mapper() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
     void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer, Actor* actor) noexcept;
 
     virtual void

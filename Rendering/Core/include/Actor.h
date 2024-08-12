@@ -25,6 +25,11 @@ class Texture;
 class JELLY_EXPORT Actor : public Object
 {
 public:
+    ~Actor() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+
     virtual void Render(const vk::raii::CommandBuffer& commandBuffer, Renderer* renderer) noexcept = 0;
 
     void SetMapper(std::shared_ptr<Mapper> mapper) noexcept;

@@ -27,6 +27,11 @@ class Viewer;
 class JELLY_EXPORT Renderer : public Object
 {
 public:
+    ~Renderer() noexcept override
+    {
+        std::cout << __func__ << std::endl;
+    }
+    
     void Render(const vk::raii::CommandBuffer& commandBuffer) noexcept;
 
     void AddActor(std::shared_ptr<Actor> actor);
