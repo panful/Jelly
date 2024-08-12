@@ -4,6 +4,7 @@
 #include <format>
 #include <optional>
 #include <set>
+#include <iostream>
 
 using namespace Jelly;
 
@@ -20,10 +21,19 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 }
 } // namespace
 
+static Device* device {};
+
 Device* Device::Get()
 {
-    static Device device {};
-    return &device;
+    static std::once_flag flag {};
+    std::call_once(flag, []() { device = new Device(); });
+    return device;
+}
+
+void Device::Destroy()
+{
+    delete device;
+    device = nullptr;
 }
 
 vk::Instance Device::InitInstance() noexcept

@@ -24,6 +24,7 @@ private:
 
 public:
     static Device* Get();
+    static void Destroy();
 
     void SetEnableValidationLayers(bool enable);
 
